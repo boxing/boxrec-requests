@@ -1,9 +1,9 @@
 {
   "name": "boxrec-requests",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "make API requests to BoxRec using NodeJS",
   "main": "./dist/index.js",
-  "types": "./dist/dist/index.d.ts",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "prepublish": "npm run build",
     "build": "tsc",
