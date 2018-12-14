@@ -1,2 +1,3 @@
-import boxrecRequests from "./boxrec-requests";
-export default boxrecRequests;
+import BoxrecRequests from "./boxrec-requests";
+
+export default BoxrecRequests;
