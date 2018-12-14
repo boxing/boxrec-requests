@@ -16,6 +16,7 @@
     "boxrec",
     "boxing"
   ],
+  "author": "Mike DiDomizio <mikedidomizio@gmail.com> (http://mikedidomizio.com)",
   "license": "MIT",
   "devDependencies": {
     "@types/cheerio": "^0.22.7",
@@ -37,7 +38,7 @@
     "webpack-cli": "^3.1.2"
   },
   "bugs": {
-    "url": "https://github.com/boxing/boxrec/labels/bug"
+    "url": "https://github.com/boxing/boxrec-requests/labels/bug"
   },
   "repository": {
     "type": "git",
