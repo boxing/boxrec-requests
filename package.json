@@ -1,0 +1,49 @@
+{
+  "name": "boxrec-requests",
+  "version": "1.0.0",
+  "description": "make API requests to BoxRec using NodeJS",
+  "main": "./dist/index.js",
+  "types": "./dist/dist/index.d.ts",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "tsc",
+    "test": "jest --config jest.config.json --coverage && cat ./coverage/lcov.info | coveralls",
+    "test-coverage-watch": "jest --config jest.config.json --coverage --watchAll",
+    "test-watch": "jest --config jest.config.json --watchAll",
+    "tslint": "tslint -c tslint.json src/**/*.ts"
+  },
+  "keywords": [
+    "boxrec",
+    "boxing"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/cheerio": "^0.22.7",
+    "@types/jest": "^22.1.1",
+    "@types/request": "^2.47.0",
+    "@types/request-promise": "^4.1.41",
+    "boxrec-mocks": "https://github.com/boxing/boxrec-mocks",
+    "cheerio": "^1.0.0-rc.2",
+    "coveralls": "^3.0.0",
+    "jest": "23.0.1",
+    "json-loader": "^0.5.7",
+    "request": "^2.83.0",
+    "ts-jest": "^22.0.3",
+    "ts-loader": "4.3.0",
+    "tslint": "^5.10.0",
+    "tslint-loader": "^3.5.3",
+    "typedoc": "^0.11.1",
+    "typescript": "2.9.1",
+    "webpack-cli": "^3.1.2"
+  },
+  "bugs": {
+    "url": "https://github.com/boxing/boxrec/labels/bug"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boxing/boxrec-requests"
+  },
+  "dependencies": {
+    "request-promise": "^4.2.2"
+  }
+}
