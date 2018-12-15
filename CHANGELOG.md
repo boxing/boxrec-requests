@@ -1,3 +1,9 @@
+## 2.0.1 (2018-12-14)
+
+## Fixed
+
+- Cheerio added as dependency instead of dev dependency
+
 ## 2.0.0 (2018-12-14)
 
 ## Added
