@@ -1,12 +1,13 @@
 import * as fs from "fs";
-import { CookieJar, Response } from "request";
+import {CookieJar, Response} from "request";
 import * as rp from "request-promise";
-import BoxrecRequests from "./boxrec-requests";
-import { BoxrecRole, BoxrecStatus, WeightDivisionCapitalized } from "./boxrec-requests.constants";
+import {BoxrecRequests} from "./boxrec-requests";
+import {BoxrecRole, BoxrecStatus, WeightDivisionCapitalized} from "./boxrec-requests.constants";
 import Mock = jest.Mock;
 import SpyInstance = jest.SpyInstance;
 
-export const boxRecMocksModulePath: string = "./node_modules/boxrec-mocks/pages/";
+// todo remove dependency on `boxrec-mocks`
+export const boxRecMocksModulePath: string = "./node_modules/boxrec-mocks/dist/pages";
 
 jest.mock("request-promise");
 
@@ -16,7 +17,6 @@ const mockProfileJudgeDaveMoretti: string = fs.readFileSync(
     `${boxRecMocksModulePath}/profile/mockProfileJudgeDaveMoretti.html`, "utf8");
 const mockSearchMayweather: string = fs.readFileSync(
     `${boxRecMocksModulePath}/search/mockSearchMayweather.html`, "utf8");
-;
 
 export const getLastCall: (spy: SpyInstance, type?: any) => any =
     (spy: SpyInstance, type: any = "uri") => spy.mock.calls[spy.mock.calls.length - 1][0][type];
@@ -273,6 +273,11 @@ describe("class BoxrecRequests", () => {
             });
         });
 
+        it("should throw an error if cannot get the correct number of columns, preventing an endless loop of requests", async () => {
+            jest.spyOn(rp, "get").mockReturnValueOnce("");
+            await expect(BoxrecRequests.getPersonById(cookieJar, 352, BoxrecRole.boxer, 20)).rejects.toThrowError(`Cannot find correct number of columns`);
+        });
+
     });
 
     describe("method getEventById", () => {
@@ -440,17 +445,13 @@ describe("class BoxrecRequests", () => {
 
     describe("method getTitles", () => {
 
-        it("should wrap passed in parameters with `WcX`", async () => {
+        it("should make a request to http://boxrec.com/en/titles", async () => {
             const spy: SpyInstance = jest.spyOn(rp, "get");
             await BoxrecRequests.getTitles(cookieJar, {
                 bout_title: 72,
                 division: WeightDivisionCapitalized.superMiddleweight,
             });
-            expect(getLastCall(spy, "qs")).toEqual({
-                "WcX[bout_title]": 72,
-                "WcX[division]": WeightDivisionCapitalized.superMiddleweight,
-                "offset": 0,
-            });
+            expect(getLastCall(spy, "uri")).toBe("http://boxrec.com/en/titles");
         });
 
     });

@@ -506,9 +506,11 @@ boolbase@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
 
-"boxrec-mocks@https://github.com/boxing/boxrec-mocks":
-  version "0.8.3"
-  resolved "https://github.com/boxing/boxrec-mocks#49186afd3e04fd9af59642705acd25619f693476"
+boxrec-mocks@^0.9.2:
+  version "0.9.2"
+  resolved "https://registry.yarnpkg.com/boxrec-mocks/-/boxrec-mocks-0.9.2.tgz#3a7d15e54956c6f6440e6f11eb54187901647a62"
+  dependencies:
+    request "^2.88.0"
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -3164,7 +3166,7 @@ request-promise@^4.2.2:
     stealthy-require "^1.1.0"
     tough-cookie ">=2.3.3"
 
-request@^2.83.0, request@^2.85.0, request@^2.87.0:
+request@^2.83.0, request@^2.85.0, request@^2.87.0, request@^2.88.0:
   version "2.88.0"
   resolved "https://registry.yarnpkg.com/request/-/request-2.88.0.tgz#9c2fca4f7d35b592efe57c7f0a55e81052124fef"
   dependencies:
