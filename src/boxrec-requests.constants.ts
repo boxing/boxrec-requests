@@ -1,15 +1,10 @@
 // todo build typings package
 export interface BoxrecRatingsParams {
-    division?: string;
-    sex?: "M" | "F";
-    status?: "a" | "";
-}
-
-export interface BoxrecRatingsParamsTransformed {
-    offset?: number;
-    "r[division]"?: string;
-    "r[sex]"?: "M" | "F";
-    "r[status]"?: "a" | "";
+    country?: Country | "";
+    division?: WeightDivisionCapitalized;
+    sex: "M" | "F"; // whatever reason this is necessary, figured it would default to Male but it does not
+    stance?: "O" | "S"; // orthodox // southpaw // undefined is both
+    status?: "a" | ""; // defaults to active/inactive
 }
 
 export interface PersonRequestParams {
@@ -67,7 +62,6 @@ export interface BoxrecSearchLocation {
     addressRegion: string | null;
     streetAddress: string | null;
 }
-
 
 export interface Location {
     country: string | null;
@@ -249,7 +243,6 @@ export interface BoxrecResultsParamsTransformed {
     "c[division]"?: string;
     offset?: number;
 }
-
 
 // if needed to rebuild
 // grab the dropdown HTML from the locations page
@@ -546,7 +539,7 @@ export interface BoxrecTitlesParamsTransformed {
 
 export interface BoxrecLocationsPeopleParams {
     country?: Country;
-    division?: WeightDivision;
+    division?: WeightDivisionCapitalized;
     l_go?: any; // BoxRec param that doesn't do anything
     region?: string;
     role?: BoxrecRole;

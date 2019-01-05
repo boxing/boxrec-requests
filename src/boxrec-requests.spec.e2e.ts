@@ -1,8 +1,12 @@
 import {CookieJar} from "request";
 import {BoxrecRequests} from "./boxrec-requests";
 
-const BOXREC_USERNAME: string = process.env.BOXREC_USERNAME as string;
-const BOXREC_PASSWORD: string = process.env.BOXREC_PASSWORD as string;
+const BOXREC_USERNAME: string | undefined = process.env.BOXREC_USERNAME;
+const BOXREC_PASSWORD: string | undefined = process.env.BOXREC_PASSWORD;
+
+if (!BOXREC_USERNAME || !BOXREC_PASSWORD) {
+    throw new Error("Required Username/Password is not set");
+}
 
 // ignores __mocks__ and makes real requests
 jest.unmock("request-promise");

@@ -1,8 +1,15 @@
+## 4.0.0 (2019-01-05)
+
+## Fixed
+
+- Get the dynamic values for ratings page as they change periodically
+- Getting ratings now requires sex of boxers
+
 ## 3.0.0 (2018-12-22)
 
 ## Changed
 
-- Remove export default package.
+- Remove export default package
 
 ## Fixed
 

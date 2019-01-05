@@ -6,7 +6,6 @@ import {
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
     BoxrecRatingsParams,
-    BoxrecRatingsParamsTransformed,
     BoxrecResultsParams,
     BoxrecResultsParamsTransformed,
     BoxrecRole,
@@ -24,10 +23,11 @@ if (typeof (Symbol as any).asyncIterator === "undefined") {
     (Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol("asyncIterator");
 }
 
-// used to hold the dynamic search param on BoxRec to prevent multiple unnecessary requests
+// used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 let searchParamWrap: string = "";
 let resultsParamWrap: string = "";
 let titlesParamWrap: string = "";
+let ratingsParamWrap: string = "";
 let numberOfFailedAttemptsAtProfileColumns: number = 0;
 
 /**
@@ -207,11 +207,12 @@ class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getRatings(jar: CookieJar, params: BoxrecRatingsParams, offset: number = 0): Promise<string> {
-        const qs: BoxrecRatingsParamsTransformed = {};
+        const qs: any = {};
+        const paramWrap: string = await BoxrecRequests.getRatingsParamWrap(jar);
 
         for (const i in params) {
             if (params.hasOwnProperty(i)) {
-                (qs as any)[`r[${i}]`] = (params as any)[i];
+                (qs as any)[`${paramWrap}[${i}]`] = (params as any)[i];
             }
         }
 
@@ -529,6 +530,19 @@ class BoxrecRequests {
         };
 
         return rp.get(options).then((data: RequestResponse) => data.headers["set-cookie"]);
+    }
+
+    private static async getRatingsParamWrap(jar: CookieJar): Promise<string> {
+        if (ratingsParamWrap === "") {
+            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+                jar,
+                uri: "http://boxrec.com/en/ratings",
+            });
+
+            ratingsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
+        }
+
+        return ratingsParamWrap;
     }
 
     /**
