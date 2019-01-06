@@ -168,7 +168,10 @@ describe("class BoxrecRequests", () => {
         });
 
         it("shouldn't make multiple unnecessary requests to BoxRec to get the search parameter", async () => {
-            const spy: Mock<any> = jest.spyOn(rp, "get").mockReturnValue(mockSearchMayweather);
+            const spy: Mock<any> = jest.spyOn(rp, "get")
+                .mockReturnValueOnce(mockSearchMayweather)
+                .mockReturnValueOnce(mockSearchMayweather)
+                .mockReturnValueOnce(mockSearchMayweather);
             // current number of API requests
             const numberOfRequests: number = spy.mock.calls.length;
 
@@ -224,16 +227,10 @@ describe("class BoxrecRequests", () => {
 
         it("should make a GET request to http://boxrec.com/en/ratings", async () => {
             const spy: SpyInstance = jest.spyOn(rp, "get");
-            await BoxrecRequests.getRatings(cookieJar, {});
-            expect(getLastCall(spy)).toBe("http://boxrec.com/en/ratings");
-        });
-
-        it("should clone any keys in the object and wrap with `r[]`", async () => {
-            const spy: SpyInstance = jest.spyOn(rp, "get");
             await BoxrecRequests.getRatings(cookieJar, {
-                division: "bar",
-            }, 0);
-            expect(getLastCall(spy, "qs")).toEqual({"offset": 0, "r[division]": "bar"});
+                sex: "M",
+            });
+            expect(getLastCall(spy)).toBe("http://boxrec.com/en/ratings");
         });
 
     });
