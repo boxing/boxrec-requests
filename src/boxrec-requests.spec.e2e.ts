@@ -33,4 +33,29 @@ describe("class BoxrecRequests", () => {
 
     });
 
+    describe("watching/unwatching", () => {
+
+        const boxer: number = 447121;
+        const boxerName: string = "Terence Crawford";
+
+        describe("method watch", () => {
+
+            it("should watch a person, adding them to the list", async () => {
+                const html: string = await BoxrecRequests.watch(cookieJar, boxer);
+                expect(html).toContain(boxerName);
+            });
+
+        });
+
+        describe("method unwatch", () => {
+
+            it("should unwatch a person.  They shouldn't exist in the returned HTML", async () => {
+                const html: string = await BoxrecRequests.unwatch(cookieJar, boxer);
+                expect(html).not.toContain(boxerName);
+            });
+
+        });
+
+    });
+
 });

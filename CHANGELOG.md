@@ -1,3 +1,9 @@
+## 4.1.0 (2019-01-10)
+
+## Added
+
+- Can now use `watch`/`unwatch` methods to watch/unwatch a boxer
+
 ## 4.0.0 (2019-01-05)
 
 ## Fixed
