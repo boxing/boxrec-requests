@@ -442,6 +442,34 @@ class BoxrecRequests {
         });
     }
 
+    /**
+     * Removes the boxer from the users watch list.  Returns the watch page where the boxer should be removed
+     * @param jar       contains cookie information about the user
+     * @param {number} boxerGlobalId
+     * @returns {Promise<boolean>}
+     */
+    static async unwatch(jar: CookieJar, boxerGlobalId: number): Promise<string> {
+        return rp.get({
+            followAllRedirects: true,
+            jar,
+            uri: `http://boxrec.com/en/unwatch/${boxerGlobalId}`,
+        });
+    }
+
+    /**
+     * Adds the boxer to the users watch list.  Returns the watch page where the boxer should have been added
+     * @param jar       contains cookie information about the user
+     * @param {number} boxerGlobalId
+     * @returns {Promise<boolean>}
+     */
+    static async watch(jar: CookieJar, boxerGlobalId: number): Promise<string> {
+        return rp.get({
+            followAllRedirects: true,
+            jar,
+            uri: `http://boxrec.com/en/watch/${boxerGlobalId}`,
+        });
+    }
+
     private static async buildResultsSchedulesParams<T>(jar: CookieJar, params: T, offset: number): Promise<T> {
         const qs: any = {};
         const searchParam: string = await BoxrecRequests.getResultsParamWrap(jar);
@@ -481,6 +509,19 @@ class BoxrecRequests {
             qs,
             uri: `http://boxrec.com/en/boxer/${globalId}`
         });
+    }
+
+    private static async getRatingsParamWrap(jar: CookieJar): Promise<string> {
+        if (ratingsParamWrap === "") {
+            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+                jar,
+                uri: "http://boxrec.com/en/ratings",
+            });
+
+            ratingsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
+        }
+
+        return ratingsParamWrap;
     }
 
     /**
@@ -530,19 +571,6 @@ class BoxrecRequests {
         };
 
         return rp.get(options).then((data: RequestResponse) => data.headers["set-cookie"]);
-    }
-
-    private static async getRatingsParamWrap(jar: CookieJar): Promise<string> {
-        if (ratingsParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await rp.get({
-                jar,
-                uri: "http://boxrec.com/en/ratings",
-            });
-
-            ratingsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
-        }
-
-        return ratingsParamWrap;
     }
 
     /**
