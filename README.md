@@ -2,6 +2,7 @@
 [![Build Status](https://travis-ci.org/boxing/boxrec-requests.svg?branch=master)](https://travis-ci.org/boxing/boxrec-requests)
 [![Coverage Status](https://coveralls.io/repos/github/boxing/boxrec-requests/badge.svg?branch=master)](https://coveralls.io/github/boxing/boxrec-requests?branch=master)
 [![npm version](https://badge.fury.io/js/boxrec-requests.svg)](https://badge.fury.io/js/boxrec-requests)
+[![Known Vulnerabilities](https://snyk.io/test/github/boxing/boxrec-requests/badge.svg?targetFile=package.json)](https://snyk.io/test/github/boxing/boxrec-requests?targetFile=package.json)
 
 This project makes HTTP requests to BoxRec and returns the HTML body.  
 The main purpose of this project is for other projects to easily make requests and return the HTML.
