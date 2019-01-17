@@ -33,6 +33,14 @@ describe("class BoxrecRequests", () => {
 
     });
 
+    describe("method getWatched", async () => {
+
+        it("should return the page of the boxers that the user is watching", async () => {
+            const html: string = await BoxrecRequests.getWatched(cookieJar);
+            expect(html).toContain(`<h1 class="pageHeading">Watching</h1>`);
+        });
+    });
+
     describe("watching/unwatching", () => {
 
         const boxer: number = 447121;

@@ -319,6 +319,19 @@ class BoxrecRequests {
     }
 
     /**
+     * Lists the boxers that the user is watching
+     * @param {request.CookieJar} jar
+     * @returns {Promise<string>}
+     */
+    static async getWatched(jar: CookieJar): Promise<string> {
+        return rp.get({
+            followAllRedirects: true,
+            jar,
+            uri: "http://boxrec.com/en/watchlist",
+        });
+    }
+
+    /**
      * Makes a request to BoxRec to log the user in
      * This is required before making any additional calls
      * The session cookie is stored inside this instance of the class
