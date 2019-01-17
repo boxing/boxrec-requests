@@ -1,3 +1,9 @@
+## 4.2.0 (2019-01-16)
+
+## Added
+
+- Can now use `getWatched` to list the boxers that are being watched by the user
+
 ## 4.1.0 (2019-01-10)
 
 ## Added
