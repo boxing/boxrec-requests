@@ -341,6 +341,12 @@ class BoxrecRequests {
      * @returns {Promise<void>}     If the response is undefined, you have successfully logged in.  Otherwise an error will be thrown
      */
     static async login(username: string, password: string): Promise<CookieJar> {
+        // check for undefined args, if undefined will throw weird error.  Therefore we check and throw proper error
+        // https://github.com/form-data/form-data/issues/336#issuecomment-301116262
+        if (username === undefined || password === undefined) {
+            throw new Error(`missing parameter: ${username === undefined ? "username" : "password"}`);
+        }
+
         let rawCookies: string[];
         const boxrecDomain: string = "http://boxrec.com";
 
@@ -377,50 +383,44 @@ class BoxrecRequests {
             url: "http://boxrec.com/en/login", // BoxRec does not support HTTPS
         };
 
-        try {
-            await rp.post(options)
-                .then((data: RequestResponse) => {
+        return rp.post(options)
+            .then((data: RequestResponse) => {
+                let errorMessage: string = "";
 
-                    let errorMessage: string = "";
+                // if the user hasn't given consent, the user is redirected to a user that contains `gdpr`
+                if (data.request.uri.pathname.includes("gdpr") || data.body.toLowerCase().includes("gdpr")) {
+                    errorMessage = "GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account";
+                }
 
-                    // if the user hasn't given consent, the user is redirected to a user that contains `gdpr`
-                    if (data.request.uri.pathname.includes("gdpr") || data.body.toLowerCase().includes("gdpr")) {
-                        errorMessage = "GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account";
-                    }
+                // the following are when login has failed
+                // an unsuccessful login returns a 200, we'll look for phrases to determine the error
+                if (data.body.includes("your password is incorrect")) {
+                    errorMessage = "Your password is incorrect";
+                }
 
-                    // the following are when login has failed
-                    // an unsuccessful login returns a 200, we'll look for phrases to determine the error
-                    if (data.body.includes("your password is incorrect")) {
-                        errorMessage = "Your password is incorrect";
-                    }
+                if (data.body.includes("username does not exist")) {
+                    errorMessage = "Username does not exist";
+                }
 
-                    if (data.body.includes("username does not exist")) {
-                        errorMessage = "Username does not exist";
-                    }
+                if (data.statusCode !== 200 || errorMessage !== "") {
+                    throw new Error(errorMessage);
+                }
 
-                    if (data.statusCode !== 200 || errorMessage !== "") {
-                        throw new Error(errorMessage);
-                    }
+                const requiredCookies: string[] = ["PHPSESSID", "REMEMBERME"];
 
-                });
-        } catch (e) {
-            throw new Error(e);
-        }
+                jar.getCookies(boxrecDomain)
+                    .forEach((cookieInsideJar: Cookie) => {
+                        const index: number = requiredCookies.findIndex((val: string) => val === cookieInsideJar.value);
+                        requiredCookies.splice(index);
+                    });
 
-        const requiredCookies: string[] = ["PHPSESSID", "REMEMBERME"];
-
-        jar.getCookies(boxrecDomain)
-            .forEach((cookieInsideJar: Cookie) => {
-                const index: number = requiredCookies.findIndex((val: string) => val === cookieInsideJar.value);
-                requiredCookies.splice(index);
+                // test to see if both cookies exist
+                if (!requiredCookies.length) {
+                    return jar; // success
+                } else {
+                    throw new Error("Cookie did not have PHPSESSID and REMEMBERME");
+                }
             });
-
-        // test to see if both cookies exist
-        if (!requiredCookies.length) {
-            return jar; // success
-        } else {
-            throw new Error("Cookie did not have PHPSESSID and REMEMBERME");
-        }
     }
 
     /**
