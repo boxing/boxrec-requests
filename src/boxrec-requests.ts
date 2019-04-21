@@ -33,7 +33,7 @@ let numberOfFailedAttemptsAtProfileColumns: number = 0;
 /**
  * Makes API requests to BoxRec and returns the HTML body
  */
-class BoxrecRequests {
+export class BoxrecRequests {
 
     /**
      * Makes a request to get Bout Information
@@ -663,7 +663,3 @@ class BoxrecRequests {
     }
 
 }
-
-export {
-    BoxrecRequests,
-};
