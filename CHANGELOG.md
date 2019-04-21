@@ -1,3 +1,9 @@
+## 4.2.2 (2019-04-21)
+
+## Changed
+
+- Used travis-ci.com instead of travis-ci.org for builds
+
 ## 4.2.0 (2019-01-16)
 
 ## Added
