@@ -1,5 +1,5 @@
 # BoxRec Requests
-[![Build Status](https://travis-ci.com/boxing/boxrec-requests.svg?branch=master)](https://travis-ci.com/boxing/boxrec-requests)
+[![CircleCI](https://circleci.com/gh/boxing/boxrec-requests.svg?style=svg)](https://circleci.com/gh/boxing/boxrec-requests)
 [![Coverage Status](https://coveralls.io/repos/github/boxing/boxrec-requests/badge.svg?branch=master)](https://coveralls.io/github/boxing/boxrec-requests?branch=master)
 [![npm version](https://badge.fury.io/js/boxrec-requests.svg)](https://badge.fury.io/js/boxrec-requests)
 [![Known Vulnerabilities](https://snyk.io/test/github/boxing/boxrec-requests/badge.svg?targetFile=package.json)](https://snyk.io/test/github/boxing/boxrec-requests?targetFile=package.json)
@@ -18,7 +18,7 @@ or
 
 or
 
-`const BoxrecRequests = require("boxrec-requests");`
+`const BoxrecRequests = require("boxrec-requests").BoxrecRequests;`
 
 ## Usage
 All responses are promises.  It is highly suggested that you log into BoxRec before hand like this
