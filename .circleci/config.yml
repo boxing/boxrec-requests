@@ -36,6 +36,15 @@ jobs:
     - run:
         name: Run tests
         command: yarn jest --ci --config=jest.config.json --coverage --runInBand && cat ./coverage/lcov.info | yarn coveralls
+    - run:
+        name: Build dist
+        command: yarn tsc
+    - run:
+        name: Test Typescript
+        command: yarn ts-node ./scripts/test-working-typescript.ts
+    - run:
+        name: Test Javascript
+        command: node ./scripts/test-working.js
 workflows:
   version: 2
   build_and_test:
