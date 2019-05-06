@@ -1,14 +1,12 @@
 {
   "transform": {
-    "^.+\\.tsx?$": "ts-jest"
+    "^.+\\.ts?$": "ts-jest"
   },
   "testRegex": "spec\\.e2e\\.ts$",
   "restoreMocks": true,
   "moduleFileExtensions": [
     "ts",
-    "tsx",
     "js",
-    "jsx",
     "json",
     "node"
   ],

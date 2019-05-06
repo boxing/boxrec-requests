@@ -1,0 +1,65 @@
+version: 2.1
+jobs:
+  # Build job that installs and saves cache
+  build:
+    docker:
+    - image: circleci/node:8.9.4
+    steps: # a collection of executable commands
+    - checkout # special step to check out source code to working directory
+    - run:
+        name: Update NPM
+        command: 'sudo npm install -g npm@latest'
+    - restore_cache: # special step to restore the dependency cache
+        # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+        key: dependency-cache-{{ checksum "yarn.lock" }}
+    - run:
+        name: Install dependencies
+        # use yarn install to ensure proper dependency caching
+        command: yarn install
+    - save_cache: # special step to save the dependency cache
+        key: dependency-cache-{{ checksum "yarn.lock" }}
+        paths:
+        - ./node_modules
+  # Checks out code and runs lint/tests
+  # Does not require dependencies installed
+  lint_and_test:
+    docker:
+    - image: circleci/node:8.9.4
+    steps: # a collection of executable commands
+    - checkout
+    - restore_cache: # special step to restore the dependency cache
+        # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
+        key: dependency-cache-{{ checksum "yarn.lock" }}
+    - run:
+        name: Run TSLint
+        command: npm run tslint
+    - run:
+        name: Run tests
+        command: yarn jest --ci --config=jest.config.json --coverage --runInBand && cat ./coverage/lcov.info | yarn coveralls
+    - run:
+        name: Build dist
+        command: yarn tsc
+    - run:
+        name: Test Typescript
+        command: yarn ts-node ./scripts/test-working-typescript.ts
+    - run:
+        name: Test Javascript
+        command: node ./scripts/test-working.js
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only:
+            - master
+            - develop
+            - /feature.*/
+            - /bugfix.*/
+            - /release.*/
+            - /hotfix.*/
+            - /support.*/
+    - lint_and_test:
+        requires:
+        - build
