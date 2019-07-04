@@ -5,13 +5,14 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublish": "npm run snyk-protect; npm run build",
     "build": "tsc",
     "test": "jest --config jest.config.json --coverage && cat ./coverage/lcov.info | coveralls",
     "test-e2e": "jest --config jest.config.e2e.json --runInBand",
     "test-coverage-watch": "jest --config jest.config.json --coverage --watchAll",
     "test-watch": "jest --config jest.config.json --watchAll",
-    "tslint": "tslint -c tslint.json src/**/*.ts"
+    "tslint": "tslint -c tslint.json src/**/*.ts",
+    "snyk-protect": "snyk protect"
   },
   "keywords": [
     "boxrec",
@@ -47,6 +48,8 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2"
-  }
+    "request-promise": "^4.2.2",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
