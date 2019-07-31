@@ -1,4 +1,3 @@
-// todo build typings package
 export interface BoxrecRatingsParams {
     country?: Country | "";
     division?: WeightDivisionCapitalized;
@@ -22,7 +21,7 @@ export enum BoxrecStatus {
 export interface BoxrecSearchParams {
     first_name: string;
     last_name: string;
-    role: BoxrecRole;
+    role: BoxrecRole | "" | "fighters";
     status: BoxrecStatus;
 }
 
@@ -35,44 +34,6 @@ export interface BoxrecSearchParamsTransformed {
     "pf[last_name]"?: string;
     "pf[role]"?: BoxrecRole;
     "pf[status]"?: BoxrecStatus;
-}
-
-export interface BoxrecSearch extends BoxrecBasic {
-    alias: string | null;
-    career: Array<number | null>;
-    division: string | null;
-    id: number;
-    last6: WinLossDraw[];
-    record: Record;
-    residence: Location;
-}
-
-export interface BoxrecSearchMetadata {
-    location: {
-        address: BoxrecSearchLocation;
-    };
-    startDate: string | null;
-
-    [key: string]: any;
-}
-
-export interface BoxrecSearchLocation {
-    addressCountry: string | null;
-    addressLocality: string | null;
-    addressRegion: string | null;
-    streetAddress: string | null;
-}
-
-export interface Location {
-    country: string | null;
-    id: number | null;
-    region: string | null;
-    town: string | null;
-}
-
-export interface BoxrecBoutLocation {
-    location: Location;
-    venue: BoxrecBasic;
 }
 
 export enum WinLossDraw {
@@ -120,63 +81,6 @@ export interface BoxrecBout extends BoxrecBoutBasic {
     location: BoxrecProfileBoutLocation;
 }
 
-export type Stance = "orthodox" | "southpaw";
-
-export interface BoxrecProfile {
-    KOs: number | null;
-    alias: string | null;
-    birthName: string | null;
-    birthPlace: string | null;
-    born: string | null;
-    bouts: BoxrecBout[];
-    debut: string | null;
-    division: string | null;
-    globalId: number | null;
-    hasBoutScheduled: boolean;
-    height: number[] | null;
-    name: string | null;
-    nationality: string | null;
-    numberOfBouts: number;
-    otherInfo: string[][] | null;
-    ranking: number[][] | null;
-    rating: number | null;
-    reach: number[] | null;
-    residence: string | null;
-    role: string | null;
-    rounds: number | null;
-    stance: string | null;
-    status: string | null;
-    suspended: string | null;
-    titlesHeld: string[] | null;
-    vadacbp: string | null;
-}
-
-export enum BoxrecProfileTable {
-    globalId = "global ID",
-    role = "role",
-    rating = "rating",
-    ranking = "ranking",
-    vadacbp = "VADA CBP",
-    bouts = "bouts",
-    rounds = "rounds",
-    KOs = "KOs",
-    status = "status",
-    titlesHeld = "titles held",
-    birthName = "birth name",
-    alias = "alias",
-    born = "born",
-    nationality = "nationality",
-    debut = "debut",
-    division = "division",
-    stance = "stance",
-    height = "height",
-    reach = "reach",
-    residence = "residence",
-    birthPlace = "birth place",
-    company = "company",
-    registeredContact = "registered contact",
-}
-
 export interface BoxrecProfileBoutLocation {
     town: string | null;
     venue: string | null;
@@ -187,10 +91,6 @@ export interface BoxrecProfileLinks {
     bout: number | null;
     event: number | null;
     other: string[];
-}
-
-export interface BoxrecProfileEventLinks {
-    event: number | null;
 }
 
 export interface PersonRequestParams {
@@ -591,8 +491,13 @@ export interface BoxrecUnformattedChampions {
 }
 
 export enum BoxrecRole {
-    all = "all", // just used for search
-    boxer = "boxer",
+    proBoxer = "proboxer",
+    amateurBoxer = "amateurboxer",
+    kickBoxer = "amateurkickboxer",
+    muayThaiBoxer = "muaythaiboxer",
+    amateurMuayThaiBoxer = "amateurmuaythaiboxer",
+    bareKnuckleBoxer = "bareknuckleboxer",
+    worldSeriesBoxer = "worldseriesboxer",
     doctor = "doctor",
     inspector = "inspector",
     judge = "judge",
@@ -600,7 +505,7 @@ export enum BoxrecRole {
     matchmaker = "matchmaker",
     promoter = "promoter",
     referee = "referee",
-    supervisor = "supervisor",
+    supervisor = "supervisor"
 }
 
 export enum WeightDivision {
