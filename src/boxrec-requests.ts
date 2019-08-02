@@ -117,14 +117,26 @@ export class BoxrecRequests {
     }
 
     /**
-     * Makes a request to BoxRec to list events by location
+     * Makes a request to BoxRec to list events by sport/location
+     * @param jar                                   contains cookie information about the user
+     * @param {BoxrecLocationEventParams} params    params included to get events by location
+     * @param {number} offset                       the number of rows to offset the search
+     * @returns {Promise<string>}
+     */
+    static async getEvents(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0): Promise<string> {
+        return BoxrecRequests.getEventsByLocation(jar, params, offset);
+    }
+
+    /**
+     * Makes a request to BoxRec to list events by sport/location
+     * @deprecated              This method is now more than location, and is also by sport (use `getPeople`)
      * @param jar                                   contains cookie information about the user
      * @param {BoxrecLocationEventParams} params    params included to get events by location
      * @param {number} offset                       the number of rows to offset the search
      * @returns {Promise<string>}
      */
     static async getEventsByLocation(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0): Promise<string> {
-        const qs: BoxrecLocationEventParams = {};
+        const qs: Partial<BoxrecLocationEventParams> = {};
 
         for (const i in params) {
             if (params.hasOwnProperty(i)) {
@@ -139,10 +151,23 @@ export class BoxrecRequests {
             qs,
             uri: `https://boxrec.com/en/locations/event`,
         });
+
     }
 
     /**
-     * Make a request to BoxRec to search for people by location
+     * Make a request to BoxRec to search for people by location/role
+     * @param jar                                   contains cookie information about the user
+     * @param {BoxrecLocationsPeopleParams} params  params included to get people by location/role
+     * @param {number} offset                       the number of rows to offset the search
+     * @returns {Promise<string>}
+     */
+    static async getPeople(jar: CookieJar, params: BoxrecLocationsPeopleParams, offset: number = 0): Promise<string> {
+        return BoxrecRequests.getPeopleByLocation(jar, params, 0);
+    }
+
+    /**
+     * Make a request to BoxRec to search for people by location/role
+     * @deprecated              This method is now more than location, and is also by sport (use `getPeople`)
      * @param jar                                   contains cookie information about the user
      * @param {BoxrecLocationsPeopleParams} params  params included to get people by location
      * @param {number} offset                       the number of rows to offset the search
@@ -186,11 +211,6 @@ export class BoxrecRequests {
         };
 
         return BoxrecRequests.search(jar, params, offset);
-
-        /*for (const result of searchResults) {
-            // todo get person by role
-            yield await BoxrecRequests.makeGetPersonByIdRequest(jar, result.id, role, offset);
-        }*/
     }
 
     /**

@@ -1,8 +1,8 @@
+import * as $ from "cheerio";
 import {CookieJar} from "request";
 import {BoxrecRequests} from "./boxrec-requests";
-import {BoxrecRole} from "./boxrec-requests.constants";
+import {BoxrecFighterRole, BoxrecRole, Country} from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
-import * as $ from "cheerio";
 
 const BOXREC_USERNAME: string | undefined = process.env.BOXREC_USERNAME;
 const BOXREC_PASSWORD: string | undefined = process.env.BOXREC_PASSWORD;
@@ -25,6 +25,42 @@ describe("class BoxrecRequests", () => {
     it("cookie should be not null and defined", () => {
         expect(cookieJar).toBeDefined();
         expect(cookieJar).not.toBeNull();
+    });
+
+    describe("method getEvents", () => {
+
+        it("should return different events if different roles are provided", async () => {
+            const proBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
+                country: Country.USA,
+                sport: BoxrecFighterRole.proBoxer,
+            });
+
+            const amateurBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
+                country: Country.USA,
+                sport: BoxrecFighterRole.amateurBoxer,
+            });
+
+            // was tested to see that two of the same requests will equal the same, so we do know this works as intended
+            expect(proBoxerResponse).not.toEqual(amateurBoxerResponse);
+        });
+
+    });
+
+    describe("method getPeople", () => {
+
+        it("should return different people if different roles are provided", async () => {
+            const proBoxerResponse: string = await BoxrecRequests.getPeople(cookieJar, {
+                role: BoxrecRole.proBoxer,
+            });
+
+            const amateurBoxerResponse: string = await BoxrecRequests.getPeople(cookieJar, {
+                role: BoxrecRole.amateurBoxer,
+            });
+
+            // was tested to see that two of the same requests will equal the same, so we do know this works as intended
+            expect(proBoxerResponse).not.toEqual(amateurBoxerResponse);
+        });
+
     });
 
     // the reason we don't test for specific roles is because it's difficult to test a specific role and things

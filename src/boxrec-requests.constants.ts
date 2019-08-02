@@ -100,15 +100,6 @@ export interface PersonRequestParams {
     toggleRatings?: "y"; // hard coded but this value doesn't actually matter to BoxRec
 }
 
-export interface BoxrecProfileRole {
-    id: number | null;
-    name: BoxrecRole;
-}
-
-export interface BoxrecPromoter extends BoxrecBasic {
-    company: string | null;
-}
-
 export enum BoxingBoutOutcome {
     TKO = "technical knockout",
     KO = "knockout",
@@ -442,7 +433,7 @@ export interface BoxrecLocationsPeopleParams {
     division?: WeightDivisionCapitalized;
     l_go?: any; // BoxRec param that doesn't do anything
     region?: string;
-    role?: BoxrecRole;
+    role: BoxrecRole | "fighters";
     town?: string;
 }
 
@@ -490,6 +481,16 @@ export interface BoxrecUnformattedChampions {
     weightDivision: WeightDivision;
 }
 
+export enum BoxrecFighterRole {
+    proBoxer = "proboxer",
+    amateurBoxer = "amateurboxer",
+    kickBoxer = "amateurkickboxer",
+    muayThaiBoxer = "muaythaiboxer",
+    amateurMuayThaiBoxer = "amateurmuaythaiboxer",
+    bareKnuckleBoxer = "bareknuckleboxer",
+    worldSeriesBoxer = "worldseriesboxer",
+}
+
 export enum BoxrecRole {
     proBoxer = "proboxer",
     amateurBoxer = "amateurboxer",
@@ -529,9 +530,10 @@ export enum WeightDivision {
 }
 
 export interface BoxrecLocationEventParams {
-    country?: Country;
+    country: Country;
     offset?: number;
     region?: string;
+    sport: BoxrecFighterRole;
     town?: string;
     venue?: string;
     year?: number;
