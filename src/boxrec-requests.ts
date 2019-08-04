@@ -665,23 +665,36 @@ export class BoxrecRequests {
         let numberOfColumnsExpecting: string = "unknown";
         let numberOfColumnsReceived: number = -1;
 
+        // we check the number of columns to ensure we have the right number that we want
         // there are (now more than )9 roles on the BoxRec website
         // the differences are that the boxers have 2 more columns `last6` for each boxer
         // the judge and others don't have those columns
         // the doctor and others have `events`
         // manager is unique in that the table is a list of boxers that they manage
+        // todo logic into another method?
         switch (role) {
             case BoxrecRole.judge:
             case BoxrecRole.supervisor:
             case BoxrecRole.referee:
                 numberOfColumnsExpecting = "!16";
-                numberOfColumnsReceived = $(boxrecPageBody).find("#listBoutsResults tbody tr:nth-child(1) td").length;
+                numberOfColumnsReceived = $(boxrecPageBody)
+                    .find("#listBoutsResults tbody tr:nth-child(1) td").length;
                 hasAllColumns = numberOfColumnsReceived !== 16;
+                break;
+            case BoxrecRole.matchmaker:
+            case BoxrecRole.doctor:
+                numberOfColumnsExpecting = "4";
+                numberOfColumnsReceived = $(boxrecPageBody)
+                    .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
+                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
                 break;
             default:
                 // default to all other roles which should only be fighters
+                // although other fighter roles like muay thai boxer don't have the same number of columns because
+                // they don't have the toggleRatings, everything proceeds as needed
                 numberOfColumnsExpecting = "16";
-                numberOfColumnsReceived = $(boxrecPageBody).find(`.dataTable tbody tr:nth-child(1) td`).length;
+                numberOfColumnsReceived = $(boxrecPageBody)
+                    .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
                 hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
         }
 
@@ -705,7 +718,7 @@ export class BoxrecRequests {
 
         // to prevent BoxRec getting spammed if the number of columns changed, we'll error out if we can't get the correct number
         if (numberOfFailedAttemptsAtProfileColumns > 1) {
-            throw new Error(`Cannot find correct number of columns.  Expecting ${numberOfColumnsExpecting}, Received ${numberOfColumnsReceived}.  Please report this error with the profile id`);
+            throw new Error(`Cannot find correct number of columns.  Expecting ${numberOfColumnsExpecting}, Received ${numberOfColumnsReceived}.  Please report this error with the profile id: ${globalId}, role: ${role}`);
         }
 
         // calls itself with the toggle for `toggleRatings=y`

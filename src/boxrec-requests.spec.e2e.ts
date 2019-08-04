@@ -120,29 +120,54 @@ describe("class BoxrecRequests", () => {
          * @param role
          * @param expectedValue
          */
-        const returnRole: (globalId: number, role: BoxrecRole | null, expectedValue: string) => Promise<void>
-            = async (globalId: number, role: BoxrecRole | null = null, expectedValue: string): Promise<void> => {
+        const returnRole: (globalId: number, role: BoxrecRole | null, expectedValue?: BoxrecRole | "") => Promise<void>
+            = async (globalId: number, role: BoxrecRole | null = null, expectedValue?: BoxrecRole | ""):
+            Promise<void> => {
             const html: string = await BoxrecRequests.getPersonById(cookieJar, globalId, role);
             const roleStr: string | null = getRoleOfHTML(html);
-            expect(roleStr).toBe(expectedValue);
+            expect(roleStr).toBe(role || expectedValue);
         };
 
         describe("person that has two roles", () => {
 
             const paulieMalignaggi: number = 52984;
+            const royJonesJr: number = 774820;
+            const louDuva: number = 24678;
+            const markMacKinnon: number = 875332;
+            const steveWillis: number = 408398;
 
             describe("not specifying a role", () => {
 
                 it("should give the profile default role of the person", async () => {
                     // Paulie Malignaggi should default to `Pro Boxing`
-                    await returnRole(paulieMalignaggi, null, "proboxer");
+                    await returnRole(paulieMalignaggi, null, BoxrecRole.proBoxer);
                 });
             });
 
             describe("specifying a role", () => {
 
-                it("should return the specified role of that person", async () => {
-                    await returnRole(paulieMalignaggi, BoxrecRole.bareKnuckleBoxer, "bareknuckleboxer");
+                describe("different roles different table columns", () => {
+
+                    it("should return the specified role of that person (bareknuckleboxer)", async () => {
+                        await returnRole(paulieMalignaggi, BoxrecRole.bareKnuckleBoxer);
+                    });
+
+                    it("should return the specified role of that person (proboxer)", async () => {
+                        await returnRole(royJonesJr, BoxrecRole.proBoxer);
+                    });
+
+                    it("should return the specified role of that person (matchmaker)", async () => {
+                        await returnRole(louDuva, BoxrecRole.matchmaker);
+                    });
+
+                    it("should return the specified role of that person (muaythaiboxing)", async () => {
+                        await returnRole(markMacKinnon, BoxrecRole.muayThaiBoxer);
+                    });
+
+                    it("should return the specified role of that person (referee)", async () => {
+                        await returnRole(steveWillis, BoxrecRole.referee);
+                    });
+
                 });
 
                 it("should throw an error if the role doesn't exist for this person", async () => {
@@ -160,8 +185,10 @@ describe("class BoxrecRequests", () => {
 
         describe("person that has one role", () => {
 
+            const marlonDavis: number = 778281;
+
             it("should return their default role if not specified", async () => {
-                await returnRole(778281, null, "matchmaker");
+                await returnRole(marlonDavis, null, BoxrecRole.matchmaker);
             });
 
         });

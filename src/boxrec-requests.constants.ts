@@ -392,10 +392,6 @@ export interface BoxrecScheduleParams extends BoxrecResultsParams {
     tv?: string;
 }
 
-export interface BoxrecScheduleParamsTransformed extends BoxrecResultsParamsTransformed {
-    "c[tv]"?: string;
-}
-
 // the params for searching titles are capitalized divisions
 export enum WeightDivisionCapitalized {
     heavyweight = "Heavyweight",
@@ -447,26 +443,6 @@ export interface BoxrecLocationsPeopleParamsTransformed {
     offset?: number;
 }
 
-export interface BoxrecChampionsByWeightDivision {
-    bantamweight: BoxrecBelts;
-    cruiserweight: BoxrecBelts;
-    featherWeight: BoxrecBelts;
-    flyweight: BoxrecBelts;
-    heavyweight: BoxrecBelts;
-    lightFlyweight: BoxrecBelts;
-    lightHeavyweight: BoxrecBelts;
-    lightweight: BoxrecBelts;
-    middleweight: BoxrecBelts;
-    minimumweight: BoxrecBelts;
-    superBantamweight: BoxrecBelts;
-    superFeatherweight: BoxrecBelts;
-    superFlyweight: BoxrecBelts;
-    superLightweight: BoxrecBelts;
-    superMiddleweight: BoxrecBelts;
-    superWelterweight: BoxrecBelts;
-    welterweight: BoxrecBelts;
-}
-
 export interface BoxrecBelts {
     BoxRec: BoxrecBasic | null;
     IBF: BoxrecBasic | null;
@@ -474,11 +450,6 @@ export interface BoxrecBelts {
     WBA: BoxrecBasic | null;
     WBC: BoxrecBasic | null;
     WBO: BoxrecBasic | null;
-}
-
-export interface BoxrecUnformattedChampions {
-    beltHolders: BoxrecBelts;
-    weightDivision: WeightDivision;
 }
 
 export enum BoxrecFighterRole {
