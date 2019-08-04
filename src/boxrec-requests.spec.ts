@@ -272,7 +272,8 @@ describe("class BoxrecRequests", () => {
 
         it("should throw an error if cannot get the correct number of columns, preventing an endless loop of requests", async () => {
             jest.spyOn(rp, "get").mockReturnValueOnce("");
-            await expect(BoxrecRequests.getPersonById(cookieJar, 352, BoxrecRole.boxer, 20)).rejects.toThrowError(`Cannot find correct number of columns`);
+            await expect(BoxrecRequests.getPersonById(cookieJar, 352, BoxrecRole.boxer, 20))
+                .rejects.toThrowError(`Cannot find correct number of columns`);
         });
 
     });
