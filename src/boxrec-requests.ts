@@ -17,6 +17,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams
 } from "./boxrec-requests.constants";
+import {getRoleOfHTML} from "./helpers";
 
 // https://github.com/Microsoft/TypeScript/issues/14151
 if (typeof (Symbol as any).asyncIterator === "undefined") {
@@ -24,10 +25,13 @@ if (typeof (Symbol as any).asyncIterator === "undefined") {
 }
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
+// todo these should all be time based or on failure update these values.
+// todo A node process not restarted will start getting failures
 let searchParamWrap: string = "";
 let resultsParamWrap: string = "";
 let titlesParamWrap: string = "";
 let ratingsParamWrap: string = "";
+let quickSearchParamWrap: string = "";
 let numberOfFailedAttemptsAtProfileColumns: number = 0;
 
 /**
@@ -43,7 +47,7 @@ export class BoxrecRequests {
     static async getBout(jar: CookieJar, eventBoutId: string): Promise<string> {
         return rp.get({
             jar,
-            uri: `http://boxrec.com/en/event/${eventBoutId}`,
+            uri: `https://boxrec.com/en/event/${eventBoutId}`,
         });
     }
 
@@ -79,7 +83,7 @@ export class BoxrecRequests {
     static async getChampions(jar: CookieJar): Promise<string> {
         return rp.get({
             jar,
-            uri: "http://boxrec.com/en/champions",
+            uri: "https://boxrec.com/en/champions",
         });
     }
 
@@ -95,7 +99,7 @@ export class BoxrecRequests {
             qs: {
                 date: dateString,
             },
-            uri: `http://boxrec.com/en/date`,
+            uri: `https://boxrec.com/en/date`,
         });
     }
 
@@ -108,19 +112,31 @@ export class BoxrecRequests {
     static async getEventById(jar: CookieJar, eventId: number): Promise<string> {
         return rp.get({
             jar,
-            uri: `http://boxrec.com/en/event/${eventId}`,
+            uri: `https://boxrec.com/en/event/${eventId}`,
         });
     }
 
     /**
-     * Makes a request to BoxRec to list events by location
+     * Makes a request to BoxRec to list events by sport/location
+     * @param jar                                   contains cookie information about the user
+     * @param {BoxrecLocationEventParams} params    params included to get events by location
+     * @param {number} offset                       the number of rows to offset the search
+     * @returns {Promise<string>}
+     */
+    static async getEvents(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0): Promise<string> {
+        return BoxrecRequests.getEventsByLocation(jar, params, offset);
+    }
+
+    /**
+     * Makes a request to BoxRec to list events by sport/location
+     * @deprecated              This method is now more than location, and is also by sport (use `getPeople`)
      * @param jar                                   contains cookie information about the user
      * @param {BoxrecLocationEventParams} params    params included to get events by location
      * @param {number} offset                       the number of rows to offset the search
      * @returns {Promise<string>}
      */
     static async getEventsByLocation(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0): Promise<string> {
-        const qs: BoxrecLocationEventParams = {};
+        const qs: Partial<BoxrecLocationEventParams> = {};
 
         for (const i in params) {
             if (params.hasOwnProperty(i)) {
@@ -133,12 +149,25 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: `http://boxrec.com/en/locations/event`,
+            uri: `https://boxrec.com/en/locations/event`,
         });
+
     }
 
     /**
-     * Make a request to BoxRec to search for people by location
+     * Make a request to BoxRec to search for people by location/role
+     * @param jar                                   contains cookie information about the user
+     * @param {BoxrecLocationsPeopleParams} params  params included to get people by location/role
+     * @param {number} offset                       the number of rows to offset the search
+     * @returns {Promise<string>}
+     */
+    static async getPeople(jar: CookieJar, params: BoxrecLocationsPeopleParams, offset: number = 0): Promise<string> {
+        return BoxrecRequests.getPeopleByLocation(jar, params, 0);
+    }
+
+    /**
+     * Make a request to BoxRec to search for people by location/role
+     * @deprecated              This method is now more than location, and is also by sport (use `getPeople`)
      * @param jar                                   contains cookie information about the user
      * @param {BoxrecLocationsPeopleParams} params  params included to get people by location
      * @param {number} offset                       the number of rows to offset the search
@@ -158,7 +187,7 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: `http://boxrec.com/en/locations/people`,
+            uri: `https://boxrec.com/en/locations/people`,
         });
     }
 
@@ -173,30 +202,32 @@ export class BoxrecRequests {
      * @param {number} offset               the number of rows to offset the search
      * @yields {string}                     returns a generator to fetch the next person by ID
      */
-    static async* getPeopleByName(jar: CookieJar, firstName: string, lastName: string, role: BoxrecRole = BoxrecRole.boxer, status: BoxrecStatus = BoxrecStatus.all, offset: number = 0): AsyncIterableIterator<string> {
+    static async getPeopleByName(jar: CookieJar, firstName: string, lastName: string, role: BoxrecRole | "" | "fighters" = "", status: BoxrecStatus = BoxrecStatus.all, offset: number = 0): Promise<string> {
         const params: BoxrecSearchParams = {
             first_name: firstName,
             last_name: lastName,
             role,
             status,
         };
-        const searchResults: RequestResponse["body"] = await BoxrecRequests.search(jar, params, offset);
 
-        for (const result of searchResults) {
-            yield await BoxrecRequests.getPersonById(jar, result.id);
-        }
+        return BoxrecRequests.search(jar, params, offset);
     }
 
     /**
      * Make a request to BoxRec to get a person by their BoxRec Global ID
      * @param jar                               contains cookie information about the user
      * @param {number} globalId                 the BoxRec profile id
-     * @param {BoxrecRole} role                 the role of the person in boxing (there seems to be multiple profiles for people if they fall under different roles)
+     * @param {BoxrecRole} role                 the role of the person in boxing (there are multiple profiles for people if they fall under different roles)
      * @param {number} offset                   offset number of bouts/events in the profile.  Not used for boxers as boxer's profiles list all bouts they've been in
      * @returns {Promise<string>}
      */
-    static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole = BoxrecRole.boxer, offset: number = 0): Promise<string> {
-        return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset);
+    static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole | null = null, offset: number = 0): Promise<string> {
+        if (role !== null) {
+            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role);
+        }
+
+        // if role is null we need to get the default profile, we `quick_search` it which will give us the default
+        return BoxrecRequests.quickSearch(jar, globalId);
     }
 
     /**
@@ -221,7 +252,7 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: "http://boxrec.com/en/ratings",
+            uri: "https://boxrec.com/en/ratings",
         });
     }
 
@@ -240,7 +271,7 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: "http://boxrec.com/en/results",
+            uri: "https://boxrec.com/en/results",
         });
     }
 
@@ -258,7 +289,7 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: "http://boxrec.com/en/schedule",
+            uri: "https://boxrec.com/en/schedule",
         });
     }
 
@@ -272,7 +303,7 @@ export class BoxrecRequests {
     static async getTitleById(jar: CookieJar, titleString: string, offset: number = 0): Promise<string> {
         return rp.get({
             jar,
-            uri: `http://boxrec.com/en/title/${titleString}`,
+            uri: `https://boxrec.com/en/title/${titleString}`,
         });
     }
 
@@ -297,7 +328,7 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: `http://boxrec.com/en/titles`,
+            uri: `https://boxrec.com/en/titles`,
         });
     }
 
@@ -314,7 +345,7 @@ export class BoxrecRequests {
             qs: {
                 offset,
             },
-            uri: `http://boxrec.com/en/venue/${venueId}`,
+            uri: `https://boxrec.com/en/venue/${venueId}`,
         });
     }
 
@@ -327,7 +358,7 @@ export class BoxrecRequests {
         return rp.get({
             followAllRedirects: true,
             jar,
-            uri: "http://boxrec.com/en/watchlist",
+            uri: "https://boxrec.com/en/watchlist",
         });
     }
 
@@ -335,7 +366,6 @@ export class BoxrecRequests {
      * Makes a request to BoxRec to log the user in
      * This is required before making any additional calls
      * The session cookie is stored inside this instance of the class
-     * Note: credentials are sent over HTTP, BoxRec doesn't support HTTPS
      * @param {string} username     your BoxRec username
      * @param {string} password     your BoxRec password
      * @returns {Promise<void>}     If the response is undefined, you have successfully logged in.  Otherwise an error will be thrown
@@ -347,27 +377,8 @@ export class BoxrecRequests {
             throw new Error(`missing parameter: ${username === undefined ? "username" : "password"}`);
         }
 
-        let rawCookies: string[];
-        const boxrecDomain: string = "http://boxrec.com";
-
-        try {
-            rawCookies = await BoxrecRequests.getSessionCookie() || [];
-        } catch (e) {
-            throw new Error("Could not get response from boxrec");
-        }
-
-        if (!rawCookies || !rawCookies[0]) {
-            throw new Error("Could not get cookie from initial request to boxrec");
-        }
-
-        const cookie: Cookie | undefined = rp.cookie(rawCookies[0]);
-
-        if (!cookie) {
-            throw new Error("Could not get cookie");
-        }
-
+        const boxrecDomain: string = "https://boxrec.com";
         const jar: CookieJar = rp.jar();
-        jar.setCookie(cookie, boxrecDomain);
 
         const options: rp.Options = {
             followAllRedirects: true, // 302 redirect occurs
@@ -380,7 +391,7 @@ export class BoxrecRequests {
             },
             jar,
             resolveWithFullResponse: true,
-            url: "http://boxrec.com/en/login", // BoxRec does not support HTTPS
+            url: "https://boxrec.com/en/login",
         };
 
         return rp.post(options)
@@ -451,7 +462,7 @@ export class BoxrecRequests {
         return rp.get({
             jar,
             qs,
-            uri: "http://boxrec.com/en/search",
+            uri: "https://boxrec.com/en/search",
         });
     }
 
@@ -465,7 +476,7 @@ export class BoxrecRequests {
         return rp.get({
             followAllRedirects: true,
             jar,
-            uri: `http://boxrec.com/en/unwatch/${boxerGlobalId}`,
+            uri: `https://boxrec.com/en/unwatch/${boxerGlobalId}`,
         });
     }
 
@@ -479,8 +490,33 @@ export class BoxrecRequests {
         return rp.get({
             followAllRedirects: true,
             jar,
-            uri: `http://boxrec.com/en/watch/${boxerGlobalId}`,
+            uri: `https://boxrec.com/en/watch/${boxerGlobalId}`,
         });
+    }
+
+    /**
+     * Search for global ID or string
+     * better for searching by global ID.  `search` doesn't have it
+     * @param jar
+     * @param globalIdOrSearchText
+     * @param searchRole    By default this is empty and returns the default role of the user
+     */
+    private static async quickSearch(jar: CookieJar, globalIdOrSearchText: string | number,
+                                     searchRole: BoxrecRole | "" = ""): Promise<string> {
+        const formData: any = {};
+        const searchParam: string = await BoxrecRequests.getQuickSearchParamWrap(jar);
+        // use an empty string or the actual passed role
+        formData[`${searchParam}[search_role]`] = searchRole === null ? "" : searchRole;
+        formData[`${searchParam}[search_text]`] = globalIdOrSearchText;
+
+        const options: rp.Options = {
+            followAllRedirects: true, // 302 redirect occurs
+            formData,
+            jar,
+            url: "https://boxrec.com/en/quick_search",
+        };
+
+        return rp.post(options);
     }
 
     private static async buildResultsSchedulesParams<T>(jar: CookieJar, params: T, offset: number): Promise<T> {
@@ -520,7 +556,7 @@ export class BoxrecRequests {
             followAllRedirects: true,
             jar,
             qs,
-            uri: `http://boxrec.com/en/boxer/${globalId}`
+            uri: `https://boxrec.com/en/boxer/${globalId}`
         });
     }
 
@@ -528,7 +564,7 @@ export class BoxrecRequests {
         if (ratingsParamWrap === "") {
             const boxrecPageBody: RequestResponse["body"] = await rp.get({
                 jar,
-                uri: "http://boxrec.com/en/ratings",
+                uri: "https://boxrec.com/en/ratings",
             });
 
             ratingsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
@@ -546,13 +582,30 @@ export class BoxrecRequests {
             // it would be nice to get this from any page but the Navbar search is a POST and not as predictable as the search box one on the search page
             const boxrecPageBody: RequestResponse["body"] = await rp.get({
                 jar,
-                uri: "http://boxrec.com/en/results",
+                uri: "https://boxrec.com/en/results",
             });
 
             resultsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
         }
 
         return resultsParamWrap;
+    }
+
+    /**
+     * Makes a request to BoxRec to fidn out the quick search param prefix that is wrapped around params
+     * @param jar
+     */
+    private static async getQuickSearchParamWrap(jar: CookieJar): Promise<string> {
+        if (quickSearchParamWrap === "") {
+            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+                jar,
+                uri: "https://boxrec.com/en/quick_search",
+            });
+
+            quickSearchParamWrap = $(boxrecPageBody).find(".navLinks form").attr("name");
+        }
+
+        return quickSearchParamWrap;
     }
 
     /**
@@ -564,26 +617,13 @@ export class BoxrecRequests {
             // it would be nice to get this from any page but the Navbar search is a POST and not as predictable as the search box one on the search page
             const boxrecPageBody: RequestResponse["body"] = await rp.get({
                 jar,
-                uri: "http://boxrec.com/en/search",
+                uri: "https://boxrec.com/en/search",
             });
 
             searchParamWrap = $(boxrecPageBody).find("h2:contains('Find People')").parents("td").find("form").attr("name");
         }
 
         return searchParamWrap;
-    }
-
-    /**
-     * Makes a request to get the PHPSESSID required to login
-     * @returns {Promise<string[]>}
-     */
-    private static async getSessionCookie(): Promise<string[] | undefined> {
-        const options: rp.Options = {
-            resolveWithFullResponse: true,
-            uri: "http://boxrec.com",
-        };
-
-        return rp.get(options).then((data: RequestResponse) => data.headers["set-cookie"]);
     }
 
     /**
@@ -594,7 +634,7 @@ export class BoxrecRequests {
         if (titlesParamWrap === "") {
             const boxrecPageBody: RequestResponse["body"] = await rp.get({
                 jar,
-                uri: "http://boxrec.com/en/titles",
+                uri: "https://boxrec.com/en/titles",
             });
 
             titlesParamWrap = $(boxrecPageBody).find(".page form").attr("name");
@@ -603,8 +643,8 @@ export class BoxrecRequests {
         return titlesParamWrap;
     }
 
-    private static async makeGetPersonByIdRequest(jar: CookieJar, globalId: number, role: BoxrecRole = BoxrecRole.boxer, offset: number = 0, callWithToggleRatings: boolean = false): Promise<string> {
-        const uri: string = `http://boxrec.com/en/${role}/${globalId}`;
+    private static async makeGetPersonByIdRequest(jar: CookieJar, globalId: number, role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0, callWithToggleRatings: boolean = false): Promise<string> {
+        const uri: string = `https://boxrec.com/en/${role}/${globalId}`;
         const qs: any = {
             offset,
         };
@@ -625,24 +665,47 @@ export class BoxrecRequests {
         let numberOfColumnsExpecting: string = "unknown";
         let numberOfColumnsReceived: number = -1;
 
-        // there are 9 roles on the BoxRec website
+        // we check the number of columns to ensure we have the right number that we want
+        // there are (now more than )9 roles on the BoxRec website
         // the differences are that the boxers have 2 more columns `last6` for each boxer
         // the judge and others don't have those columns
         // the doctor and others have `events`
         // manager is unique in that the table is a list of boxers that they manage
+        // todo logic into another method?
         switch (role) {
-            case BoxrecRole.boxer:
-                numberOfColumnsExpecting = "16";
-                numberOfColumnsReceived = $(boxrecPageBody).find(`.dataTable tbody tr:nth-child(1) td`).length;
-                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
-                break;
             case BoxrecRole.judge:
             case BoxrecRole.supervisor:
             case BoxrecRole.referee:
                 numberOfColumnsExpecting = "!16";
-                numberOfColumnsReceived = $(boxrecPageBody).find("#listBoutsResults tbody tr:nth-child(1) td").length;
+                numberOfColumnsReceived = $(boxrecPageBody)
+                    .find("#listBoutsResults tbody tr:nth-child(1) td").length;
                 hasAllColumns = numberOfColumnsReceived !== 16;
                 break;
+            case BoxrecRole.matchmaker:
+            case BoxrecRole.doctor:
+                numberOfColumnsExpecting = "4";
+                numberOfColumnsReceived = $(boxrecPageBody)
+                    .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
+                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
+                break;
+            default:
+                // default to all other roles which should only be fighters
+                // although other fighter roles like muay thai boxer don't have the same number of columns because
+                // they don't have the toggleRatings, everything proceeds as needed
+                numberOfColumnsExpecting = "16";
+                numberOfColumnsReceived = $(boxrecPageBody)
+                    .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
+                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
+        }
+
+        // if the profile does not match what we expected (returns something different), we make the other request for data
+        // ex. getPersonById `52984` boxer Paulie Malignaggi
+        // if we don't specify a role, it'll give his `pro boxer` career
+        // if we do specify a role that he doesn't have like `muay thai boxer`, it'll return his `bare knuckle boxing` career
+        // there is a test for this
+        if (getRoleOfHTML(boxrecPageBody) !== role) {
+            // throw an error so we don't deceive the developer/user what type of profile this is
+            throw new Error("Person does not have this role");
         }
 
         // this is not applicable to all roles
@@ -655,7 +718,7 @@ export class BoxrecRequests {
 
         // to prevent BoxRec getting spammed if the number of columns changed, we'll error out if we can't get the correct number
         if (numberOfFailedAttemptsAtProfileColumns > 1) {
-            throw new Error(`Cannot find correct number of columns.  Expecting ${numberOfColumnsExpecting}, Received ${numberOfColumnsReceived}.  Please report this error with the profile id`);
+            throw new Error(`Cannot find correct number of columns.  Expecting ${numberOfColumnsExpecting}, Received ${numberOfColumnsReceived}.  Please report this error with the profile id: ${globalId}, role: ${role}`);
         }
 
         // calls itself with the toggle for `toggleRatings=y`
