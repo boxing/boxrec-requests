@@ -127,52 +127,74 @@ describe("class BoxrecRequests", () => {
             const roleStr: string | null = getRoleOfHTML(html);
             expect(roleStr).toBe(role || expectedValue);
         };
+        const promoter: any = {
+            leonardEllerbe: 419406,
+        };
+        const bareknuckleboxer: any = {
+            paulieMalignaggi: 52984,
+        };
+        const proboxer: any = {
+            royJonesJr: 774820,
+        };
+        const muayThaiBoxer: any = {
+            markMacKinnon: 875332,
+        };
+        const matchmaker: any = {
+            louDuva: 24678,
+        };
+        const referee: any = {
+            steveWillis: 408398,
+        };
+        const judge: any = {
+            daveMoretti: 401002,
+        };
+
+        const doctor: any = {
+            anthonyRuggeroli: 412676,
+        };
+        const inspector: any = {
+            michaelBuchato: 775611,
+        };
+        const manager: any = {
+            michaelMcSorleyJr: 785510,
+        };
+        const supervisor: any = {
+            sammyMacias: 406714,
+        };
+        const amateurBoxer: any = {
+            keyshawnDavis: 861063,
+        };
+        const amateurkickBoxer: any = {
+            kyleCassel: 874375,
+        };
+        const proKickBoxer: any = {
+            keithAzzopardi: 744924,
+        };
+        const proMuayThaiBoxer: any = {
+            diegoPaez: 851398,
+        };
+        const amateurMuayThaiBoxer: any = {
+            gurnihalSandhu: 888936,
+        };
+        const worldSeriesBoxer: any = {
+            imamKhataev: 852471,
+        };
 
         describe("person that has two roles", () => {
-
-            const paulieMalignaggi: number = 52984;
-            const royJonesJr: number = 774820;
-            const louDuva: number = 24678;
-            const markMacKinnon: number = 875332;
-            const steveWillis: number = 408398;
 
             describe("not specifying a role", () => {
 
                 it("should give the profile default role of the person", async () => {
                     // Paulie Malignaggi should default to `Pro Boxing`
-                    await returnRole(paulieMalignaggi, null, BoxrecRole.proBoxer);
+                    await returnRole(bareknuckleboxer.paulieMalignaggi, null, BoxrecRole.proBoxer);
                 });
             });
 
             describe("specifying a role", () => {
 
-                describe("different roles different table columns", () => {
-
-                    it("should return the specified role of that person (bareknuckleboxer)", async () => {
-                        await returnRole(paulieMalignaggi, BoxrecRole.bareKnuckleBoxer);
-                    });
-
-                    it("should return the specified role of that person (proboxer)", async () => {
-                        await returnRole(royJonesJr, BoxrecRole.proBoxer);
-                    });
-
-                    it("should return the specified role of that person (matchmaker)", async () => {
-                        await returnRole(louDuva, BoxrecRole.matchmaker);
-                    });
-
-                    it("should return the specified role of that person (muaythaiboxing)", async () => {
-                        await returnRole(markMacKinnon, BoxrecRole.muayThaiBoxer);
-                    });
-
-                    it("should return the specified role of that person (referee)", async () => {
-                        await returnRole(steveWillis, BoxrecRole.referee);
-                    });
-
-                });
-
                 it("should throw an error if the role doesn't exist for this person", async () => {
                     try {
-                        await BoxrecRequests.getPersonById(cookieJar, paulieMalignaggi,
+                        await BoxrecRequests.getPersonById(cookieJar, bareknuckleboxer.paulieMalignaggi,
                             BoxrecRole.amateurMuayThaiBoxer);
                     } catch (e) {
                         expect(e.message).toBe("Person does not have this role");
@@ -183,11 +205,95 @@ describe("class BoxrecRequests", () => {
 
         });
 
+        describe("different roles different table columns", () => {
+
+            describe("should return the specified role of that person", () => {
+
+                it("(pro kickboxer)", async () => {
+                    await returnRole(proKickBoxer.keithAzzopardi, BoxrecRole.proKickBoxer);
+                });
+
+                it("(pro muay thai)", async () => {
+                    await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecRole.proMuayThaiBoxer);
+                });
+
+                it("(pro muay thai)", async () => {
+                    await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecRole.proMuayThaiBoxer);
+                });
+
+                it("(world series boxer)", async () => {
+                    await returnRole(worldSeriesBoxer.imamKhataev, BoxrecRole.worldSeriesBoxer);
+                });
+
+                it("(amateur boxer)", async () => {
+                    await returnRole(amateurMuayThaiBoxer.gurnihalSandhu, BoxrecRole.amateurMuayThaiBoxer);
+                });
+
+                it("(amateur boxer)", async () => {
+                    await returnRole(amateurMuayThaiBoxer.gurnihalSandhu, BoxrecRole.amateurMuayThaiBoxer);
+                });
+
+                it("(amateur boxer)", async () => {
+                    await returnRole(amateurBoxer.keyshawnDavis, BoxrecRole.amateurBoxer);
+                });
+
+                it("(amateur kickboxer)", async () => {
+                    await returnRole(amateurkickBoxer.kyleCassel, BoxrecRole.amateurKickBoxer);
+                });
+
+                it("(judge)", async () => {
+                    await returnRole(judge.daveMoretti, BoxrecRole.judge);
+                });
+
+                it("(doctor)", async () => {
+                    await returnRole(doctor.anthonyRuggeroli, BoxrecRole.doctor);
+                });
+
+                it("(inspector)", async () => {
+                    await returnRole(inspector.michaelBuchato, BoxrecRole.inspector);
+                });
+
+                it("(manager)", async () => {
+                    await returnRole(manager.michaelMcSorleyJr, BoxrecRole.manager);
+                });
+
+                it("(supervisor)", async () => {
+                    await returnRole(supervisor.sammyMacias, BoxrecRole.supervisor);
+                });
+
+                it("(bareknuckleboxer)", async () => {
+                    await returnRole(bareknuckleboxer.paulieMalignaggi, BoxrecRole.bareKnuckleBoxer);
+                });
+
+                it("(proboxer)", async () => {
+                    await returnRole(proboxer.royJonesJr, BoxrecRole.proBoxer);
+                });
+
+                it("(matchmaker)", async () => {
+                    await returnRole(matchmaker.louDuva, BoxrecRole.matchmaker);
+                });
+
+                it("(muaythaiboxing)", async () => {
+                    await returnRole(muayThaiBoxer.markMacKinnon, BoxrecRole.proMuayThaiBoxer);
+                });
+
+                it("(referee)", async () => {
+                    await returnRole(referee.steveWillis, BoxrecRole.referee);
+                });
+
+                it("(promoter)", async () => {
+                    await returnRole(promoter.leonardEllerbe, BoxrecRole.promoter);
+                });
+
+            });
+
+        });
+
         describe("person that has one role", () => {
 
             const marlonDavis: number = 778281;
 
-            it("should return their default role if not specified", async () => {
+            it("should return their default role if not specified (matchmaker)", async () => {
                 await returnRole(marlonDavis, null, BoxrecRole.matchmaker);
             });
 

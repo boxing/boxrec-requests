@@ -19,11 +19,6 @@ import {
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
 
-// https://github.com/Microsoft/TypeScript/issues/14151
-if (typeof (Symbol as any).asyncIterator === "undefined") {
-    (Symbol as any).asyncIterator = Symbol.asyncIterator || Symbol("asyncIterator");
-}
-
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
 // todo A node process not restarted will start getting failures
@@ -32,7 +27,16 @@ let resultsParamWrap: string = "";
 let titlesParamWrap: string = "";
 let ratingsParamWrap: string = "";
 let quickSearchParamWrap: string = "";
-let numberOfFailedAttemptsAtProfileColumns: number = 0;
+
+const createParamsObject: (params: object, prefix: string) => object = (params: object, prefix: string) => {
+    const qs: object = {};
+    for (const i in params) {
+        if (params.hasOwnProperty(i)) {
+            (qs as any)[`${prefix}[${i}]`] = (params as any)[i];
+        }
+    }
+    return qs;
+};
 
 /**
  * Makes API requests to BoxRec and returns the HTML body
@@ -136,14 +140,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getEventsByLocation(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0): Promise<string> {
-        const qs: Partial<BoxrecLocationEventParams> = {};
-
-        for (const i in params) {
-            if (params.hasOwnProperty(i)) {
-                (qs as any)[`l[${i}]`] = (params as any)[i];
-            }
-        }
-
+        const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 
         return rp.get({
@@ -174,14 +171,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getPeopleByLocation(jar: CookieJar, params: BoxrecLocationsPeopleParams, offset: number = 0): Promise<string> {
-        const qs: BoxrecLocationsPeopleParamsTransformed = {};
-
-        for (const i in params) {
-            if (params.hasOwnProperty(i)) {
-                (qs as any)[`l[${i}]`] = (params as any)[i];
-            }
-        }
-
+        const qs: BoxrecLocationsPeopleParamsTransformed = createParamsObject(params, "l");
         qs.offset = offset;
 
         return rp.get({
@@ -218,12 +208,12 @@ export class BoxrecRequests {
      * @param jar                               contains cookie information about the user
      * @param {number} globalId                 the BoxRec profile id
      * @param {BoxrecRole} role                 the role of the person in boxing (there are multiple profiles for people if they fall under different roles)
-     * @param {number} offset                   offset number of bouts/events in the profile.  Not used for boxers as boxer's profiles list all bouts they've been in
+     * @param {number} offset                   offset number of bouts/events in the profile.  todo boxer support?
      * @returns {Promise<string>}
      */
     static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole | null = null, offset: number = 0): Promise<string> {
         if (role !== null) {
-            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role);
+            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset);
         }
 
         // if role is null we need to get the default profile, we `quick_search` it which will give us the default
@@ -238,15 +228,8 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getRatings(jar: CookieJar, params: BoxrecRatingsParams, offset: number = 0): Promise<string> {
-        const qs: any = {};
         const paramWrap: string = await BoxrecRequests.getRatingsParamWrap(jar);
-
-        for (const i in params) {
-            if (params.hasOwnProperty(i)) {
-                (qs as any)[`${paramWrap}[${i}]`] = (params as any)[i];
-            }
-        }
-
+        const qs: any = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
         return rp.get({
@@ -314,15 +297,8 @@ export class BoxrecRequests {
      * @param offset
      */
     static async getTitles(jar: CookieJar, params: BoxrecTitlesParams, offset: number = 0): Promise<any> {
-        const qs: BoxrecTitlesParamsTransformed = {};
         const paramWrap: string = await BoxrecRequests.getTitlesParamWrap(jar);
-
-        for (const i in params) {
-            if (params.hasOwnProperty(i)) {
-                (qs as any)[`${paramWrap}[${i}]`] = (params as any)[i];
-            }
-        }
-
+        const qs: BoxrecTitlesParamsTransformed = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
         return rp.get({
@@ -448,15 +424,8 @@ export class BoxrecRequests {
             throw new Error("Requires `first_name` or `last_name` - minimum 3 characters long");
         }
 
-        const qs: BoxrecSearchParamsTransformed = {};
         const searchParam: string = await BoxrecRequests.getSearchParamWrap(jar);
-
-        for (const i in params) {
-            if (params.hasOwnProperty(i)) {
-                (qs as any)[`${searchParam}[${i}]`] = (params as any)[i];
-            }
-        }
-
+        const qs: BoxrecSearchParamsTransformed = createParamsObject(params, searchParam);
         qs.offset = offset;
 
         return rp.get({
@@ -520,15 +489,8 @@ export class BoxrecRequests {
     }
 
     private static async buildResultsSchedulesParams<T>(jar: CookieJar, params: T, offset: number): Promise<T> {
-        const qs: any = {};
         const searchParam: string = await BoxrecRequests.getResultsParamWrap(jar);
-
-        for (const i in params) {
-            if (params.hasOwnProperty(i)) {
-                (qs as any)[`${searchParam}[${i}]`] = (params as any)[i];
-            }
-        }
-
+        const qs: any = createParamsObject(params as any, searchParam);
         qs.offset = offset;
 
         return qs as T;
@@ -592,7 +554,7 @@ export class BoxrecRequests {
     }
 
     /**
-     * Makes a request to BoxRec to fidn out the quick search param prefix that is wrapped around params
+     * Makes a request to BoxRec to find out the quick search param prefix that is wrapped around params
      * @param jar
      */
     private static async getQuickSearchParamWrap(jar: CookieJar): Promise<string> {
@@ -643,7 +605,60 @@ export class BoxrecRequests {
         return titlesParamWrap;
     }
 
-    private static async makeGetPersonByIdRequest(jar: CookieJar, globalId: number, role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0, callWithToggleRatings: boolean = false): Promise<string> {
+    private static hasExpectedNumberOfColumns(boxrecPageBody: string, role: BoxrecRole): [boolean, string, number] {
+        let hasAllColumns: boolean = false;
+        let numberOfColumnsExpecting: string = "unknown";
+        const numberOfColumnsReceived: number = $(boxrecPageBody)
+            .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
+
+        // we check the number of columns to ensure we have the right number that we want
+        // there are (now more than) 9 roles on the BoxRec website
+        // the differences are that the boxers have 2 more columns `last6` for each boxer
+        // the judge and others don't have those columns
+        // the doctor and others have `events`
+        // manager is unique in that the table is a list of boxers that they manage
+        switch (role) {
+            case BoxrecRole.judge:
+            case BoxrecRole.supervisor:
+            case BoxrecRole.referee:
+                numberOfColumnsExpecting = "!16";
+                hasAllColumns = numberOfColumnsReceived !== 16;
+                break;
+            case BoxrecRole.matchmaker:
+            case BoxrecRole.doctor:
+            case BoxrecRole.promoter:
+            case BoxrecRole.inspector:
+                numberOfColumnsExpecting = "4";
+                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
+                break;
+            case BoxrecRole.manager:
+                numberOfColumnsExpecting = "9";
+                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
+                break;
+            default:
+                // default to all other roles which should only be fighters
+                // although other fighter roles like muay thai boxer don't have the same number of columns because
+                // they don't have the toggleRatings, everything proceeds as needed
+                numberOfColumnsExpecting = "16";
+                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
+        }
+
+        return [hasAllColumns, numberOfColumnsExpecting, numberOfColumnsReceived];
+    }
+
+    /**
+     *
+     * @param jar
+     * @param globalId
+     * @param role
+     * @param offset        offset is the number of bouts/events on a person's profile (not tested with boxers)
+     * @param callWithToggleRatings     some profiles like boxers have different number of columns if logged in
+     * @param numberOfFailedAttemptsAtProfileColumns    if too many failures occur, an error is thrown
+     */
+    private static async makeGetPersonByIdRequest(jar: CookieJar, globalId: number,
+                                                  role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0,
+                                                  callWithToggleRatings: boolean = false,
+                                                  numberOfFailedAttemptsAtProfileColumns: number = 0): Promise<string> {
         const uri: string = `https://boxrec.com/en/${role}/${globalId}`;
         const qs: any = {
             offset,
@@ -660,43 +675,7 @@ export class BoxrecRequests {
             uri,
         });
 
-        // to ensure we don't recursively call this method, by default we return the results
-        let hasAllColumns: boolean = true;
-        let numberOfColumnsExpecting: string = "unknown";
-        let numberOfColumnsReceived: number = -1;
-
-        // we check the number of columns to ensure we have the right number that we want
-        // there are (now more than )9 roles on the BoxRec website
-        // the differences are that the boxers have 2 more columns `last6` for each boxer
-        // the judge and others don't have those columns
-        // the doctor and others have `events`
-        // manager is unique in that the table is a list of boxers that they manage
-        // todo logic into another method?
-        switch (role) {
-            case BoxrecRole.judge:
-            case BoxrecRole.supervisor:
-            case BoxrecRole.referee:
-                numberOfColumnsExpecting = "!16";
-                numberOfColumnsReceived = $(boxrecPageBody)
-                    .find("#listBoutsResults tbody tr:nth-child(1) td").length;
-                hasAllColumns = numberOfColumnsReceived !== 16;
-                break;
-            case BoxrecRole.matchmaker:
-            case BoxrecRole.doctor:
-                numberOfColumnsExpecting = "4";
-                numberOfColumnsReceived = $(boxrecPageBody)
-                    .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
-                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
-                break;
-            default:
-                // default to all other roles which should only be fighters
-                // although other fighter roles like muay thai boxer don't have the same number of columns because
-                // they don't have the toggleRatings, everything proceeds as needed
-                numberOfColumnsExpecting = "16";
-                numberOfColumnsReceived = $(boxrecPageBody)
-                    .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
-                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
-        }
+        const [hasAllColumns, numberOfColumnsExpecting, numberOfColumnsReceived] = BoxrecRequests.hasExpectedNumberOfColumns(boxrecPageBody, role);
 
         // if the profile does not match what we expected (returns something different), we make the other request for data
         // ex. getPersonById `52984` boxer Paulie Malignaggi
@@ -714,15 +693,17 @@ export class BoxrecRequests {
             return boxrecPageBody;
         }
 
-        numberOfFailedAttemptsAtProfileColumns++;
+        const newNumberOfFailedAttemptsAtProfileColumns: number = numberOfFailedAttemptsAtProfileColumns + 1;
 
         // to prevent BoxRec getting spammed if the number of columns changed, we'll error out if we can't get the correct number
-        if (numberOfFailedAttemptsAtProfileColumns > 1) {
+        if (newNumberOfFailedAttemptsAtProfileColumns > 1) {
+            // todo this error can probably be removed once we get proper CI/CD and we'll find these errors as they come up
             throw new Error(`Cannot find correct number of columns.  Expecting ${numberOfColumnsExpecting}, Received ${numberOfColumnsReceived}.  Please report this error with the profile id: ${globalId}, role: ${role}`);
         }
 
         // calls itself with the toggle for `toggleRatings=y`
-        return this.makeGetPersonByIdRequest(jar, globalId, role, offset, true);
+        return this.makeGetPersonByIdRequest(jar, globalId, role, offset, true,
+            newNumberOfFailedAttemptsAtProfileColumns);
     }
 
 }
