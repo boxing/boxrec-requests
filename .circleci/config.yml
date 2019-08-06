@@ -35,7 +35,7 @@ jobs:
         command: npm run tslint
     - run:
         name: Run tests
-        command: yarn jest --ci --config=jest.config.json --coverage --runInBand && cat ./coverage/lcov.info | yarn coveralls
+        command: yarn jest --ci --config=jest.config.e2e.json --coverage --runInBand && cat ./coverage/lcov.info | yarn coveralls
     - run:
         name: Build dist
         command: yarn tsc
