@@ -1,3 +1,18 @@
+## 5.0.0 (2019-08-05)
+
+## Added
+
+- Support for new BoxRec roles like pro boxer, amateur boxer, kick boxer, muay thai boxer etc.
+
+## Changed
+
+- `getPeopleByName` now returns the HTML body and not a generator.  This was because it was nice to have but was very 
+inefficient
+
+## Fixed
+
+- Logging in now works again.  The logging in functionality changed.  BoxRec requests also now support HTTPS
+
 ## 4.2.2 (2019-04-21)
 
 ## Changed

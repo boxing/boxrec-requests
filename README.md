@@ -1,6 +1,4 @@
 # BoxRec Requests
-[![CircleCI](https://circleci.com/gh/boxing/boxrec-requests.svg?style=svg)](https://circleci.com/gh/boxing/boxrec-requests)
-[![Coverage Status](https://coveralls.io/repos/github/boxing/boxrec-requests/badge.svg?branch=master)](https://coveralls.io/github/boxing/boxrec-requests?branch=master)
 [![npm version](https://badge.fury.io/js/boxrec-requests.svg)](https://badge.fury.io/js/boxrec-requests)
 [![Known Vulnerabilities](https://snyk.io/test/github/boxing/boxrec-requests/badge.svg?targetFile=package.json)](https://snyk.io/test/github/boxing/boxrec-requests?targetFile=package.json)
 
@@ -30,3 +28,7 @@ await BoxrecRequests.getPersonById(cookieJar, 352); // makes next request as a l
 
 BoxRec returns additional data if you're logged in.  It's recommended that you log in.  
 Store the cookie so you can reuse it to lower the amount of log in requests that you make to BoxRec
+
+## Todo
+
+Needs proper CI/CD with E2E tests and not mocks
