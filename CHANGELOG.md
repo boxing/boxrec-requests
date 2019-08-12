@@ -1,3 +1,10 @@
+## 5.0.1 (2019-08-12)
+
+## Fixed
+
+- Profiles were not showing multiple pages of events/bouts for certain roles
+- Return proper column data for different roles
+
 ## 5.0.0 (2019-08-05)
 
 ## Added

@@ -455,18 +455,33 @@ export interface BoxrecBelts {
 export enum BoxrecFighterRole {
     proBoxer = "proboxer",
     amateurBoxer = "amateurboxer",
-    kickBoxer = "amateurkickboxer",
+    amateurKickBoxer = "amateurkickboxer",
+    proKickBoxer = "kickboxer",
     muayThaiBoxer = "muaythaiboxer",
     amateurMuayThaiBoxer = "amateurmuaythaiboxer",
     bareKnuckleBoxer = "bareknuckleboxer",
     worldSeriesBoxer = "worldseriesboxer",
 }
 
+// used as params for `locations/events`
+export enum BoxrecFighterOption {
+    "Pro Boxing" = "proboxing",
+    "Amateur Boxing" = "amateurboxing",
+    "Pro Kickboxing" = "kickboxing",
+    "Amateur Kickboxing" = "amateurkickboxing",
+    "Pro Muay Thai Boxing" = "amateurmuaythaiboxing",
+    "Bare Knuckle Boxing" = "bareknuckleboxing",
+    "World Series Boxing" = "worldseriesboxing",
+}
+
 export enum BoxrecRole {
     proBoxer = "proboxer",
     amateurBoxer = "amateurboxer",
-    kickBoxer = "amateurkickboxer",
+    amateurKickBoxer = "amateurkickboxer",
+    kickboxer = "kickboxer",
+    proKickBoxer = "kickboxer", // synthetic (is custom)
     muayThaiBoxer = "muaythaiboxer",
+    proMuayThaiBoxer = "muaythaiboxer", // synthetic (is custom)
     amateurMuayThaiBoxer = "amateurmuaythaiboxer",
     bareKnuckleBoxer = "bareknuckleboxer",
     worldSeriesBoxer = "worldseriesboxer",
@@ -504,7 +519,7 @@ export interface BoxrecLocationEventParams {
     country: Country;
     offset?: number;
     region?: string;
-    sport: BoxrecFighterRole;
+    sport: BoxrecFighterOption;
     town?: string;
     venue?: string;
     year?: number;
