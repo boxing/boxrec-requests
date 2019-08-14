@@ -159,7 +159,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getPeople(jar: CookieJar, params: BoxrecLocationsPeopleParams, offset: number = 0): Promise<string> {
-        return BoxrecRequests.getPeopleByLocation(jar, params, 0);
+        return BoxrecRequests.getPeopleByLocation(jar, params, offset);
     }
 
     /**
