@@ -1,7 +1,7 @@
 import * as $ from "cheerio";
 import {CookieJar} from "request";
 import {BoxrecRequests} from "./boxrec-requests";
-import {BoxrecFighterRole, BoxrecRole, Country} from "./boxrec-requests.constants";
+import {BoxrecFighterOption, BoxrecFighterRole, BoxrecRole, Country} from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
 
 const BOXREC_USERNAME: string | undefined = process.env.BOXREC_USERNAME;
@@ -32,12 +32,12 @@ describe("class BoxrecRequests", () => {
         it("should return different events if different roles are provided", async () => {
             const proBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
                 country: Country.USA,
-                sport: BoxrecFighterRole.proBoxer,
+                sport: BoxrecFighterOption["Pro Boxing"],
             });
 
             const amateurBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
                 country: Country.USA,
-                sport: BoxrecFighterRole.amateurBoxer,
+                sport: BoxrecFighterOption["Amateur Boxing"],
             });
 
             // was tested to see that two of the same requests will equal the same, so we do know this works as intended
