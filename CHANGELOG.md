@@ -1,3 +1,9 @@
+## 5.0.3 (2019-11-05)
+
+-   With the roll out of enrollments by BoxRec, some profiles were broken.
+    No longer test for column numbers because they can change frequently.
+    Instead test to make sure we have the most columns.
+
 ## 5.0.2 (2019-08-14)
 
 ### Fixed

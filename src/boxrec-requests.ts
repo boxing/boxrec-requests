@@ -28,6 +28,8 @@ let titlesParamWrap: string = "";
 let ratingsParamWrap: string = "";
 let quickSearchParamWrap: string = "";
 
+jest.setTimeout(30000);
+
 const createParamsObject: (params: object, prefix: string) => object = (params: object, prefix: string) => {
     const qs: object = {};
     for (const i in params) {
@@ -220,7 +222,7 @@ export class BoxrecRequests {
     static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole | null = null, offset: number = 0):
         Promise<string> {
         if (role !== null) {
-            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset);
+            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset, undefined);
         }
 
         // if role is null we need to get the default profile, we `quick_search` it which will give us the default
@@ -618,45 +620,16 @@ export class BoxrecRequests {
         return titlesParamWrap;
     }
 
-    private static hasExpectedNumberOfColumns(boxrecPageBody: string, role: BoxrecRole): [boolean, string, number] {
-        let hasAllColumns: boolean = false;
-        let numberOfColumnsExpecting: string = "unknown";
-        const numberOfColumnsReceived: number = $(boxrecPageBody)
+    /**
+     * Returns the number of table columns on the page in dataTables
+     * Note: Due to the selector be lazy and the poor HTML structure on BoxRec, this selector also includes other tables
+     *      like enrollments.  We don't care about that though, we're just comparing the page with toggleRatings to get
+     *      the most columns we can
+     * @param boxrecPageBody
+     */
+    private static numberOfTableColumns(boxrecPageBody: string): number {
+        return $(boxrecPageBody)
             .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
-
-        // we check the number of columns to ensure we have the right number that we want
-        // there are (now more than) 9 roles on the BoxRec website
-        // the differences are that the boxers have 2 more columns `last6` for each boxer
-        // the judge and others don't have those columns
-        // the doctor and others have `events`
-        // manager is unique in that the table is a list of boxers that they manage
-        switch (role) {
-            case BoxrecRole.judge:
-            case BoxrecRole.supervisor:
-            case BoxrecRole.referee:
-                numberOfColumnsExpecting = "!16";
-                hasAllColumns = numberOfColumnsReceived !== 16;
-                break;
-            case BoxrecRole.matchmaker:
-            case BoxrecRole.doctor:
-            case BoxrecRole.promoter:
-            case BoxrecRole.inspector:
-                numberOfColumnsExpecting = "4";
-                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
-                break;
-            case BoxrecRole.manager:
-                numberOfColumnsExpecting = "9";
-                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
-                break;
-            default:
-                // default to all other roles which should only be fighters
-                // although other fighter roles like muay thai boxer don't have the same number of columns because
-                // they don't have the toggleRatings, everything proceeds as needed
-                numberOfColumnsExpecting = "16";
-                hasAllColumns = numberOfColumnsReceived === parseInt(numberOfColumnsExpecting, 10);
-        }
-
-        return [hasAllColumns, numberOfColumnsExpecting, numberOfColumnsReceived];
     }
 
     /**
@@ -665,19 +638,21 @@ export class BoxrecRequests {
      * @param globalId
      * @param role
      * @param offset        offset is the number of bouts/events on a person's profile (not tested with boxers)
-     * @param callWithToggleRatings     some profiles like boxers have different number of columns if logged in
-     * @param numberOfFailedAttemptsAtProfileColumns    if too many failures occur, an error is thrown
+     * @param previousRequestBody  we'll compare both requests and return the one with more columns
+     *                                          the reason for this is because it's hard to determine and keep up
+     *                                          BoxRec column changes, therefore we just take the one with most columns
      */
     private static async makeGetPersonByIdRequest(jar: CookieJar, globalId: number,
                                                   role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0,
-                                                  callWithToggleRatings: boolean = false,
-                                                  numberOfFailedAttemptsAtProfileColumns: number = 0): Promise<string> {
+                                                  previousRequestBody: string | void):
+        Promise<string> {
         const uri: string = `https://boxrec.com/en/${role}/${globalId}`;
         const qs: any = {
             offset,
         };
 
-        if (callWithToggleRatings) {
+        // we made the same request before therefore we toggle ratings to see the difference
+        if (previousRequestBody) {
             qs.toggleRatings = "y";
         }
 
@@ -688,8 +663,8 @@ export class BoxrecRequests {
             uri,
         });
 
-        const [hasAllColumns, numberOfColumnsExpecting, numberOfColumnsReceived] =
-            BoxrecRequests.hasExpectedNumberOfColumns(boxrecPageBody, role);
+        const numberOfColumnsReceived: number =
+            BoxrecRequests.numberOfTableColumns(boxrecPageBody);
 
         // if the profile does not match what we expected (returns something different),
         // we make the other request for data
@@ -703,23 +678,17 @@ export class BoxrecRequests {
             throw new Error("Person does not have this role");
         }
 
-        // this is not applicable to all roles
-        // the roles that return and don't have `bouts` on their profile page will never hit this point
-        if (hasAllColumns) {
-            return boxrecPageBody;
-        }
+        if (previousRequestBody) {
+            const numberOfColumnsReceivedPrevious: number =
+                BoxrecRequests.numberOfTableColumns(previousRequestBody);
 
-        const newNumberOfFailedAttemptsAtProfileColumns: number = numberOfFailedAttemptsAtProfileColumns + 1;
-
-        // to prevent BoxRec getting spammed if the number of columns changed, we'll error out if we can't get the correct number
-        if (newNumberOfFailedAttemptsAtProfileColumns > 1) {
-            // todo this error can probably be removed once we get proper CI/CD and we'll find these errors as they come up
-            throw new Error(`Cannot find correct number of columns.  Expecting ${numberOfColumnsExpecting}, Received ${numberOfColumnsReceived}.  Please report this error with the profile id: ${globalId}, role: ${role}`);
+            // if the previous request has more columns, we return that body instead
+            return numberOfColumnsReceivedPrevious > numberOfColumnsReceived
+                ? previousRequestBody : boxrecPageBody;
         }
 
         // calls itself with the toggle for `toggleRatings=y`
-        return this.makeGetPersonByIdRequest(jar, globalId, role, offset, true,
-            newNumberOfFailedAttemptsAtProfileColumns);
+        return this.makeGetPersonByIdRequest(jar, globalId, role, offset, boxrecPageBody);
     }
 
 }
