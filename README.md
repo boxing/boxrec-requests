@@ -1,6 +1,7 @@
 # BoxRec Requests
 [![npm version](https://badge.fury.io/js/boxrec-requests.svg)](https://badge.fury.io/js/boxrec-requests)
 [![Known Vulnerabilities](https://snyk.io/test/github/boxing/boxrec-requests/badge.svg?targetFile=package.json)](https://snyk.io/test/github/boxing/boxrec-requests?targetFile=package.json)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/81db3ecc80f8489eb4a6367511bcbb17)](https://www.codacy.com/manual/mikedidomizio/boxrec-requests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=boxing/boxrec-requests&amp;utm_campaign=Badge_Grade)
 
 This project makes HTTP requests to BoxRec and returns the HTML body.  
 The main purpose of this project is for other projects to easily make requests and return the HTML.
