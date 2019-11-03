@@ -58,24 +58,26 @@ export class BoxrecRequests {
     /**
      * Makes a request to BoxRec to return/save the PDF version of a boxer profile
      * @param jar           contains cookie information about the user
-     * @param {number} globalId     the BoxRec global id of the boxer
-     * @param {string} pathToSaveTo directory to save to.  if not used will only return data
-     * @param {string} fileName     file name to save as.  Will save as {globalId}.pdf as default.  Add .pdf to end of filename
+     * @param globalId     the BoxRec global id of the boxer
+     * @param pathToSaveTo directory to save to.  if not used will only return data
+     * @param fileName     file name to save as.  Will save as {globalId}.pdf as default.  Add .pdf to end of filename
      * @returns {Promise<string>}
      */
-    static async getBoxerPDF(jar: CookieJar, globalId: number, pathToSaveTo?: string, fileName?: string): Promise<string> {
+    static async getBoxerPDF(jar: CookieJar, globalId: number, pathToSaveTo?: string, fileName?: string):
+        Promise<string> {
         return BoxrecRequests.getBoxerOther(jar, globalId, "pdf", pathToSaveTo, fileName);
     }
 
     /**
      * Makes a request to BoxRec to return/save the printable version of a boxer profile
      * @param jar           contains cookie information about the user
-     * @param {number} globalId     the BoxRec global id of the boxer
-     * @param {string} pathToSaveTo directory to save to.  if not used will only return data
-     * @param {string} fileName     file name to save as.  Will save as {globalId}.html as default.  Add .html to end of filename
+     * @param globalId     the BoxRec global id of the boxer
+     * @param pathToSaveTo directory to save to.  if not used will only return data
+     * @param fileName     file name to save as.  Will save as {globalId}.html as default.  Add .html to end of filename
      * @returns {Promise<string>}
      */
-    static async getBoxerPrint(jar: CookieJar, globalId: number, pathToSaveTo?: string, fileName?: string): Promise<string> {
+    static async getBoxerPrint(jar: CookieJar, globalId: number, pathToSaveTo?: string, fileName?: string):
+        Promise<string> {
         return BoxrecRequests.getBoxerOther(jar, globalId, "print", pathToSaveTo, fileName);
     }
 
@@ -139,7 +141,8 @@ export class BoxrecRequests {
      * @param {number} offset                       the number of rows to offset the search
      * @returns {Promise<string>}
      */
-    static async getEventsByLocation(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0): Promise<string> {
+    static async getEventsByLocation(jar: CookieJar, params: BoxrecLocationEventParams, offset: number = 0):
+        Promise<string> {
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 
@@ -170,7 +173,8 @@ export class BoxrecRequests {
      * @param {number} offset                       the number of rows to offset the search
      * @returns {Promise<string>}
      */
-    static async getPeopleByLocation(jar: CookieJar, params: BoxrecLocationsPeopleParams, offset: number = 0): Promise<string> {
+    static async getPeopleByLocation(jar: CookieJar, params: BoxrecLocationsPeopleParams, offset: number = 0):
+        Promise<string> {
         const qs: BoxrecLocationsPeopleParamsTransformed = createParamsObject(params, "l");
         qs.offset = offset;
 
@@ -192,7 +196,9 @@ export class BoxrecRequests {
      * @param {number} offset               the number of rows to offset the search
      * @yields {string}                     returns a generator to fetch the next person by ID
      */
-    static async getPeopleByName(jar: CookieJar, firstName: string, lastName: string, role: BoxrecRole | "" | "fighters" = "", status: BoxrecStatus = BoxrecStatus.all, offset: number = 0): Promise<string> {
+    static async getPeopleByName(jar: CookieJar, firstName: string, lastName: string,
+                                 role: BoxrecRole | "" | "fighters" = "", status: BoxrecStatus = BoxrecStatus.all,
+                                 offset: number = 0): Promise<string> {
         const params: BoxrecSearchParams = {
             first_name: firstName,
             last_name: lastName,
@@ -211,7 +217,8 @@ export class BoxrecRequests {
      * @param {number} offset                   offset number of bouts/events in the profile.  todo boxer support?
      * @returns {Promise<string>}
      */
-    static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole | null = null, offset: number = 0): Promise<string> {
+    static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole | null = null, offset: number = 0):
+        Promise<string> {
         if (role !== null) {
             return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset);
         }
@@ -344,7 +351,7 @@ export class BoxrecRequests {
      * The session cookie is stored inside this instance of the class
      * @param {string} username     your BoxRec username
      * @param {string} password     your BoxRec password
-     * @returns {Promise<void>}     If the response is undefined, you have successfully logged in.  Otherwise an error will be thrown
+     * @returns     If the response is undefined, you have successfully logged in.  Otherwise an error will be thrown
      */
     static async login(username: string, password: string): Promise<CookieJar> {
         // check for undefined args, if undefined will throw weird error.  Therefore we check and throw proper error
@@ -505,7 +512,9 @@ export class BoxrecRequests {
      * @param {string} fileName
      * @returns {Promise<string>}
      */
-    private static async getBoxerOther(jar: CookieJar, globalId: number, type: "pdf" | "print", pathToSaveTo?: string, fileName?: string): Promise<string> {
+    private static async getBoxerOther(jar: CookieJar, globalId: number,
+                                       type: "pdf" | "print", pathToSaveTo?: string, fileName?: string):
+        Promise<string> {
         const qs: PersonRequestParams = {};
 
         if (type === "pdf") {
@@ -541,7 +550,8 @@ export class BoxrecRequests {
      */
     private static async getResultsParamWrap(jar: CookieJar): Promise<string> {
         if (resultsParamWrap === "") {
-            // it would be nice to get this from any page but the Navbar search is a POST and not as predictable as the search box one on the search page
+            // it would be nice to get this from any page but the Navbar search is a POST and
+            // not as predictable as the search box one on the search page
             const boxrecPageBody: RequestResponse["body"] = await rp.get({
                 jar,
                 uri: "https://boxrec.com/en/results",
@@ -576,13 +586,16 @@ export class BoxrecRequests {
      */
     private static async getSearchParamWrap(jar: CookieJar): Promise<string> {
         if (searchParamWrap === "") {
-            // it would be nice to get this from any page but the Navbar search is a POST and not as predictable as the search box one on the search page
+            // it would be nice to get this from any page but the Navbar search is a POST and not as predictable
+            // as the search box one on the search page
             const boxrecPageBody: RequestResponse["body"] = await rp.get({
                 jar,
                 uri: "https://boxrec.com/en/search",
             });
 
-            searchParamWrap = $(boxrecPageBody).find("h2:contains('Find People')").parents("td").find("form").attr("name");
+            searchParamWrap = $(boxrecPageBody)
+                .find("h2:contains('Find People')")
+                .parents("td").find("form").attr("name");
         }
 
         return searchParamWrap;
@@ -675,12 +688,15 @@ export class BoxrecRequests {
             uri,
         });
 
-        const [hasAllColumns, numberOfColumnsExpecting, numberOfColumnsReceived] = BoxrecRequests.hasExpectedNumberOfColumns(boxrecPageBody, role);
+        const [hasAllColumns, numberOfColumnsExpecting, numberOfColumnsReceived] =
+            BoxrecRequests.hasExpectedNumberOfColumns(boxrecPageBody, role);
 
-        // if the profile does not match what we expected (returns something different), we make the other request for data
+        // if the profile does not match what we expected (returns something different),
+        // we make the other request for data
         // ex. getPersonById `52984` boxer Paulie Malignaggi
         // if we don't specify a role, it'll give his `pro boxer` career
-        // if we do specify a role that he doesn't have like `muay thai boxer`, it'll return his `bare knuckle boxing` career
+        // if we do specify a role that he doesn't have like `muay thai boxer`,
+        // it'll return his `bare knuckle boxing` career
         // there is a test for this
         if (getRoleOfHTML(boxrecPageBody) !== role) {
             // throw an error so we don't deceive the developer/user what type of profile this is
