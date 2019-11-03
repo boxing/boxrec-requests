@@ -1,8 +1,11 @@
 import * as $ from "cheerio";
 import {CookieJar} from "request";
+import * as rp from "request-promise";
 import {BoxrecRequests} from "./boxrec-requests";
-import {BoxrecFighterOption, BoxrecFighterRole, BoxrecRole, Country} from "./boxrec-requests.constants";
+import {BoxrecFighterOption, BoxrecRole, Country} from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
+import SpyInstance = jest.SpyInstance;
+
 
 const BOXREC_USERNAME: string | undefined = process.env.BOXREC_USERNAME;
 const BOXREC_PASSWORD: string | undefined = process.env.BOXREC_PASSWORD;
@@ -201,6 +204,14 @@ describe("class BoxrecRequests", () => {
                     }
                 });
 
+                it("should make two requests to BoxRec because we compare the two requests for number of columns",
+                    async () => {
+                        const spy: SpyInstance = jest.spyOn(rp, "get");
+                        await BoxrecRequests.getPersonById(cookieJar, 348759, BoxrecRole.proBoxer);
+
+                        expect(spy.mock.calls.length).toBe(2);
+                    });
+
             });
 
         });
@@ -217,19 +228,11 @@ describe("class BoxrecRequests", () => {
                     await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecRole.proMuayThaiBoxer);
                 });
 
-                it("(pro muay thai)", async () => {
-                    await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecRole.proMuayThaiBoxer);
-                });
-
                 it("(world series boxer)", async () => {
                     await returnRole(worldSeriesBoxer.imamKhataev, BoxrecRole.worldSeriesBoxer);
                 });
 
-                it("(amateur boxer)", async () => {
-                    await returnRole(amateurMuayThaiBoxer.gurnihalSandhu, BoxrecRole.amateurMuayThaiBoxer);
-                });
-
-                it("(amateur boxer)", async () => {
+                it("(amateur muay thai boxer)", async () => {
                     await returnRole(amateurMuayThaiBoxer.gurnihalSandhu, BoxrecRole.amateurMuayThaiBoxer);
                 });
 
