@@ -1,13 +1,12 @@
 {
   "name": "boxrec-requests",
-  "version": "5.0.3",
+  "version": "5.0.4",
   "description": "make API requests to BoxRec using NodeJS and returns the HTML body",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "prepublish": "snyk protect && yarn build",
     "build": "tsc",
-    "test": "snyk test && jest --config jest.config.json",
     "test:coveralls": "snyk test && jest --config jest.config.json --coverage && cat ./coverage/lcov.info | coveralls",
     "test-e2e": "jest --config jest.config.e2e.json --runInBand",
     "test-coverage-watch": "jest --config jest.config.json --coverage --watchAll",

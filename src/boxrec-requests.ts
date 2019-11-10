@@ -28,8 +28,6 @@ let titlesParamWrap: string = "";
 let ratingsParamWrap: string = "";
 let quickSearchParamWrap: string = "";
 
-jest.setTimeout(30000);
-
 const createParamsObject: (params: object, prefix: string) => object = (params: object, prefix: string) => {
     const qs: object = {};
     for (const i in params) {
@@ -222,7 +220,7 @@ export class BoxrecRequests {
     static async getPersonById(jar: CookieJar, globalId: number, role: BoxrecRole | null = null, offset: number = 0):
         Promise<string> {
         if (role !== null) {
-            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset, undefined);
+            return BoxrecRequests.makeGetPersonByIdRequest(jar, globalId, role, offset, null);
         }
 
         // if role is null we need to get the default profile, we `quick_search` it which will give us the default
@@ -644,7 +642,7 @@ export class BoxrecRequests {
      */
     private static async makeGetPersonByIdRequest(jar: CookieJar, globalId: number,
                                                   role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0,
-                                                  previousRequestBody: string | void):
+                                                  previousRequestBody: string | null):
         Promise<string> {
         const uri: string = `https://boxrec.com/en/${role}/${globalId}`;
         const qs: any = {
@@ -662,7 +660,6 @@ export class BoxrecRequests {
             resolveWithFullResponse: false,
             uri,
         });
-
         const numberOfColumnsReceived: number =
             BoxrecRequests.numberOfTableColumns(boxrecPageBody);
 

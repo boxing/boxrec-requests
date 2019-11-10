@@ -6,7 +6,6 @@ import {BoxrecFighterOption, BoxrecRole, Country} from "./boxrec-requests.consta
 import {getRoleOfHTML} from "./helpers";
 import SpyInstance = jest.SpyInstance;
 
-
 const BOXREC_USERNAME: string | undefined = process.env.BOXREC_USERNAME;
 const BOXREC_PASSWORD: string | undefined = process.env.BOXREC_PASSWORD;
 
@@ -208,6 +207,15 @@ describe("class BoxrecRequests", () => {
                     async () => {
                         const spy: SpyInstance = jest.spyOn(rp, "get");
                         await BoxrecRequests.getPersonById(cookieJar, 348759, BoxrecRole.proBoxer);
+
+                        expect(spy.mock.calls.length).toBe(2);
+                    });
+
+                it(`should make two requests to BoxRec regardless of the role
+                because we compare the two requests for number of columns`,
+                    async () => {
+                        const spy: SpyInstance = jest.spyOn(rp, "get");
+                        await BoxrecRequests.getPersonById(cookieJar, 4010002, BoxrecRole.judge);
 
                         expect(spy.mock.calls.length).toBe(2);
                     });
