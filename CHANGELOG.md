@@ -1,4 +1,12 @@
+## 5.0.4 (2019-11-11)
+
+### Fixed
+
+-   remove `Jest.timeout` as other packages were throwing issues
+
 ## 5.0.3 (2019-11-05)
+
+### Fixed
 
 -   With the roll out of enrollments by BoxRec, some profiles were broken.
     No longer test for column numbers because they can change frequently.
