@@ -26,73 +26,73 @@
 
 ## 5.0.1 (2019-08-12)
 
-## Fixed
+### Fixed
 
-- Profiles were not showing multiple pages of events/bouts for certain roles
-- Return proper column data for different roles
+-   Profiles were not showing multiple pages of events/bouts for certain roles
+-   Return proper column data for different roles
 
 ## 5.0.0 (2019-08-05)
 
-## Added
+### Added
 
-- Support for new BoxRec roles like pro boxer, amateur boxer, kick boxer, muay thai boxer etc.
+-   Support for new BoxRec roles like pro boxer, amateur boxer, kick boxer, muay thai boxer etc.
 
-## Changed
+### Changed
 
-- `getPeopleByName` now returns the HTML body and not a generator.  This was because it was nice to have but was very 
+-   `getPeopleByName` now returns the HTML body and not a generator.  This was because it was nice to have but was very 
 inefficient
 
-## Fixed
+### Fixed
 
-- Logging in now works again.  The logging in functionality changed.  BoxRec requests also now support HTTPS
+-   Logging in now works again.  The logging in functionality changed.  BoxRec requests also now support HTTPS
 
 ## 4.2.2 (2019-04-21)
 
-## Changed
+### Changed
 
-- Used travis-ci.com instead of travis-ci.org for builds
+-   Used travis-ci.com instead of travis-ci.org for builds
 
 ## 4.2.0 (2019-01-16)
 
-## Added
+### Added
 
-- Can now use `getWatched` to list the boxers that are being watched by the user
+-   Can now use `getWatched` to list the boxers that are being watched by the user
 
 ## 4.1.0 (2019-01-10)
 
-## Added
+### Added
 
-- Can now use `watch`/`unwatch` methods to watch/unwatch a boxer
+-   Can now use `watch`/`unwatch` methods to watch/unwatch a boxer
 
 ## 4.0.0 (2019-01-05)
 
-## Fixed
+### Fixed
 
-- Get the dynamic values for ratings page as they change periodically
-- Getting ratings now requires sex of boxers
+-   Get the dynamic values for ratings page as they change periodically
+-   Getting ratings now requires sex of boxers
 
 ## 3.0.0 (2018-12-22)
 
-## Changed
+### Changed
 
-- Remove export default package
+-   Remove export default package
 
-## Fixed
+### Fixed
 
-- Get the dynamic values for results/titles page as they change periodically
+-   Get the dynamic values for results/titles page as they change periodically
 
 ## 2.0.1 (2018-12-14)
 
-## Fixed
+### Fixed
 
-- Cheerio added as dependency instead of dev dependency
+-   Cheerio added as dependency instead of dev dependency
 
 ## 2.0.0 (2018-12-14)
 
-## Added
+### Added
 
-- Requests now require `cookieJar` passed in.  It can be that of a logged in user or not
+-   Requests now require `cookieJar` passed in.  It can be that of a logged in user or not
 
-## Fixed
+### Fixed
 
-- Type definitions now working properly
+-   Type definitions now working properly
