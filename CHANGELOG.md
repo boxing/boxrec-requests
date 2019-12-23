@@ -1,3 +1,9 @@
+## 5.0.5 (2019-12-23)
+
+### Fixed
+
+-   Change the login request to not check the body for `gdpr`.  This was preventing people from logging in
+
 ## 5.0.4 (2019-11-11)
 
 ### Fixed
