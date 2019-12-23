@@ -377,44 +377,43 @@ export class BoxrecRequests {
             url: "https://boxrec.com/en/login",
         };
 
-        return rp.post(options)
-            .then((data: RequestResponse) => {
-                let errorMessage: string = "";
+        const data: RequestResponse = await rp.post(options);
 
-                // if the user hasn't given consent, the user is redirected to a user that contains `gdpr`
-                if (data.request.uri.pathname.includes("gdpr") || data.body.toLowerCase().includes("gdpr")) {
-                    errorMessage = "GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account";
-                }
+        let errorMessage: string = "";
 
-                // the following are when login has failed
-                // an unsuccessful login returns a 200, we'll look for phrases to determine the error
-                if (data.body.includes("your password is incorrect")) {
-                    errorMessage = "Your password is incorrect";
-                }
+        // if the user hasn't given consent, the user is redirected to a user that contains `gdpr`
+        if (data.request.uri.pathname.includes("gdpr")) {
+            errorMessage = "GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account";
+        }
 
-                if (data.body.includes("username does not exist")) {
-                    errorMessage = "Username does not exist";
-                }
+        // the following are when login has failed
+        // an unsuccessful login returns a 200, we'll look for phrases to determine the error
+        if (data.body.includes("your password is incorrect")) {
+            errorMessage = "Your password is incorrect";
+        }
 
-                if (data.statusCode !== 200 || errorMessage !== "") {
-                    throw new Error(errorMessage);
-                }
+        if (data.body.includes("username does not exist")) {
+            errorMessage = "Username does not exist";
+        }
 
-                const requiredCookies: string[] = ["PHPSESSID", "REMEMBERME"];
+        if (data.statusCode !== 200 || errorMessage !== "") {
+            throw new Error(errorMessage);
+        }
 
-                jar.getCookies(boxrecDomain)
-                    .forEach((cookieInsideJar: Cookie) => {
-                        const index: number = requiredCookies.findIndex((val: string) => val === cookieInsideJar.value);
-                        requiredCookies.splice(index);
-                    });
+        const requiredCookies: string[] = ["PHPSESSID", "REMEMBERME"];
 
-                // test to see if both cookies exist
-                if (!requiredCookies.length) {
-                    return jar; // success
-                } else {
-                    throw new Error("Cookie did not have PHPSESSID and REMEMBERME");
-                }
+        jar.getCookies(boxrecDomain)
+            .forEach((cookieInsideJar: Cookie) => {
+                const index: number = requiredCookies.findIndex((val: string) => val === cookieInsideJar.value);
+                requiredCookies.splice(index);
             });
+
+        // test to see if both cookies exist
+        if (!requiredCookies.length) {
+            return jar; // success
+        } else {
+            throw new Error("Cookie did not have PHPSESSID and REMEMBERME");
+        }
     }
 
     /**
