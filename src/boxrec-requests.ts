@@ -1,5 +1,5 @@
 import * as $ from "cheerio";
-import {Cookie, CookieJar, RequestResponse} from "request";
+import {Cookie, CookieJar, RequestResponse, Response} from "request";
 import * as rp from "request-promise";
 import {
     BoxrecLocationEventParams,
@@ -17,7 +17,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams
 } from "./boxrec-requests.constants";
-import {getRoleOfHTML} from "./helpers";
+import {getRoleOfHTML, requestWrapper} from "./helpers";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -49,9 +49,10 @@ export class BoxrecRequests {
      * @param eventBoutId   includes both the event and bout separated by "/"
      */
     static async getBout(jar: CookieJar, eventBoutId: string): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             jar,
-            uri: `https://boxrec.com/en/event/${eventBoutId}`,
+            method: "GET",
+            url: `https://boxrec.com/en/event/${eventBoutId}`,
         });
     }
 
@@ -87,9 +88,10 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getChampions(jar: CookieJar): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             jar,
-            uri: "https://boxrec.com/en/champions",
+            method: "GET",
+            url: "https://boxrec.com/en/champions",
         });
     }
 
@@ -100,12 +102,13 @@ export class BoxrecRequests {
      * @returns {Promise<void>}
      */
     static async getDate(jar: CookieJar, dateString: string): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs: {
                 date: dateString,
             },
-            uri: `https://boxrec.com/en/date`,
+            url: `https://boxrec.com/en/date`,
         });
     }
 
@@ -116,9 +119,10 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getEventById(jar: CookieJar, eventId: number): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             jar,
-            uri: `https://boxrec.com/en/event/${eventId}`,
+            method: "GET",
+            url: `https://boxrec.com/en/event/${eventId}`,
         });
     }
 
@@ -146,12 +150,12 @@ export class BoxrecRequests {
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: `https://boxrec.com/en/locations/event`,
+            url: `https://boxrec.com/en/locations/event`,
         });
-
     }
 
     /**
@@ -178,10 +182,11 @@ export class BoxrecRequests {
         const qs: BoxrecLocationsPeopleParamsTransformed = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: `https://boxrec.com/en/locations/people`,
+            url: `https://boxrec.com/en/locations/people`,
         });
     }
 
@@ -239,10 +244,11 @@ export class BoxrecRequests {
         const qs: any = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: "https://boxrec.com/en/ratings",
+            url: "https://boxrec.com/en/ratings",
         });
     }
 
@@ -258,10 +264,11 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(jar, params, offset);
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: "https://boxrec.com/en/results",
+            url: "https://boxrec.com/en/results",
         });
     }
 
@@ -276,10 +283,11 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(jar, params, offset);
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: "https://boxrec.com/en/schedule",
+            url: "https://boxrec.com/en/schedule",
         });
     }
 
@@ -291,9 +299,10 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getTitleById(jar: CookieJar, titleString: string, offset: number = 0): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             jar,
-            uri: `https://boxrec.com/en/title/${titleString}`,
+            method: "GET",
+            url: `https://boxrec.com/en/title/${titleString}`,
         });
     }
 
@@ -303,15 +312,16 @@ export class BoxrecRequests {
      * @param params
      * @param offset
      */
-    static async getTitles(jar: CookieJar, params: BoxrecTitlesParams, offset: number = 0): Promise<any> {
+    static async getTitles(jar: CookieJar, params: BoxrecTitlesParams, offset: number = 0): Promise<string> {
         const paramWrap: string = await BoxrecRequests.getTitlesParamWrap(jar);
         const qs: BoxrecTitlesParamsTransformed = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: `https://boxrec.com/en/titles`,
+            url: `https://boxrec.com/en/titles`,
         });
     }
 
@@ -323,12 +333,13 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getVenueById(jar: CookieJar, venueId: number, offset: number = 0): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs: {
                 offset,
             },
-            uri: `https://boxrec.com/en/venue/${venueId}`,
+            url: `https://boxrec.com/en/venue/${venueId}`,
         });
     }
 
@@ -338,10 +349,11 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getWatched(jar: CookieJar): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             followAllRedirects: true,
             jar,
-            uri: "https://boxrec.com/en/watchlist",
+            method: "GET",
+            url: "https://boxrec.com/en/watchlist",
         });
     }
 
@@ -373,15 +385,16 @@ export class BoxrecRequests {
                 "login[go]": "", // not required
             },
             jar,
+            method: "POST",
             resolveWithFullResponse: true,
             url: "https://boxrec.com/en/login",
         };
 
-        const data: RequestResponse = await rp.post(options);
+        const data: RequestResponse = await requestWrapper<Response>(options);
 
         let errorMessage: string = "";
 
-        // if the user hasn't given consent, the user is redirected to a user that contains `gdpr`
+        // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
         if (data.request.uri.pathname.includes("gdpr")) {
             errorMessage = "GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account";
         }
@@ -434,10 +447,11 @@ export class BoxrecRequests {
         const qs: BoxrecSearchParamsTransformed = createParamsObject(params, searchParam);
         qs.offset = offset;
 
-        return rp.get({
+        return requestWrapper<string>({
             jar,
+            method: "GET",
             qs,
-            uri: "https://boxrec.com/en/search",
+            url: "https://boxrec.com/en/search",
         });
     }
 
@@ -448,10 +462,11 @@ export class BoxrecRequests {
      * @returns {Promise<boolean>}
      */
     static async unwatch(jar: CookieJar, boxerGlobalId: number): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             followAllRedirects: true,
             jar,
-            uri: `https://boxrec.com/en/unwatch/${boxerGlobalId}`,
+            method: "GET",
+            url: `https://boxrec.com/en/unwatch/${boxerGlobalId}`,
         });
     }
 
@@ -462,10 +477,11 @@ export class BoxrecRequests {
      * @returns {Promise<boolean>}
      */
     static async watch(jar: CookieJar, boxerGlobalId: number): Promise<string> {
-        return rp.get({
+        return requestWrapper<string>({
             followAllRedirects: true,
             jar,
-            uri: `https://boxrec.com/en/watch/${boxerGlobalId}`,
+            method: "GET",
+            url: `https://boxrec.com/en/watch/${boxerGlobalId}`,
         });
     }
 
@@ -488,10 +504,11 @@ export class BoxrecRequests {
             followAllRedirects: true, // 302 redirect occurs
             formData,
             jar,
+            method: "POST",
             url: "https://boxrec.com/en/quick_search",
         };
 
-        return rp.post(options);
+        return requestWrapper<string>(options);
     }
 
     private static async buildResultsSchedulesParams<T>(jar: CookieJar, params: T, offset: number): Promise<T> {
@@ -522,19 +539,21 @@ export class BoxrecRequests {
             qs.print = "y";
         }
 
-        return rp.get({
+        return requestWrapper<string>({
             followAllRedirects: true,
             jar,
+            method: "GET",
             qs,
-            uri: `https://boxrec.com/en/boxer/${globalId}`
+            url: `https://boxrec.com/en/boxer/${globalId}`
         });
     }
 
     private static async getRatingsParamWrap(jar: CookieJar): Promise<string> {
         if (ratingsParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
                 jar,
-                uri: "https://boxrec.com/en/ratings",
+                method: "GET",
+                url: "https://boxrec.com/en/ratings",
             });
 
             ratingsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
@@ -551,9 +570,10 @@ export class BoxrecRequests {
         if (resultsParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and
             // not as predictable as the search box one on the search page
-            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
                 jar,
-                uri: "https://boxrec.com/en/results",
+                method: "GET",
+                url: "https://boxrec.com/en/results",
             });
 
             resultsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
@@ -568,9 +588,10 @@ export class BoxrecRequests {
      */
     private static async getQuickSearchParamWrap(jar: CookieJar): Promise<string> {
         if (quickSearchParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
                 jar,
-                uri: "https://boxrec.com/en/quick_search",
+                method: "GET",
+                url: "https://boxrec.com/en/quick_search",
             });
 
             quickSearchParamWrap = $(boxrecPageBody).find(".navLinks form").attr("name");
@@ -587,9 +608,10 @@ export class BoxrecRequests {
         if (searchParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and not as predictable
             // as the search box one on the search page
-            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
                 jar,
-                uri: "https://boxrec.com/en/search",
+                method: "GET",
+                url: "https://boxrec.com/en/search",
             });
 
             searchParamWrap = $(boxrecPageBody)
@@ -606,9 +628,10 @@ export class BoxrecRequests {
      */
     private static async getTitlesParamWrap(jar: CookieJar): Promise<string> {
         if (titlesParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await rp.get({
+            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
                 jar,
-                uri: "https://boxrec.com/en/titles",
+                method: "GET",
+                url: "https://boxrec.com/en/titles",
             });
 
             titlesParamWrap = $(boxrecPageBody).find(".page form").attr("name");
@@ -643,7 +666,7 @@ export class BoxrecRequests {
                                                   role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0,
                                                   previousRequestBody: string | null):
         Promise<string> {
-        const uri: string = `https://boxrec.com/en/${role}/${globalId}`;
+        const url: string = `https://boxrec.com/en/${role}/${globalId}`;
         const qs: any = {
             offset,
         };
@@ -653,11 +676,12 @@ export class BoxrecRequests {
             qs.toggleRatings = "y";
         }
 
-        const boxrecPageBody: RequestResponse["body"] = await rp.get({
+        const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
             jar,
+            method: "GET",
             qs,
             resolveWithFullResponse: false,
-            uri,
+            url,
         });
         const numberOfColumnsReceived: number =
             BoxrecRequests.numberOfTableColumns(boxrecPageBody);
