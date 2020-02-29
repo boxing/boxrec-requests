@@ -1,13 +1,10 @@
 import * as $ from "cheerio";
 import {CookieJar} from "request";
-import * as rp from "request-promise";
 import {BoxrecRequests} from "./boxrec-requests";
 import {BoxrecFighterOption, BoxrecRole, Country} from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
-import SpyInstance = jest.SpyInstance;
 
-const BOXREC_USERNAME: string | undefined = process.env.BOXREC_USERNAME;
-const BOXREC_PASSWORD: string | undefined = process.env.BOXREC_PASSWORD;
+const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
 if (!BOXREC_USERNAME || !BOXREC_PASSWORD) {
     throw new Error("Required Username/Password is not set");
@@ -22,6 +19,14 @@ describe("class BoxrecRequests", () => {
 
     beforeAll(async () => {
         cookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+    });
+
+    it("Bad password should throw an error", async () => {
+        try {
+            await BoxrecRequests.login(BOXREC_USERNAME, "");
+        } catch (e) {
+            expect(e.message).toBe("Your password is incorrect");
+        }
     });
 
     it("cookie should be not null and defined", () => {
@@ -74,8 +79,9 @@ describe("class BoxrecRequests", () => {
         }
 
         // different role selection changes which column the role data is in
+        // todo these are subject to change
         const enum ColRole {
-            fighters = 2,
+            // fighters = 2,
             all,
             other = 3,
         }
@@ -88,15 +94,19 @@ describe("class BoxrecRequests", () => {
         const getTableRoles: (html: string, isAllFighterOrOther: ColRole) => string[] =
             (html: string, isAllFighterOrOther: ColRole): string[] => {
                 const roles: string[] = [];
-                $(html).find(".dataTable tbody tr").each((i: number, tableRow: CheerioElement) => {
-                    // other roles don't have a link, they are separated by `div`
-                    // this is all very subject to failure
-                    const elementToGet: "a" | "div" = isAllFighterOrOther !== ColRole.other ? "a" : "div";
-                    $(tableRow).find(`td:nth-child(${isAllFighterOrOther}) ${elementToGet}`)
-                        .each((j: number, el: CheerioElement) => {
-                            roles.push($(el).text());
-                        });
-                });
+                let roleIdx: number = $(html).find(".dataTable thead th:contains('role')").eq(0).index();
+
+                if (roleIdx === -1) {
+                    throw new Error("Could not find role column");
+                }
+
+                // bump the column
+                roleIdx++;
+
+                $(html).find(`.dataTable tbody tr td:nth-child(${roleIdx})`)
+                    .each((j: number, el: CheerioElement) => {
+                        roles.push($(el).text().replace("\n", ""));
+                    });
 
                 return roles;
             };
@@ -106,8 +116,13 @@ describe("class BoxrecRequests", () => {
             it("should give you an assortment of different roles", async () => {
                 const response: string = await BoxrecRequests.getPeopleByName(cookieJar, "Mike", "", "");
                 const roles: string[] = getTableRoles(response, ColRole.all);
+
+                if (roles.length === 0) {
+                    throw new Error("0 rows?  Something has broken before this");
+                }
                 const uniqueRoles: string[] = roles.filter(onlyUnique);
-                expect(uniqueRoles.length).toBeGreaterThan(1);
+                expect(uniqueRoles.length).toBeGreaterThanOrEqual(1);
+                expect(uniqueRoles.includes("pro boxer")).toBe(true);
             });
 
         });
@@ -202,23 +217,6 @@ describe("class BoxrecRequests", () => {
                         expect(e.message).toBe("Person does not have this role");
                     }
                 });
-
-                it("should make two requests to BoxRec because we compare the two requests for number of columns",
-                    async () => {
-                        const spy: SpyInstance = jest.spyOn(rp, "get");
-                        await BoxrecRequests.getPersonById(cookieJar, 348759, BoxrecRole.proBoxer);
-
-                        expect(spy.mock.calls.length).toBe(2);
-                    });
-
-                it(`should make two requests to BoxRec regardless of the role
-                because we compare the two requests for number of columns`,
-                    async () => {
-                        const spy: SpyInstance = jest.spyOn(rp, "get");
-                        await BoxrecRequests.getPersonById(cookieJar, 4010002, BoxrecRole.judge);
-
-                        expect(spy.mock.calls.length).toBe(2);
-                    });
 
             });
 
