@@ -1,3 +1,9 @@
+## 5.1.0 (2020-03-03)
+
+### Added
+
+-   When BoxRec returns 429 Too Many Requests a human readable error will be thrown to callers of this package
+
 ## 5.0.5 (2019-12-23)
 
 ### Fixed
