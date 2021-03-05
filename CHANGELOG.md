@@ -1,3 +1,9 @@
+## 5.1.1 (2021-03-04)
+
+### Fixed
+
+-   BoxRec log in request changed from form-data to x-www-form-urlencoded
+
 ## 5.1.0 (2020-03-03)
 
 ### Added
