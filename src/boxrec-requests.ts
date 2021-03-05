@@ -377,7 +377,7 @@ export class BoxrecRequests {
 
         const options: rp.Options = {
             followAllRedirects: true, // 302 redirect occurs
-            formData: {
+            form: {
                 "_password": password,
                 "_remember_me": "on",
                 "_target_path": boxrecDomain, // not required,
