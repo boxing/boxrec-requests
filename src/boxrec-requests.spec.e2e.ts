@@ -3,6 +3,7 @@ import {CookieJar} from "request";
 import {BoxrecRequests} from "./boxrec-requests";
 import {BoxrecFighterOption, BoxrecRole, Country} from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
+import DoneCallback = jest.DoneCallback;
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
@@ -13,12 +14,31 @@ if (!BOXREC_USERNAME || !BOXREC_PASSWORD) {
 // ignores __mocks__ and makes real requests
 jest.unmock("request-promise");
 
+jest.setTimeout(30000);
+
+const napTime: number = 10000;
+
+const wait: (done: DoneCallback) => void = (done: DoneCallback) => setTimeout(done, napTime);
+
+const sleep: (ms?: number) => Promise<void> = (ms: number = napTime) => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 describe("class BoxrecRequests", () => {
 
     let cookieJar: CookieJar;
+    let num: number = 0;
 
     beforeAll(async () => {
         cookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+    });
+
+    // delay each test so we don't get blocked by BoxRec
+    beforeEach(done => {
+        num++;
+        // tslint:disable-next-line:no-console
+        console.log(num);
+        wait(done);
     });
 
     it("Bad password should throw an error", async () => {
@@ -42,6 +62,7 @@ describe("class BoxrecRequests", () => {
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
+            await sleep();
             const amateurBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
                 country: Country.USA,
                 sport: BoxrecFighterOption["Amateur Boxing"],
@@ -60,6 +81,7 @@ describe("class BoxrecRequests", () => {
                 role: BoxrecRole.proBoxer,
             });
 
+            await sleep();
             const amateurBoxerResponse: string = await BoxrecRequests.getPeople(cookieJar, {
                 role: BoxrecRole.amateurBoxer,
             });
