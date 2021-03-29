@@ -1,9 +1,12 @@
 import * as $ from "cheerio";
+import * as fs from "fs";
+import * as path from "path";
 import {CookieJar} from "request";
 import {BoxrecRequests} from "./boxrec-requests";
 import {BoxrecFighterOption, BoxrecRole, Country} from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
 import DoneCallback = jest.DoneCallback;
+import * as rp from "request-promise";
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
@@ -26,11 +29,26 @@ const sleep: (ms?: number) => Promise<void> = (ms: number = napTime) => {
 
 describe("class BoxrecRequests", () => {
 
-    let cookieJar: CookieJar;
+    let cookieJar: CookieJar = rp.jar();
     let num: number = 0;
 
     beforeAll(async () => {
-        cookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+        // To prevent massive amounts of logging in unnecessarily, after logging in we'll store the cookie in a temp
+        // directory.  Temp directory must exist, if it doesn't, create it.
+        let cookieBuffer: Buffer;
+        const tmpPath: string = path.resolve(process.cwd(), "./tmp/cookies.txt");
+        const cookieDomain: string = "https://boxrec.com";
+        let cookieString: string | null = null;
+        try {
+            cookieBuffer = await fs.readFileSync(tmpPath);
+            cookieString = cookieBuffer.toString();
+            cookieJar.setCookie(cookieString, cookieDomain);
+        } catch (e) {
+            // if the file doesn't exist, we login and store the cookie in the "../tmp" directory
+            cookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+            const newCookieString: string = cookieJar.getCookieString(cookieDomain);
+            await fs.writeFileSync(tmpPath, newCookieString);
+        }
     });
 
     // delay each test so we don't get blocked by BoxRec
