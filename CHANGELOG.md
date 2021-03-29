@@ -1,3 +1,9 @@
+## 5.1.2 (2021-03-28)
+
+### Fixed
+
+-   BoxRec log in request back to form-data.  I can't explain if this was an error with this package or BoxRec changed
+
 ## 5.1.1 (2021-03-04)
 
 ### Fixed

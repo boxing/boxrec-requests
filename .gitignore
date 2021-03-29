@@ -127,3 +127,6 @@ typings/
 
 
 dist/
+
+# tmp folder for storing cookies
+tmp/
