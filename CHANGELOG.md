@@ -1,3 +1,13 @@
+## 5.1.3 (2021-05-08)
+
+### Changed
+
+-   Updated `.npmignore` to decrease package size
+    
+### Fixed
+
+-   Fix issue with Cheerio and traversing the DOM.  Selectors would come up empty
+
 ## 5.1.2 (2021-03-28)
 
 ### Fixed

@@ -33,8 +33,8 @@ describe("class BoxrecRequests", () => {
     let num: number = 0;
 
     beforeAll(async () => {
-        // To prevent massive amounts of logging in unnecessarily, after logging in we'll store the cookie in a temp
-        // directory.  Temp directory must exist, if it doesn't, create it.
+        // to prevent massive amounts of logging in unnecessarily, after logging in we'll store the cookie in a temp
+        // directory
         let cookieBuffer: Buffer;
         const tmpPath: string = path.resolve(process.cwd(), "./tmp/cookies.txt");
         const cookieDomain: string = "https://boxrec.com";
