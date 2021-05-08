@@ -556,7 +556,7 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/ratings",
             });
 
-            ratingsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
+            ratingsParamWrap = $("div", boxrecPageBody).find(".page form").attr("name");
         }
 
         return ratingsParamWrap;
@@ -576,7 +576,7 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/results",
             });
 
-            resultsParamWrap = $(boxrecPageBody).find(".page form").attr("name");
+            resultsParamWrap = $("div", boxrecPageBody).find(".page form").attr("name");
         }
 
         return resultsParamWrap;
@@ -594,7 +594,12 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/quick_search",
             });
 
-            quickSearchParamWrap = $(boxrecPageBody).find(".navLinks form").attr("name");
+            // not sure why but when the package is now compiled and you try to traverse the DOM Cheerio comes
+            // up with errors
+            // https://github.com/boxing/boxrec/issues/252
+            // the fix I found was to wrap the response (which includes the doctype/html tag) inside a div.
+            // I'm not sure how to explain why this started but this should fix it
+            quickSearchParamWrap = $("div", boxrecPageBody).find(".navLinks form").attr("name");
         }
 
         return quickSearchParamWrap;
@@ -614,7 +619,7 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/search",
             });
 
-            searchParamWrap = $(boxrecPageBody)
+            searchParamWrap = $("div", boxrecPageBody)
                 .find("h2:contains('Find People')")
                 .parents("td").find("form").attr("name");
         }
@@ -634,7 +639,7 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/titles",
             });
 
-            titlesParamWrap = $(boxrecPageBody).find(".page form").attr("name");
+            titlesParamWrap = $("div", boxrecPageBody).find(".page form").attr("name");
         }
 
         return titlesParamWrap;
@@ -648,7 +653,7 @@ export class BoxrecRequests {
      * @param boxrecPageBody
      */
     private static numberOfTableColumns(boxrecPageBody: string): number {
-        return $(boxrecPageBody)
+        return $("div", boxrecPageBody)
             .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
     }
 
