@@ -1,3 +1,9 @@
+## 5.1.4 (2022-02-14)
+
+### Fixed
+
+-   Fix `cheerio.load` to properly create the `$` function
+
 ## 5.1.3 (2021-05-08)
 
 ### Changed

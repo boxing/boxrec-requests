@@ -1,4 +1,4 @@
-import * as $ from "cheerio";
+import * as cheerio from "cheerio";
 import {Cookie, CookieJar, RequestResponse, Response} from "request";
 import * as rp from "request-promise";
 import {
@@ -556,7 +556,8 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/ratings",
             });
 
-            ratingsParamWrap = $("div", boxrecPageBody).find(".page form").attr("name");
+            const $: CheerioStatic = cheerio.load(boxrecPageBody);
+            ratingsParamWrap = $(".page form").attr("name");
         }
 
         return ratingsParamWrap;
@@ -576,7 +577,8 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/results",
             });
 
-            resultsParamWrap = $("div", boxrecPageBody).find(".page form").attr("name");
+            const $: CheerioStatic = cheerio.load(boxrecPageBody);
+            resultsParamWrap = $(".page form").attr("name");
         }
 
         return resultsParamWrap;
@@ -599,7 +601,8 @@ export class BoxrecRequests {
             // https://github.com/boxing/boxrec/issues/252
             // the fix I found was to wrap the response (which includes the doctype/html tag) inside a div.
             // I'm not sure how to explain why this started but this should fix it
-            quickSearchParamWrap = $("div", boxrecPageBody).find(".navLinks form").attr("name");
+            const $: CheerioStatic = cheerio.load(boxrecPageBody);
+            quickSearchParamWrap = $(".navLinks form").attr("name");
         }
 
         return quickSearchParamWrap;
@@ -619,8 +622,8 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/search",
             });
 
-            searchParamWrap = $("div", boxrecPageBody)
-                .find("h2:contains('Find People')")
+            const $: CheerioStatic = cheerio.load(boxrecPageBody);
+            searchParamWrap = $("h2:contains('Find People')")
                 .parents("td").find("form").attr("name");
         }
 
@@ -639,7 +642,8 @@ export class BoxrecRequests {
                 url: "https://boxrec.com/en/titles",
             });
 
-            titlesParamWrap = $("div", boxrecPageBody).find(".page form").attr("name");
+            const $: CheerioStatic = cheerio.load(boxrecPageBody);
+            titlesParamWrap = $(".page form").attr("name");
         }
 
         return titlesParamWrap;
@@ -653,8 +657,8 @@ export class BoxrecRequests {
      * @param boxrecPageBody
      */
     private static numberOfTableColumns(boxrecPageBody: string): number {
-        return $("div", boxrecPageBody)
-            .find(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
+        const $: CheerioStatic = cheerio.load(boxrecPageBody);
+        return $(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
     }
 
     /**
