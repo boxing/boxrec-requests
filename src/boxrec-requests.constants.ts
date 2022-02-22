@@ -6,6 +6,8 @@ export interface BoxrecRatingsParams {
     status?: "a" | ""; // defaults to active/inactive
 }
 
+export type ScoreCard = Array<[number, number]>;
+
 export interface PersonRequestParams {
     offset?: number;
     pdf?: "y";
