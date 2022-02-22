@@ -15,7 +15,7 @@ import {
     BoxrecStatus,
     BoxrecTitlesParams,
     BoxrecTitlesParamsTransformed,
-    PersonRequestParams
+    PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML, requestWrapper} from "./helpers";
 
@@ -288,6 +288,56 @@ export class BoxrecRequests {
             method: "GET",
             qs,
             url: "https://boxrec.com/en/schedule",
+        });
+    }
+
+    /**
+     * Makes a request to BoxRec to list all the scores of the user
+     * @param jar                               contains cookie information about the user
+     * @returns {Promise<string>}
+     */
+    static async listScores(jar: CookieJar): Promise<string> {
+        return requestWrapper<string>({
+           jar,
+           method: "GET",
+           url: `https://boxrec.com/en/my_scores`,
+        });
+    }
+
+    /**
+     * Makes a request to BoxRec to list all the scores of a single bout (including the user and fans)
+     * @param jar                               contains cookie information about the user
+     * @param boutId                            the ID of the bout
+     * @returns {Promise<string>}
+     */
+    static async getScoresByBoutId(jar: CookieJar, boutId: number): Promise<string> {
+        return requestWrapper<string>({
+            jar,
+            method: "GET",
+            url: `https://boxrec.com/en/scoring/${boutId}`,
+        });
+    }
+
+    /**
+     * Makes a request to BoxRec to update the user's score of a bout
+     * @param jar                               contains cookie information about the user
+     * @param boutId                            the ID of the bout
+     * @param scorecard                         an array of numbers that represent the points for each fighter per round
+     * @returns {Promise<string>}
+     */
+    static async updateScoreByBoutId(jar: CookieJar, boutId: number, scorecard: ScoreCard): Promise<string> {
+        const qs: Record<string, string> = {};
+
+        scorecard.forEach((round: [number, number], idx: number) => {
+            qs[`a${idx + 1}`] = "" + round[0];
+            qs[`b${idx + 1}`] = "" + round[1];
+        });
+
+        return requestWrapper<string>({
+            jar,
+            method: "GET",
+            qs,
+            url: `https://boxrec.com/en/scoring/historical/submit/${boutId}`,
         });
     }
 

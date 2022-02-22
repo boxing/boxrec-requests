@@ -1,3 +1,9 @@
+## 5.2.0 (2022-02-22)
+
+### Added
+
+-   Endpoints that can list all scores of a bout (user, fan, judges), all user scores, and update the scorecard of a user
+
 ## 5.1.4 (2022-02-14)
 
 ### Fixed

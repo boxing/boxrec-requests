@@ -2,11 +2,11 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import {CookieJar} from "request";
-import {BoxrecRequests} from "./boxrec-requests";
-import {BoxrecFighterOption, BoxrecRole, Country} from "./boxrec-requests.constants";
-import {getRoleOfHTML} from "./helpers";
 import DoneCallback = jest.DoneCallback;
 import * as rp from "request-promise";
+import {BoxrecRequests} from "./boxrec-requests";
+import {BoxrecFighterOption, BoxrecRole, Country, ScoreCard} from "./boxrec-requests.constants";
+import {getRoleOfHTML} from "./helpers";
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
@@ -379,6 +379,45 @@ describe("class BoxrecRequests", () => {
                 expect(html).not.toContain(boxerName);
             });
 
+        });
+
+    });
+
+    describe("method listScores", () => {
+
+        it("should return the list of all the user's scorecards", async () => {
+            const html: string = await BoxrecRequests.listScores(cookieJar);
+
+            expect(html).toContain("My Scores");
+        });
+
+    });
+
+    describe("method getScoreByBoutId", () => {
+
+        it("should return the page with scorecards for a bout", async () => {
+            const html: string = await BoxrecRequests.getScoresByBoutId(cookieJar, 2756346);
+
+            expect(html).toContain("Scoring");
+        });
+
+    });
+
+    describe("method updateScoreByBoutId", () => {
+
+        // todo this isn't really a bullet proof test, even if the request fails it can come back with "Scores saved"
+        it("should update the scorecard of a bout", async () => {
+            const score: ScoreCard = [
+                [10, 9],
+                [9, 10],
+                [10, 9],
+                [9, 10],
+                [10, 9],
+            ];
+
+            const html: string = await BoxrecRequests.updateScoreByBoutId(cookieJar, 2756346, score);
+
+            expect(html).toContain("Scores saved");
         });
 
     });
