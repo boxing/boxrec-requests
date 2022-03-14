@@ -44,7 +44,7 @@ describe("class BoxrecRequests", () => {
             cookieString = cookieBuffer.toString();
             cookieJar.setCookie(cookieString, cookieDomain);
         } catch (e) {
-            // if the file doesn't exist, we login and store the cookie in the "../tmp" directory
+            // if the file doesn't exist, we log in and store the cookie in the "../tmp" directory
             cookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
             const newCookieString: string = cookieJar.getCookieString(cookieDomain);
             await fs.writeFileSync(tmpPath, newCookieString);
@@ -59,12 +59,24 @@ describe("class BoxrecRequests", () => {
         wait(done);
     });
 
-    it("Bad password should throw an error", async () => {
-        try {
-            await BoxrecRequests.login(BOXREC_USERNAME, "");
-        } catch (e) {
-            expect(e.message).toBe("Your password is incorrect");
-        }
+    describe("method login", () => {
+
+        it("Bad username should throw an error stating bad credentials because of returning to a page with the login form", async () => {
+            try {
+                await BoxrecRequests.login("", "");
+            } catch (e) {
+                expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
+            }
+        });
+
+        it("Bad password should throw stating bad credentials because of returning to a page with the login form", async () => {
+            try {
+                await BoxrecRequests.login("boxrec", "");
+            } catch (e) {
+                expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
+            }
+        });
+
     });
 
     it("cookie should be not null and defined", () => {
