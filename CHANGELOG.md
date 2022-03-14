@@ -1,3 +1,10 @@
+## 5.2.1 (2022-03-14)
+
+### Fixed
+
+-   Fix issue where a bad username would throw the wrong error due to a change with the BoxRec error message. 
+    Error now just checks if the login returns the login form
+
 ## 5.2.0 (2022-02-22)
 
 ### Added

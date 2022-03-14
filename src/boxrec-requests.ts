@@ -450,13 +450,10 @@ export class BoxrecRequests {
         }
 
         // the following are when login has failed
-        // an unsuccessful login returns a 200, we'll look for phrases to determine the error
-        if (data.body.includes("your password is incorrect")) {
-            errorMessage = "Your password is incorrect";
-        }
-
-        if (data.body.includes("username does not exist")) {
-            errorMessage = "Username does not exist";
+        // an unsuccessful login returns a 200
+        const $: CheerioStatic = cheerio.load(data.body);
+        if ($("input#username").length) {
+            errorMessage = "Please check your credentials, could not log into BoxRec";
         }
 
         if (data.statusCode !== 200 || errorMessage !== "") {
