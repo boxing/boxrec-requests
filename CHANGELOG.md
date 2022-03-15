@@ -1,3 +1,9 @@
+## 5.3.0 (2022-03-15)
+
+### Added
+
+-   Proper exporting of constants/interfaces
+
 ## 5.2.3 (2022-03-15)
 
 ### Fixed

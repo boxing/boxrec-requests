@@ -4,8 +4,7 @@ import * as path from "path";
 import {CookieJar} from "request";
 import DoneCallback = jest.DoneCallback;
 import * as rp from "request-promise";
-import {BoxrecRequests} from "./boxrec-requests";
-import {BoxrecFighterOption, BoxrecRole, Country, ScoreCard} from "./boxrec-requests.constants";
+import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "./";
 import {getRoleOfHTML} from "./helpers";
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
@@ -86,7 +85,7 @@ describe("class BoxrecRequests", () => {
 
         });
 
-        it("should return a cookie if log in was successful", async() => {
+        it("should return a cookie if log in was successful", async () => {
             const jar: CookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
             const newCookieString: string = jar.getCookieString(cookieDomain);
             expect(newCookieString).toContain("PHPSESSID");
