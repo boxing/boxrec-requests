@@ -458,7 +458,7 @@ export class BoxrecRequests {
             }
         }
 
-        if (data.statusCode !== 200 || errorMessage !== "") {
+        if (data.statusCode !== 200 || errorMessage !== null) {
             throw new Error(errorMessage || "unknown error");
         }
 
