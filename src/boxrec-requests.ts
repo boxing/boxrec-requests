@@ -442,22 +442,24 @@ export class BoxrecRequests {
 
         const data: RequestResponse = await requestWrapper<Response>(options);
 
-        let errorMessage: string = "";
+        let errorMessage: string | null = null;
 
         // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
         if (data.request.uri.pathname.includes("gdpr")) {
             errorMessage = "GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account";
         }
 
-        // the following are when login has failed
-        // an unsuccessful login returns a 200
-        const $: CheerioStatic = cheerio.load(data.body);
-        if ($("input#username").length) {
-            errorMessage = "Please check your credentials, could not log into BoxRec";
+        if (!errorMessage) {
+            // the following are when login has failed
+            // an unsuccessful login returns a 200
+            const $: CheerioStatic = cheerio.load(data.body);
+            if ($("input#username").length) {
+                errorMessage = "Please check your credentials, could not log into BoxRec";
+            }
         }
 
         if (data.statusCode !== 200 || errorMessage !== "") {
-            throw new Error(errorMessage);
+            throw new Error(errorMessage || "unknown error");
         }
 
         const requiredCookies: string[] = ["PHPSESSID", "REMEMBERME"];

@@ -1,3 +1,9 @@
+## 5.2.2 (2022-03-14)
+
+### Changed
+
+-   If GDPR error message occurs, the username/login error shouldn't override it
+
 ## 5.2.1 (2022-03-14)
 
 ### Fixed
