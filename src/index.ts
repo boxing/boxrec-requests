@@ -1,5 +1,2 @@
-import {BoxrecRequests} from "./boxrec-requests";
-
-export {
-    BoxrecRequests,
-};
+export * from "./boxrec-requests.constants";
+export {BoxrecRequests} from "./boxrec-requests";
