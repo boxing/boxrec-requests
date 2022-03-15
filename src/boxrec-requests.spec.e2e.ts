@@ -21,6 +21,8 @@ jest.setTimeout(30000);
 
 const napTime: number = 10000;
 
+const cookieDomain: string = "https://boxrec.com";
+
 const wait: (done: DoneCallback) => void = (done: DoneCallback) => setTimeout(done, napTime);
 
 const sleep: (ms?: number) => Promise<void> = (ms: number = napTime) => {
@@ -37,7 +39,6 @@ describe("class BoxrecRequests", () => {
         // directory
         let cookieBuffer: Buffer;
         const tmpPath: string = path.resolve(process.cwd(), "./tmp/cookies.txt");
-        const cookieDomain: string = "https://boxrec.com";
         let cookieString: string | null = null;
         try {
             cookieBuffer = await fs.readFileSync(tmpPath);
@@ -61,20 +62,34 @@ describe("class BoxrecRequests", () => {
 
     describe("method login", () => {
 
-        it("Bad username should throw an error stating bad credentials because of returning to a page with the login form", async () => {
-            try {
-                await BoxrecRequests.login("", "");
-            } catch (e) {
-                expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
-            }
+        describe("bad username", () => {
+
+           it("should throw an error stating bad credentials because of returning to a page with the login form", async () => {
+               try {
+                   await BoxrecRequests.login("", "");
+               } catch (e) {
+                   expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
+               }
+           });
+
         });
 
-        it("Bad password should throw stating bad credentials because of returning to a page with the login form", async () => {
-            try {
-                await BoxrecRequests.login("boxrec", "");
-            } catch (e) {
-                expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
-            }
+        describe("bad password", () => {
+
+            it("should throw stating bad credentials because of returning to a page with the login form", async () => {
+                try {
+                    await BoxrecRequests.login("boxrec", "");
+                } catch (e) {
+                    expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
+                }
+            });
+
+        });
+
+        it("should return a cookie if log in was successful", async() => {
+            const jar: CookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+            const newCookieString: string = jar.getCookieString(cookieDomain);
+            expect(newCookieString).toContain("PHPSESSID");
         });
 
     });

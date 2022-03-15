@@ -1,3 +1,9 @@
+## 5.2.3 (2022-03-15)
+
+### Fixed
+
+-   Fix log in issue with code comparing null and empty string
+
 ## 5.2.2 (2022-03-14)
 
 ### Changed
