@@ -1,3 +1,9 @@
+## 5.3.1 (2022-03-15)
+
+### Changed
+
+-   Compile using the `files` attribute in `package.json` instead of `.npmignore`
+
 ## 5.3.0 (2022-03-15)
 
 ### Added
