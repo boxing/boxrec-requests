@@ -1,4 +1,6 @@
 import * as cheerio from "cheerio";
+import * as FormData from "form-data";
+import fetch, { File, fileFrom } from "node-fetch";
 import {Cookie, CookieJar, RequestResponse, Response} from "request";
 import * as rp from "request-promise";
 import {
@@ -17,7 +19,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
-import {getRoleOfHTML, requestWrapper} from "./helpers";
+import {getRoleOfHTML, requestWrapper, requestWrapperFetch} from "./helpers";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -423,24 +425,54 @@ export class BoxrecRequests {
         }
 
         const boxrecDomain: string = "https://boxrec.com";
-        const jar: CookieJar = rp.jar();
+        // const jar: CookieJar = rp.jar();
+        //
+        // const options: rp.Options = {
+        //     followAllRedirects: true, // 302 redirect occurs
+        //     formData: {
+        //         "_password": password,
+        //         "_remember_me": "on",
+        //         "_target_path": boxrecDomain, // not required,
+        //         "_username": username,
+        //         "login[go]": "", // not required
+        //     },
+        //     jar,
+        //     method: "POST",
+        //     resolveWithFullResponse: true,
+        //     url: "https://boxrec.com/en/login",
+        // };
 
-        const options: rp.Options = {
-            followAllRedirects: true, // 302 redirect occurs
-            formData: {
-                "_password": password,
-                "_remember_me": "on",
-                "_target_path": boxrecDomain, // not required,
-                "_username": username,
-                "login[go]": "", // not required
-            },
-            jar,
+        const formData: any = new FormData();
+        formData.append( "_password", password);
+        formData.append( "_remember_me", "on");
+        formData.append( "_target_path", boxrecDomain);  // not required,
+        formData.append( "_username", username);
+        formData.append( "login[go]", ""); // not required
+
+
+        // const data: RequestResponse = await requestWrapper<Response>(options);
+        const data: FetchResponse = await requestWrapperFetch<Response>("https://boxrec.com/en/login", {
+            body: formData,
             method: "POST",
-            resolveWithFullResponse: true,
-            url: "https://boxrec.com/en/login",
-        };
+            mode: "no-cors",
+            cache: "no-cache",
+            credentials: "same-origin",
+        });
 
-        const data: RequestResponse = await requestWrapper<Response>(options);
+        const data2: any = fetch("https://boxrec.com/en/login", {
+            body: formData,
+            method: "POST",
+            mode: "no-cors",
+            cache: "no-cache",
+            credentials: 'include'
+        })
+
+        // const cookies: any = data.headers.get('set-cookie')
+
+        // console.log(data.headers.raw()['set-cookie']);
+
+        console.log(data2.url, await data2.text());
+        console.log(data.headers.raw()["set-cookie"]);
 
         let errorMessage: string | null = null;
 
@@ -464,15 +496,15 @@ export class BoxrecRequests {
 
         const requiredCookies: string[] = ["PHPSESSID", "REMEMBERME"];
 
-        jar.getCookies(boxrecDomain)
-            .forEach((cookieInsideJar: Cookie) => {
-                const index: number = requiredCookies.findIndex((val: string) => val === cookieInsideJar.value);
-                requiredCookies.splice(index);
-            });
+        // jar.getCookies(boxrecDomain)
+        //     .forEach((cookieInsideJar: Cookie) => {
+        //         const index: number = requiredCookies.findIndex((val: string) => val === cookieInsideJar.value);
+        //         requiredCookies.splice(index);
+        //     });
 
         // test to see if both cookies exist
         if (!requiredCookies.length) {
-            return jar; // success
+            // return jar; // success
         } else {
             throw new Error("Cookie did not have PHPSESSID and REMEMBERME");
         }
