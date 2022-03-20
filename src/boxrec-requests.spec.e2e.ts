@@ -30,7 +30,7 @@ const sleep: (ms?: number) => Promise<void> = (ms: number = napTime) => {
 
 describe("class BoxrecRequests", () => {
 
-    let cookieJar: CookieJar = rp.jar();
+    let cookies: string | null = null;
     let num: number = 0;
 
     beforeAll(async () => {
@@ -38,16 +38,14 @@ describe("class BoxrecRequests", () => {
         // directory
         let cookieBuffer: Buffer;
         const tmpPath: string = path.resolve(process.cwd(), "./tmp/cookies.txt");
-        let cookieString: string | null = null;
         try {
             cookieBuffer = await fs.readFileSync(tmpPath);
-            cookieString = cookieBuffer.toString();
-            cookieJar.setCookie(cookieString, cookieDomain);
+            cookies = cookieBuffer.toString();
         } catch (e) {
             // if the file doesn't exist, we log in and store the cookie in the "../tmp" directory
-            cookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
-            const newCookieString: string = cookieJar.getCookieString(cookieDomain);
-            await fs.writeFileSync(tmpPath, newCookieString);
+            const cookiesResponse: string = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+            await fs.writeFileSync(tmpPath, cookiesResponse);
+            cookies = cookiesResponse;
         }
     });
 
@@ -86,28 +84,27 @@ describe("class BoxrecRequests", () => {
         });
 
         it("should return a cookie if log in was successful", async () => {
-            const jar: CookieJar = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
-            const newCookieString: string = jar.getCookieString(cookieDomain);
-            expect(newCookieString).toContain("PHPSESSID");
+            const cookiesResponse: string = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+            expect(cookiesResponse).toContain("PHPSESSID");
         });
 
     });
 
     it("cookie should be not null and defined", () => {
-        expect(cookieJar).toBeDefined();
-        expect(cookieJar).not.toBeNull();
+        expect(cookies).toBeDefined();
+        expect(cookies).not.toBeNull();
     });
 
     describe("method getEvents", () => {
 
         it("should return different events if different roles are provided", async () => {
-            const proBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
+            const proBoxerResponse: string = await BoxrecRequests.getEvents(cookies, {
                 country: Country.USA,
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
             await sleep();
-            const amateurBoxerResponse: string = await BoxrecRequests.getEvents(cookieJar, {
+            const amateurBoxerResponse: string = await BoxrecRequests.getEvents(cookies, {
                 country: Country.USA,
                 sport: BoxrecFighterOption["Amateur Boxing"],
             });
@@ -121,12 +118,12 @@ describe("class BoxrecRequests", () => {
     describe("method getPeople", () => {
 
         it("should return different people if different roles are provided", async () => {
-            const proBoxerResponse: string = await BoxrecRequests.getPeople(cookieJar, {
+            const proBoxerResponse: string = await BoxrecRequests.getPeople(cookies, {
                 role: BoxrecRole.proBoxer,
             });
 
             await sleep();
-            const amateurBoxerResponse: string = await BoxrecRequests.getPeople(cookieJar, {
+            const amateurBoxerResponse: string = await BoxrecRequests.getPeople(cookies, {
                 role: BoxrecRole.amateurBoxer,
             });
 
@@ -180,7 +177,7 @@ describe("class BoxrecRequests", () => {
         describe("search for `all`", () => {
 
             it("should give you an assortment of different roles", async () => {
-                const response: string = await BoxrecRequests.getPeopleByName(cookieJar, "Mike", "", "");
+                const response: string = await BoxrecRequests.getPeopleByName(cookies, "Mike", "", "");
                 const roles: string[] = getTableRoles(response, ColRole.all);
 
                 if (roles.length === 0) {
@@ -206,7 +203,7 @@ describe("class BoxrecRequests", () => {
         const returnRole: (globalId: number, role: BoxrecRole | null, expectedValue?: BoxrecRole | "") => Promise<void>
             = async (globalId: number, role: BoxrecRole | null = null, expectedValue?: BoxrecRole | ""):
             Promise<void> => {
-            const html: string = await BoxrecRequests.getPersonById(cookieJar, globalId, role);
+            const html: string = await BoxrecRequests.getPersonById(cookies, globalId, role);
             const roleStr: string | null = getRoleOfHTML(html);
             expect(roleStr).toBe(role || expectedValue);
         };
@@ -277,7 +274,7 @@ describe("class BoxrecRequests", () => {
 
                 it("should throw an error if the role doesn't exist for this person", async () => {
                     try {
-                        await BoxrecRequests.getPersonById(cookieJar, bareknuckleboxer.paulieMalignaggi,
+                        await BoxrecRequests.getPersonById(cookies, bareknuckleboxer.paulieMalignaggi,
                             BoxrecRole.amateurMuayThaiBoxer);
                     } catch (e) {
                         expect(e.message).toBe("Person does not have this role");
@@ -379,7 +376,7 @@ describe("class BoxrecRequests", () => {
     describe("method getWatched", async () => {
 
         it("should return the page of the boxers that the user is watching", async () => {
-            const html: string = await BoxrecRequests.getWatched(cookieJar);
+            const html: string = await BoxrecRequests.getWatched(cookies);
             expect(html).toContain(`<h1 class="pageHeading">Watching</h1>`);
         });
     });
@@ -392,7 +389,7 @@ describe("class BoxrecRequests", () => {
         describe("method watch", () => {
 
             it("should watch a person, adding them to the list", async () => {
-                const html: string = await BoxrecRequests.watch(cookieJar, boxer);
+                const html: string = await BoxrecRequests.watch(cookies, boxer);
                 expect(html).toContain(boxerName);
             });
 
@@ -401,7 +398,7 @@ describe("class BoxrecRequests", () => {
         describe("method unwatch", () => {
 
             it("should unwatch a person.  They shouldn't exist in the returned HTML", async () => {
-                const html: string = await BoxrecRequests.unwatch(cookieJar, boxer);
+                const html: string = await BoxrecRequests.unwatch(cookies, boxer);
                 expect(html).not.toContain(boxerName);
             });
 
@@ -412,7 +409,7 @@ describe("class BoxrecRequests", () => {
     describe("method listScores", () => {
 
         it("should return the list of all the user's scorecards", async () => {
-            const html: string = await BoxrecRequests.listScores(cookieJar);
+            const html: string = await BoxrecRequests.listScores(cookies);
 
             expect(html).toContain("My Scores");
         });
@@ -422,7 +419,7 @@ describe("class BoxrecRequests", () => {
     describe("method getScoreByBoutId", () => {
 
         it("should return the page with scorecards for a bout", async () => {
-            const html: string = await BoxrecRequests.getScoresByBoutId(cookieJar, 2756346);
+            const html: string = await BoxrecRequests.getScoresByBoutId(cookies, 2756346);
 
             expect(html).toContain("Scoring");
         });
@@ -441,7 +438,7 @@ describe("class BoxrecRequests", () => {
                 [10, 9],
             ];
 
-            const html: string = await BoxrecRequests.updateScoreByBoutId(cookieJar, 2756346, score);
+            const html: string = await BoxrecRequests.updateScoreByBoutId(cookies, 2756346, score);
 
             expect(html).toContain("Scores saved");
         });

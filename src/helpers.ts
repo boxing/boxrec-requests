@@ -1,8 +1,9 @@
 import * as $ from "cheerio";
-import fetch, {Response} from "node-fetch";
+import fetch, {RequestInit, Response} from "node-fetch";
 import {UrlOptions} from "request";
 import * as rp from "request-promise";
 import {RequestPromiseOptions} from "request-promise";
+import { URLSearchParams } from "url";
 import {BoxrecRole} from "./boxrec-requests.constants";
 
 /**
@@ -51,10 +52,24 @@ Please open a browser and login to BoxRec with this account and then resume.`);
     }
 };
 
-export const requestWrapperFetch: <T extends unknown>(url: string, parameters: object) => Promise<Response>
-    = async <T>(url: string, parameters: object): Promise<Response> => {
+// todo change response typedef depending on returnBody param
+export function requestWrapperFetch(url: string, cookies: string, parametersOrQueryString: RequestInit):
+    Promise<string>;
+export function requestWrapperFetch(url: string, cookie?: string, parametersOrQueryString?: any):
+    Promise<Response>;
+export async function requestWrapperFetch(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any): Promise<Response | string> {
+
     try {
-        return fetch(url, parameters);
+        if (parametersOrQueryString && parametersOrQueryString?.method === "POST") {
+            return fetch(url, parametersOrQueryString);
+        }
+
+        const queryString: URLSearchParams = new URLSearchParams(parametersOrQueryString);
+        return fetch(url + queryString, {
+            headers: {
+                Cookie: cookies,
+            }
+        });
     } catch (e) {
         if (e.message.includes("recaptcha")) {
             throw new Error(`429 has occurred.
@@ -65,4 +80,4 @@ Please open a browser and login to BoxRec with this account and then resume.`);
 
         throw e;
     }
-};
+}
