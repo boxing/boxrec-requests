@@ -1,9 +1,7 @@
 import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
-import {CookieJar} from "request";
 import DoneCallback = jest.DoneCallback;
-import * as rp from "request-promise";
 import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "./";
 import {getRoleOfHTML} from "./helpers";
 
@@ -30,7 +28,7 @@ const sleep: (ms?: number) => Promise<void> = (ms: number = napTime) => {
 
 describe("class BoxrecRequests", () => {
 
-    let cookies: string | null = null;
+    let cookies: string = "";
     let num: number = 0;
 
     beforeAll(async () => {

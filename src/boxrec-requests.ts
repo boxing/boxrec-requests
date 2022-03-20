@@ -2,7 +2,6 @@ import * as cheerio from "cheerio";
 import * as FormData from "form-data";
 import HttpsProxyAgent from "https-proxy-agent/dist/agent";
 import { Response as FetchResponse } from "node-fetch";
-import {Cookie, CookieJar, RequestResponse, Response} from "request";
 import {
     BoxrecLocationEventParams,
     BoxrecLocationsPeopleParams,
@@ -19,7 +18,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
-import {getRoleOfHTML, requestWrapper, requestWrapperFetch} from "./helpers";
+import {getRoleOfHTML, requestWrapperFetch} from "./helpers";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -133,7 +132,7 @@ export class BoxrecRequests {
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return requestWrapperFetch(`https://boxrec.com/en/locations/event`, cookies);
+        return requestWrapperFetch(`https://boxrec.com/en/locations/event`, cookies, qs);
     }
 
     /**
@@ -160,7 +159,7 @@ export class BoxrecRequests {
         const qs: BoxrecLocationsPeopleParamsTransformed = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return requestWrapperFetch(`https://boxrec.com/en/locations/people`, cookies);
+        return requestWrapperFetch(`https://boxrec.com/en/locations/people`, cookies, qs);
     }
 
     /**
@@ -217,18 +216,13 @@ export class BoxrecRequests {
         const qs: any = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return requestWrapperFetch({
-            jar,
-            method: "GET",
-            qs,
-            url: "https://boxrec.com/en/ratings",
-        });
+        return requestWrapperFetch("https://boxrec.com/en/ratings", cookies, qs);
     }
 
     /**
      * Makes a request to BoxRec to get a list of results.
      * Uses same class
-     * @param jar                           contains cookie information about the user
+     * @param cookies                       contains cookie information about the user
      * @param {BoxrecResultsParams} params  params included to get results
      * @param {number} offset               the number of rows to offset this search
      * @returns {Promise<string>}
@@ -237,17 +231,12 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            qs,
-            url: "https://boxrec.com/en/results",
-        });
+        return requestWrapperFetch("https://boxrec.com/en/results", cookies, qs);
     }
 
     /**
      * Makes a request to BoxRec to get a list of scheduled events
-     * @param jar                               contains cookie information about the user
+     * @param cookies                           contains cookie information about the user
      * @param {BoxrecScheduleParams} params     params included to get schedule
      * @param {number} offset                   the number of rows to offset the search
      * @returns {Promise<string>}
@@ -256,44 +245,31 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            qs,
-            url: "https://boxrec.com/en/schedule",
-        });
+        return requestWrapperFetch("https://boxrec.com/en/schedule", cookies, params);
     }
 
     /**
      * Makes a request to BoxRec to list all the scores of the user
-     * @param jar                               contains cookie information about the user
+     * @param cookies                            contains cookie information about the user
      * @returns {Promise<string>}
      */
     static async listScores(cookies: string): Promise<string> {
-        return requestWrapper<string>({
-           jar,
-           method: "GET",
-           url: `https://boxrec.com/en/my_scores`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/my_scores`, cookies);
     }
 
     /**
      * Makes a request to BoxRec to list all the scores of a single bout (including the user and fans)
-     * @param jar                               contains cookie information about the user
+     * @param cookies                           contains cookie information about the user
      * @param boutId                            the ID of the bout
      * @returns {Promise<string>}
      */
     static async getScoresByBoutId(cookies: string, boutId: number): Promise<string> {
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            url: `https://boxrec.com/en/scoring/${boutId}`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/scoring/${boutId}`, cookies);
     }
 
     /**
      * Makes a request to BoxRec to update the user's score of a bout
-     * @param jar                               contains cookie information about the user
+     * @param cookies                           contains cookie information about the user
      * @param boutId                            the ID of the bout
      * @param scorecard                         an array of numbers that represent the points for each fighter per round
      * @returns {Promise<string>}
@@ -306,32 +282,24 @@ export class BoxrecRequests {
             qs[`b${idx + 1}`] = "" + round[1];
         });
 
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            qs,
-            url: `https://boxrec.com/en/scoring/historical/submit/${boutId}`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/scoring/historical/submit/${boutId}`, cookies, qs);
     }
 
     /**
      * Makes a request to BoxRec to the specific title URL to get a belt's history
-     * @param jar                   contains cookie information about the user
+     * @param cookies               contains cookie information about the user
      * @param {string} titleString  in the format of "6/Middleweight" which would be the WBC Middleweight title
      * @param {number} offset       the number of rows to offset the search
      * @returns {Promise<string>}
+     * @todo offset not used?  Does this link work?
      */
     static async getTitleById(cookies: string, titleString: string, offset: number = 0): Promise<string> {
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            url: `https://boxrec.com/en/title/${titleString}`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/title/${titleString}`, cookies);
     }
 
     /**
      * Makes a request to BoxRec to get information on scheduled title fights
-     * @param jar                   contains cookie information about the user
+     * @param cookies                contains cookie information about the user
      * @param params
      * @param offset
      */
@@ -340,44 +308,29 @@ export class BoxrecRequests {
         const qs: BoxrecTitlesParamsTransformed = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            qs,
-            url: `https://boxrec.com/en/titles`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/titles`, cookies, qs);
     }
 
     /**
      * Makes a request to BoxRec to get the information of a venue
-     * @param jar               contains cookie information about the user
+     * @param cookies           contains cookie information about the user
      * @param {number} venueId
      * @param {number} offset   the number of rows to offset the search
      * @returns {Promise<string>}
      */
     static async getVenueById(cookies: string, venueId: number, offset: number = 0): Promise<string> {
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            qs: {
-                offset,
-            },
-            url: `https://boxrec.com/en/venue/${venueId}`,
+        return requestWrapperFetch(`https://boxrec.com/en/venue/${venueId}`, cookies, {
+            offset,
         });
     }
 
     /**
      * Lists the boxers that the user is watching
-     * @param {request.CookieJar} jar
+     * @param {request.CookieJar} cookies
      * @returns {Promise<string>}
      */
     static async getWatched(cookies: string): Promise<string> {
-        return requestWrapper<string>({
-            followAllRedirects: true,
-            jar,
-            method: "GET",
-            url: "https://boxrec.com/en/watchlist",
-        });
+        return requestWrapperFetch("https://boxrec.com/en/watchlist", cookies);
     }
 
     /**
@@ -404,12 +357,12 @@ export class BoxrecRequests {
         formData.append( "_username", username);
         formData.append( "login[go]", ""); // not required
 
-        const data: FetchResponse = await requestWrapperFetch("https://boxrec.com/en/login", {
+        const data: FetchResponse = await requestWrapperFetch("https://boxrec.com/en/login", undefined, {
+            agent: new HttpsProxyAgent("http://127.0.0.1:8866"), // todo remove only for testing
             body: formData,
             method: "POST",
             redirect: "manual",
-            agent: new HttpsProxyAgent("http://127.0.0.1:8866"),
-        }, true);
+        });
 
         const cookies: any = data.headers.get("set-cookie");
 
@@ -421,11 +374,11 @@ export class BoxrecRequests {
         }
 
         // get the redirect response to see if login was successful
-        const loginRedirect: FetchResponse = await requestWrapperFetch<Response>(redirectUrl, {
+        const loginRedirect: FetchResponse = await requestWrapperFetch(redirectUrl, cookies, {
             headers: {
                 Cookie: cookies,
             }
-        }, true);
+        });
 
         const loginRedirectBody: string = await loginRedirect.text();
         // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
@@ -450,7 +403,7 @@ export class BoxrecRequests {
     /**
      * Makes a request to BoxRec to search people by
      * Note: currently only supports boxers
-     * @param jar                           contains cookie information about the user
+     * @param cookies                       contains cookie information about the user
      * @param {BoxrecSearchParams} params   params included in this search
      * @param {number}             offset   the number of rows to offset the search
      * @returns {Promise<string>}
@@ -465,48 +418,33 @@ export class BoxrecRequests {
         const qs: BoxrecSearchParamsTransformed = createParamsObject(params, searchParam);
         qs.offset = offset;
 
-        return requestWrapper<string>({
-            jar,
-            method: "GET",
-            qs,
-            url: "https://boxrec.com/en/search",
-        });
+        return requestWrapperFetch("https://boxrec.com/en/search", cookies, qs);
     }
 
     /**
      * Removes the boxer from the users watch list.  Returns the watch page where the boxer should be removed
-     * @param jar       contains cookie information about the user
+     * @param cookies    contains cookie information about the user
      * @param {number} boxerGlobalId
      * @returns {Promise<boolean>}
      */
     static async unwatch(cookies: string, boxerGlobalId: number): Promise<string> {
-        return requestWrapper<string>({
-            followAllRedirects: true,
-            jar,
-            method: "GET",
-            url: `https://boxrec.com/en/unwatch/${boxerGlobalId}`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/unwatch/${boxerGlobalId}`, cookies);
     }
 
     /**
      * Adds the boxer to the users watch list.  Returns the watch page where the boxer should have been added
-     * @param jar       contains cookie information about the user
+     * @param cookies    contains cookie information about the user
      * @param {number} boxerGlobalId
      * @returns {Promise<boolean>}
      */
     static async watch(cookies: string, boxerGlobalId: number): Promise<string> {
-        return requestWrapper<string>({
-            followAllRedirects: true,
-            jar,
-            method: "GET",
-            url: `https://boxrec.com/en/watch/${boxerGlobalId}`,
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
     }
 
     /**
      * Search for global ID or string
      * better for searching by global ID.  `search` doesn't have it
-     * @param jar
+     * @param cookies
      * @param globalIdOrSearchText
      * @param searchRole    By default this is empty and returns the default role of the user
      */
@@ -518,15 +456,10 @@ export class BoxrecRequests {
         formData[`${searchParam}[search_role]`] = searchRole === null ? "" : searchRole;
         formData[`${searchParam}[search_text]`] = globalIdOrSearchText;
 
-        const options: rp.Options = {
-            followAllRedirects: true, // 302 redirect occurs
-            formData,
-            jar,
+        return requestWrapperFetch("https://boxrec.com/en/quick_search", cookies, {
+            body: formData,
             method: "POST",
-            url: "https://boxrec.com/en/quick_search",
-        };
-
-        return requestWrapper<string>(options);
+        });
     }
 
     private static async buildResultsSchedulesParams<T>(cookies: string, params: T, offset: number): Promise<T> {
@@ -539,7 +472,7 @@ export class BoxrecRequests {
 
     /**
      * Returns/saves a boxer's profile in print/pdf format
-     * @param jar                           contains cookie information about the user
+     * @param cookies                       contains cookie information about the user
      * @param {number} globalId
      * @param {"pdf" | "print"} type
      * @param {string} pathToSaveTo
@@ -557,22 +490,12 @@ export class BoxrecRequests {
             qs.print = "y";
         }
 
-        return requestWrapper<string>({
-            followAllRedirects: true,
-            jar,
-            method: "GET",
-            qs,
-            url: `https://boxrec.com/en/boxer/${globalId}`
-        });
+        return requestWrapperFetch(`https://boxrec.com/en/boxer/${globalId}`, cookies, qs);
     }
 
     private static async getRatingsParamWrap(cookies: string): Promise<string> {
         if (ratingsParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
-                jar,
-                method: "GET",
-                url: "https://boxrec.com/en/ratings",
-            });
+            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/ratings", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             ratingsParamWrap = $(".page form").attr("name");
@@ -583,17 +506,13 @@ export class BoxrecRequests {
 
     /**
      * Makes a request to BoxRec to get the search param prefix that is wrapped around params for the `results` page
-     * @param jar
+     * @param cookies
      */
     private static async getResultsParamWrap(cookies: string): Promise<string> {
         if (resultsParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and
             // not as predictable as the search box one on the search page
-            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
-                jar,
-                method: "GET",
-                url: "https://boxrec.com/en/results",
-            });
+            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/results", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             resultsParamWrap = $(".page form").attr("name");
@@ -604,15 +523,11 @@ export class BoxrecRequests {
 
     /**
      * Makes a request to BoxRec to find out the quick search param prefix that is wrapped around params
-     * @param jar
+     * @param cookies
      */
     private static async getQuickSearchParamWrap(cookies: string): Promise<string> {
         if (quickSearchParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
-                jar,
-                method: "GET",
-                url: "https://boxrec.com/en/quick_search",
-            });
+            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/quick_search", cookies);
 
             // not sure why but when the package is now compiled and you try to traverse the DOM Cheerio comes
             // up with errors
@@ -628,17 +543,13 @@ export class BoxrecRequests {
 
     /**
      * Makes a request to BoxRec to find out the search param prefix that is wrapped around params
-     * @param jar
+     * @param cookies
      */
     private static async getSearchParamWrap(cookies: string): Promise<string> {
         if (searchParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and not as predictable
             // as the search box one on the search page
-            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
-                jar,
-                method: "GET",
-                url: "https://boxrec.com/en/search",
-            });
+            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/search", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             searchParamWrap = $("h2:contains('Find People')")
@@ -650,15 +561,11 @@ export class BoxrecRequests {
 
     /**
      * Makes a request to BoxRec to get the titles param prefix that is wrapped around params for the `titles` page
-     * @param jar
+     * @param cookies
      */
     private static async getTitlesParamWrap(cookies: string): Promise<string> {
         if (titlesParamWrap === "") {
-            const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
-                jar,
-                method: "GET",
-                url: "https://boxrec.com/en/titles",
-            });
+            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/titles", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             titlesParamWrap = $(".page form").attr("name");
@@ -681,7 +588,7 @@ export class BoxrecRequests {
 
     /**
      *
-     * @param jar
+     * @param cookies
      * @param globalId
      * @param role
      * @param offset        offset is the number of bouts/events on a person's profile (not tested with boxers)
@@ -703,13 +610,7 @@ export class BoxrecRequests {
             qs.toggleRatings = "y";
         }
 
-        const boxrecPageBody: RequestResponse["body"] = await requestWrapper({
-            jar,
-            method: "GET",
-            qs,
-            resolveWithFullResponse: false,
-            url,
-        });
+        const boxrecPageBody: string = await requestWrapperFetch(url, cookies);
         const numberOfColumnsReceived: number =
             BoxrecRequests.numberOfTableColumns(boxrecPageBody);
 
