@@ -374,11 +374,7 @@ export class BoxrecRequests {
         }
 
         // get the redirect response to see if login was successful
-        const loginRedirect: FetchResponse = await requestWrapperFetch(redirectUrl, cookies, {
-            headers: {
-                Cookie: cookies,
-            }
-        });
+        const loginRedirect: FetchResponse = await requestWrapperFetch(redirectUrl, cookies, {}, true);
 
         const loginRedirectBody: string = await loginRedirect.text();
         // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`

@@ -1,4 +1,5 @@
 import * as $ from "cheerio";
+import HttpsProxyAgent from "https-proxy-agent/dist/agent";
 import fetch, {RequestInit, Response} from "node-fetch";
 import {UrlOptions} from "request";
 import * as rp from "request-promise";
@@ -34,25 +35,30 @@ export const getRoleOfHTML: (html: string) => string | null = (html: string): st
  * This acts as a middleware between the package and the requests to BoxRec
  * For example if we hit a 429 "Too Many Requests" we want to return a proper message to the callers
  */
-export async function requestWrapperFetch(url: string, cookies: undefined, parametersOrQueryString: RequestInit):
+export async function requestWrapperFetch(url: string, cookies: string, parametersOrQueryString?: any, fullResponse?: true):
     Promise<Response>;
-export async function requestWrapperFetch(url: string, cookies: string, parametersOrQueryString?: any):
+export async function requestWrapperFetch(url: string, cookies: string, parametersOrQueryString?: any, fullResponse?: false):
     Promise<string>;
-export async function requestWrapperFetch(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any): Promise<Response | string> {
-
+export async function requestWrapperFetch(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any, fullResponse: boolean = false): Promise<Response | string> {
     try {
         if (parametersOrQueryString && parametersOrQueryString?.method === "POST") {
             return fetch(url, parametersOrQueryString);
         }
 
         const queryString: URLSearchParams = new URLSearchParams(parametersOrQueryString);
-        const response: Response = await fetch(url + queryString, {
+
+        const response: Response = await fetch(`${url}?${queryString.toString()}`, {
+            agent: new HttpsProxyAgent("http://127.0.0.1:8866"), // todo remove only for testing
             headers: {
                 Cookie: cookies || "",
             }
         });
 
-        return await response.text();
+        if (fullResponse) {
+            return response;
+        }
+
+        return response.text();
     } catch (e) {
         if (e.message.includes("recaptcha")) {
             throw new Error(`429 has occurred.
