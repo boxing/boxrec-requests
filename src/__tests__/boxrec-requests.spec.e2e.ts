@@ -2,8 +2,8 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import DoneCallback = jest.DoneCallback;
-import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "./";
-import {getRoleOfHTML} from "./helpers";
+import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
+import {getRoleOfHTML} from "../helpers";
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 

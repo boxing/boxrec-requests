@@ -1,6 +1,5 @@
 import * as cheerio from "cheerio";
 import * as FormData from "form-data";
-import HttpsProxyAgent from "https-proxy-agent/dist/agent";
 import { Response as FetchResponse } from "node-fetch";
 import {
     BoxrecLocationEventParams,
