@@ -1,9 +1,6 @@
 import * as $ from "cheerio";
 import HttpsProxyAgent from "https-proxy-agent/dist/agent";
 import fetch, {RequestInit, Response} from "node-fetch";
-import {UrlOptions} from "request";
-import * as rp from "request-promise";
-import {RequestPromiseOptions} from "request-promise";
 import { URLSearchParams } from "url";
 import {BoxrecRole} from "./boxrec-requests.constants";
 
@@ -31,34 +28,25 @@ export const getRoleOfHTML: (html: string) => string | null = (html: string): st
     return null;
 };
 
-/**
- * This acts as a middleware between the package and the requests to BoxRec
- * For example if we hit a 429 "Too Many Requests" we want to return a proper message to the callers
- */
-export async function requestWrapperFetch(url: string, cookies: string, parametersOrQueryString?: any, fullResponse?: true):
-    Promise<Response>;
-export async function requestWrapperFetch(url: string, cookies: string, parametersOrQueryString?: any, fullResponse?: false):
-    Promise<string>;
-export async function requestWrapperFetch(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any, fullResponse: boolean = false): Promise<Response | string> {
+export async function requestWrapperFetchFull(url: string, cookies?: string, parametersOrQueryString?: any): Promise<Response> {
     try {
         if (parametersOrQueryString && parametersOrQueryString?.method === "POST") {
-            return fetch(url, parametersOrQueryString);
+            return fetch(url, {
+                ...parametersOrQueryString,
+                headers: {
+                    ...parametersOrQueryString.headers,
+                    Cookie: cookies || "",
+                },
+            });
         }
 
         const queryString: URLSearchParams = new URLSearchParams(parametersOrQueryString);
 
-        const response: Response = await fetch(`${url}?${queryString.toString()}`, {
-            agent: new HttpsProxyAgent("http://127.0.0.1:8866"), // todo remove only for testing
+        return fetch(`${url}?${queryString.toString()}`, {
             headers: {
                 Cookie: cookies || "",
             }
         });
-
-        if (fullResponse) {
-            return response;
-        }
-
-        return response.text();
     } catch (e) {
         if (e.message.includes("recaptcha")) {
             throw new Error(`429 has occurred.
@@ -69,4 +57,13 @@ Please open a browser and login to BoxRec with this account and then resume.`);
 
         throw e;
     }
+}
+
+/**
+ * This acts as a middleware between the package and the requests to BoxRec
+ * For example if we hit a 429 "Too Many Requests" we want to return a proper message to the callers
+ */
+export async function requestWrapperFetch(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any): Promise<string> {
+    const response: Response = await requestWrapperFetchFull(url, cookies, parametersOrQueryString);
+    return response.text();
 }

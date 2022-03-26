@@ -18,8 +18,6 @@ jest.setTimeout(30000);
 
 const napTime: number = 10000;
 
-const cookieDomain: string = "https://boxrec.com";
-
 const wait: (done: DoneCallback) => void = (done: DoneCallback) => setTimeout(done, napTime);
 
 const sleep: (ms?: number) => Promise<void> = (ms: number = napTime) => {
@@ -55,11 +53,21 @@ describe("class BoxrecRequests", () => {
         wait(done);
     });
 
+    it("cookie should be not null and defined", () => {
+        expect(cookies).toBeDefined();
+        expect(cookies).not.toBeNull();
+    });
+
     describe("method login", () => {
+
+        it("should return a cookie if log in was successful", async () => {
+            const cookiesResponse: string = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+            expect(cookiesResponse).toContain("PHPSESSID");
+        });
 
         describe("bad username", () => {
 
-           it("should throw an error stating bad credentials because of returning to a page with the login form", async () => {
+            it("should throw an error stating bad credentials because of returning to a page with the login form", async () => {
                try {
                    await BoxrecRequests.login("", "");
                } catch (e) {
@@ -81,16 +89,6 @@ describe("class BoxrecRequests", () => {
 
         });
 
-        it("should return a cookie if log in was successful", async () => {
-            const cookiesResponse: string = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
-            expect(cookiesResponse).toContain("PHPSESSID");
-        });
-
-    });
-
-    it("cookie should be not null and defined", () => {
-        expect(cookies).toBeDefined();
-        expect(cookies).not.toBeNull();
     });
 
     describe("method getEvents", () => {
@@ -204,6 +202,7 @@ describe("class BoxrecRequests", () => {
             const html: string = await BoxrecRequests.getPersonById(cookies, globalId, role);
             const roleStr: string | null = getRoleOfHTML(html);
             expect(roleStr).toBe(role || expectedValue);
+            expect(roleStr).not.toBe(null);
         };
         const promoter: any = {
             leonardEllerbe: 419406,
@@ -295,8 +294,8 @@ describe("class BoxrecRequests", () => {
                     await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecRole.proMuayThaiBoxer);
                 });
 
-                it("(world series boxer)", async () => {
-                    await returnRole(worldSeriesBoxer.imamKhataev, BoxrecRole.worldSeriesBoxer);
+                it("(world series boxer) gets lumped in with amateur boxing", async () => {
+                    await returnRole(worldSeriesBoxer.imamKhataev, BoxrecRole.amateurBoxer);
                 });
 
                 it("(amateur muay thai boxer)", async () => {
@@ -375,7 +374,7 @@ describe("class BoxrecRequests", () => {
 
         it("should return the page of the boxers that the user is watching", async () => {
             const html: string = await BoxrecRequests.getWatched(cookies);
-            expect(html).toContain(`<h1 class="pageHeading">Watching</h1>`);
+            expect(html).toContain(`Following`);
         });
     });
 

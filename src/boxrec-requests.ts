@@ -18,7 +18,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
-import {getRoleOfHTML, requestWrapperFetch} from "./helpers";
+import {getRoleOfHTML, requestWrapperFetch, requestWrapperFetchFull} from "./helpers";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -348,19 +348,19 @@ export class BoxrecRequests {
             throw new Error(`missing parameter: ${username === undefined ? "username" : "password"}`);
         }
 
-        const boxrecDomain: string = "https://boxrec.com";
-
-        const formData: any = new FormData();
+        const formData: FormData = new FormData();
         formData.append( "_password", password);
         formData.append( "_remember_me", "on");
-        formData.append( "_target_path", boxrecDomain);  // not required,
+        formData.append( "_target_path", "https://boxrec.com");  // not required,
         formData.append( "_username", username);
         formData.append( "login[go]", ""); // not required
 
-        const data: FetchResponse = await requestWrapperFetch("https://boxrec.com/en/login", undefined, {
-            agent: new HttpsProxyAgent("http://127.0.0.1:8866"), // todo remove only for testing
+        const data: FetchResponse = await requestWrapperFetchFull("https://boxrec.com/en/login", undefined, {
             body: formData,
+            cache: "no-cache",
+            credentials: "same-origin",
             method: "POST",
+            mode: "no-cors",
             redirect: "manual",
         });
 
@@ -374,7 +374,7 @@ export class BoxrecRequests {
         }
 
         // get the redirect response to see if login was successful
-        const loginRedirect: FetchResponse = await requestWrapperFetch(redirectUrl, cookies, {}, true);
+        const loginRedirect: FetchResponse = await requestWrapperFetchFull(redirectUrl, cookies, {});
 
         const loginRedirectBody: string = await loginRedirect.text();
         // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
@@ -446,11 +446,11 @@ export class BoxrecRequests {
      */
     private static async quickSearch(cookies: string, globalIdOrSearchText: string | number,
                                      searchRole: BoxrecRole | "" = ""): Promise<string> {
-        const formData: any = {};
         const searchParam: string = await BoxrecRequests.getQuickSearchParamWrap(cookies);
         // use an empty string or the actual passed role
-        formData[`${searchParam}[search_role]`] = searchRole === null ? "" : searchRole;
-        formData[`${searchParam}[search_text]`] = globalIdOrSearchText;
+        const formData: FormData = new FormData();
+        formData.append( `${searchParam}[search_role]`, searchRole === null ? "" : searchRole);
+        formData.append( `${searchParam}[search_text]`, globalIdOrSearchText);
 
         return requestWrapperFetch("https://boxrec.com/en/quick_search", cookies, {
             body: formData,

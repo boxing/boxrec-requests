@@ -487,7 +487,6 @@ export enum BoxrecRole {
     proMuayThaiBoxer = "muaythaiboxer", // synthetic (is custom)
     amateurMuayThaiBoxer = "amateurmuaythaiboxer",
     bareKnuckleBoxer = "bareknuckleboxer",
-    worldSeriesBoxer = "worldseriesboxer",
     doctor = "doctor",
     inspector = "inspector",
     judge = "judge",
