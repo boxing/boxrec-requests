@@ -18,7 +18,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
-import {getRoleOfHTML, requestWrapperFetch, requestWrapperFetchFull} from "./helpers";
+import {getRoleOfHTML, requestWrapper, requestWrapperFullResponse} from "./helpers";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -50,7 +50,7 @@ export class BoxrecRequests {
      * @param eventBoutId   includes both the event and bout separated by "/"
      */
     static async getBout(cookies: string, eventBoutId: string): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/event/${eventBoutId}`, cookies);
+        return requestWrapper(`https://boxrec.com/en/event/${eventBoutId}`, cookies);
     }
 
     /**
@@ -85,7 +85,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getChampions(cookies: string): Promise<string> {
-        return requestWrapperFetch("https://boxrec.com/en/champions", cookies);
+        return requestWrapper("https://boxrec.com/en/champions", cookies);
     }
 
     /**
@@ -95,7 +95,7 @@ export class BoxrecRequests {
      * @returns {Promise<void>}
      */
     static async getDate(cookies: string, dateString: string): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/date`, cookies);
+        return requestWrapper(`https://boxrec.com/en/date`, cookies);
     }
 
     /**
@@ -105,7 +105,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getEventById(cookies: string, eventId: number): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/event/${eventId}`, cookies);
+        return requestWrapper(`https://boxrec.com/en/event/${eventId}`, cookies);
     }
 
     /**
@@ -132,7 +132,7 @@ export class BoxrecRequests {
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return requestWrapperFetch(`https://boxrec.com/en/locations/event`, cookies, qs);
+        return requestWrapper(`https://boxrec.com/en/locations/event`, cookies, qs);
     }
 
     /**
@@ -159,7 +159,7 @@ export class BoxrecRequests {
         const qs: BoxrecLocationsPeopleParamsTransformed = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return requestWrapperFetch(`https://boxrec.com/en/locations/people`, cookies, qs);
+        return requestWrapper(`https://boxrec.com/en/locations/people`, cookies, qs);
     }
 
     /**
@@ -216,7 +216,7 @@ export class BoxrecRequests {
         const qs: any = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return requestWrapperFetch("https://boxrec.com/en/ratings", cookies, qs);
+        return requestWrapper("https://boxrec.com/en/ratings", cookies, qs);
     }
 
     /**
@@ -231,7 +231,7 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapperFetch("https://boxrec.com/en/results", cookies, qs);
+        return requestWrapper("https://boxrec.com/en/results", cookies, qs);
     }
 
     /**
@@ -245,7 +245,7 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapperFetch("https://boxrec.com/en/schedule", cookies, params);
+        return requestWrapper("https://boxrec.com/en/schedule", cookies, params);
     }
 
     /**
@@ -254,7 +254,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async listScores(cookies: string): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/my_scores`, cookies);
+        return requestWrapper(`https://boxrec.com/en/my_scores`, cookies);
     }
 
     /**
@@ -264,7 +264,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getScoresByBoutId(cookies: string, boutId: number): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/scoring/${boutId}`, cookies);
+        return requestWrapper(`https://boxrec.com/en/scoring/${boutId}`, cookies);
     }
 
     /**
@@ -282,7 +282,7 @@ export class BoxrecRequests {
             qs[`b${idx + 1}`] = "" + round[1];
         });
 
-        return requestWrapperFetch(`https://boxrec.com/en/scoring/historical/submit/${boutId}`, cookies, qs);
+        return requestWrapper(`https://boxrec.com/en/scoring/historical/submit/${boutId}`, cookies, qs);
     }
 
     /**
@@ -294,7 +294,7 @@ export class BoxrecRequests {
      * @todo offset not used?  Does this link work?
      */
     static async getTitleById(cookies: string, titleString: string, offset: number = 0): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/title/${titleString}`, cookies);
+        return requestWrapper(`https://boxrec.com/en/title/${titleString}`, cookies);
     }
 
     /**
@@ -308,7 +308,7 @@ export class BoxrecRequests {
         const qs: BoxrecTitlesParamsTransformed = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return requestWrapperFetch(`https://boxrec.com/en/titles`, cookies, qs);
+        return requestWrapper(`https://boxrec.com/en/titles`, cookies, qs);
     }
 
     /**
@@ -319,7 +319,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getVenueById(cookies: string, venueId: number, offset: number = 0): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/venue/${venueId}`, cookies, {
+        return requestWrapper(`https://boxrec.com/en/venue/${venueId}`, cookies, {
             offset,
         });
     }
@@ -330,7 +330,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getWatched(cookies: string): Promise<string> {
-        return requestWrapperFetch("https://boxrec.com/en/watchlist", cookies);
+        return requestWrapper("https://boxrec.com/en/watchlist", cookies);
     }
 
     /**
@@ -355,7 +355,7 @@ export class BoxrecRequests {
         formData.append( "_username", username);
         formData.append( "login[go]", ""); // not required
 
-        const data: FetchResponse = await requestWrapperFetchFull("https://boxrec.com/en/login", undefined, {
+        const data: FetchResponse = await requestWrapperFullResponse("https://boxrec.com/en/login", undefined, {
             body: formData,
             cache: "no-cache",
             credentials: "same-origin",
@@ -374,7 +374,7 @@ export class BoxrecRequests {
         }
 
         // get the redirect response to see if login was successful
-        const loginRedirect: FetchResponse = await requestWrapperFetchFull(redirectUrl, cookies, {});
+        const loginRedirect: FetchResponse = await requestWrapperFullResponse(redirectUrl, cookies, {});
 
         const loginRedirectBody: string = await loginRedirect.text();
         // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
@@ -414,7 +414,7 @@ export class BoxrecRequests {
         const qs: BoxrecSearchParamsTransformed = createParamsObject(params, searchParam);
         qs.offset = offset;
 
-        return requestWrapperFetch("https://boxrec.com/en/search", cookies, qs);
+        return requestWrapper("https://boxrec.com/en/search", cookies, qs);
     }
 
     /**
@@ -424,7 +424,7 @@ export class BoxrecRequests {
      * @returns {Promise<boolean>}
      */
     static async unwatch(cookies: string, boxerGlobalId: number): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/unwatch/${boxerGlobalId}`, cookies);
+        return requestWrapper(`https://boxrec.com/en/unwatch/${boxerGlobalId}`, cookies);
     }
 
     /**
@@ -434,7 +434,7 @@ export class BoxrecRequests {
      * @returns {Promise<boolean>}
      */
     static async watch(cookies: string, boxerGlobalId: number): Promise<string> {
-        return requestWrapperFetch(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
+        return requestWrapper(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
     }
 
     /**
@@ -452,7 +452,7 @@ export class BoxrecRequests {
         formData.append( `${searchParam}[search_role]`, searchRole === null ? "" : searchRole);
         formData.append( `${searchParam}[search_text]`, globalIdOrSearchText);
 
-        return requestWrapperFetch("https://boxrec.com/en/quick_search", cookies, {
+        return requestWrapper("https://boxrec.com/en/quick_search", cookies, {
             body: formData,
             method: "POST",
         });
@@ -486,12 +486,12 @@ export class BoxrecRequests {
             qs.print = "y";
         }
 
-        return requestWrapperFetch(`https://boxrec.com/en/boxer/${globalId}`, cookies, qs);
+        return requestWrapper(`https://boxrec.com/en/boxer/${globalId}`, cookies, qs);
     }
 
     private static async getRatingsParamWrap(cookies: string): Promise<string> {
         if (ratingsParamWrap === "") {
-            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/ratings", cookies);
+            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/ratings", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             ratingsParamWrap = $(".page form").attr("name");
@@ -508,7 +508,7 @@ export class BoxrecRequests {
         if (resultsParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and
             // not as predictable as the search box one on the search page
-            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/results", cookies);
+            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/results", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             resultsParamWrap = $(".page form").attr("name");
@@ -523,7 +523,7 @@ export class BoxrecRequests {
      */
     private static async getQuickSearchParamWrap(cookies: string): Promise<string> {
         if (quickSearchParamWrap === "") {
-            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/quick_search", cookies);
+            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/quick_search", cookies);
 
             // not sure why but when the package is now compiled and you try to traverse the DOM Cheerio comes
             // up with errors
@@ -545,7 +545,7 @@ export class BoxrecRequests {
         if (searchParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and not as predictable
             // as the search box one on the search page
-            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/search", cookies);
+            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/search", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             searchParamWrap = $("h2:contains('Find People')")
@@ -561,7 +561,7 @@ export class BoxrecRequests {
      */
     private static async getTitlesParamWrap(cookies: string): Promise<string> {
         if (titlesParamWrap === "") {
-            const boxrecPageBody: string = await requestWrapperFetch("https://boxrec.com/en/titles", cookies);
+            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/titles", cookies);
 
             const $: CheerioStatic = cheerio.load(boxrecPageBody);
             titlesParamWrap = $(".page form").attr("name");
@@ -606,7 +606,7 @@ export class BoxrecRequests {
             qs.toggleRatings = "y";
         }
 
-        const boxrecPageBody: string = await requestWrapperFetch(url, cookies);
+        const boxrecPageBody: string = await requestWrapper(url, cookies);
         const numberOfColumnsReceived: number =
             BoxrecRequests.numberOfTableColumns(boxrecPageBody);
 

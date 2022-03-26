@@ -28,7 +28,7 @@ export const getRoleOfHTML: (html: string) => string | null = (html: string): st
     return null;
 };
 
-export async function requestWrapperFetchFull(url: string, cookies?: string, parametersOrQueryString?: any): Promise<Response> {
+export async function requestWrapperFullResponse(url: string, cookies?: string, parametersOrQueryString?: any): Promise<Response> {
     try {
         if (parametersOrQueryString && parametersOrQueryString?.method === "POST") {
             return fetch(url, {
@@ -63,7 +63,7 @@ Please open a browser and login to BoxRec with this account and then resume.`);
  * This acts as a middleware between the package and the requests to BoxRec
  * For example if we hit a 429 "Too Many Requests" we want to return a proper message to the callers
  */
-export async function requestWrapperFetch(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any): Promise<string> {
-    const response: Response = await requestWrapperFetchFull(url, cookies, parametersOrQueryString);
+export async function requestWrapper(url: string, cookies?: string, parametersOrQueryString?: RequestInit | any): Promise<string> {
+    const response: Response = await requestWrapperFullResponse(url, cookies, parametersOrQueryString);
     return response.text();
 }
