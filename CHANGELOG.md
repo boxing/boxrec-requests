@@ -1,3 +1,9 @@
+## 5.3.2 (2022-03-26)
+
+### Changed
+
+-   Replace deprecated `request`/`request-promise` package with `node-fetch`.  Which hopefully will make the jump to native Node fetch easier
+
 ## 5.3.1 (2022-03-15)
 
 ### Changed

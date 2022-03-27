@@ -1,6 +1,6 @@
 {
   "name": "boxrec-requests",
-  "version": "5.3.1",
+  "version": "5.3.2",
   "description": "make API requests to BoxRec using NodeJS and returns the HTML body",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -26,8 +26,7 @@
     "@types/cheerio": "^0.22.7",
     "@types/form-data": "^2.5.0",
     "@types/jest": "^22.1.1",
-    "@types/request": "^2.47.0",
-    "@types/request-promise": "^4.1.41",
+    "@types/node-fetch": "^2.6.1",
     "coveralls": "^3.0.0",
     "jest": "23.0.1",
     "json-loader": "^0.5.7",
@@ -50,9 +49,8 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.6",
-    "snyk": "^1.265.0"
+    "node-fetch": "2",
+    "snyk": "^1.883.0"
   },
   "snyk": true
 }
