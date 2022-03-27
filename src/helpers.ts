@@ -1,16 +1,16 @@
 import * as $ from "cheerio";
-import HttpsProxyAgent from "https-proxy-agent/dist/agent";
 import fetch, {RequestInit, Response} from "node-fetch";
 import { URLSearchParams } from "url";
 import {BoxrecRole} from "./boxrec-requests.constants";
+import Root = cheerio.Root;
 
 /**
  * Takes a person's profile and returns what kind of profile role it is
  * @param html
  */
 export const getRoleOfHTML: (html: string) => string | null = (html: string): string | null => {
-    const $a: CheerioStatic = $.load(html);
-    const href: string = $a("link[rel='canonical']").attr("href");
+    const $a: Root = $.load(html);
+    const href: string | undefined = $a("link[rel='canonical']").attr("href");
 
     if (href) {
         const matches: RegExpMatchArray | null = href.match(/boxrec\.com\/en\/(\w+)\/\d+/);
@@ -48,7 +48,7 @@ export async function requestWrapperFullResponse(url: string, cookies?: string, 
             }
         });
     } catch (e) {
-        if (e.message.includes("recaptcha")) {
+        if ((e as any).message.includes("recaptcha")) {
             throw new Error(`429 has occurred.
 This is because of too many requests to BoxRec too quickly.
 This package has not found a workaround at this time.

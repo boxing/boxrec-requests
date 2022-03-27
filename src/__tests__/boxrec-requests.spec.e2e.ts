@@ -1,18 +1,15 @@
 import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
+import {getRoleOfHTML} from "../helpers";
 import DoneCallback = jest.DoneCallback;
 import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
-import {getRoleOfHTML} from "../helpers";
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
 if (!BOXREC_USERNAME || !BOXREC_PASSWORD) {
     throw new Error("Required Username/Password is not set");
 }
-
-// ignores __mocks__ and makes real requests
-jest.unmock("request-promise");
 
 jest.setTimeout(30000);
 
@@ -163,7 +160,7 @@ describe("class BoxrecRequests", () => {
                 roleIdx++;
 
                 $(html).find(`.dataTable tbody tr td:nth-child(${roleIdx})`)
-                    .each((j: number, el: CheerioElement) => {
+                    .each((j: number, el) => {
                         roles.push($(el).text().replace("\n", ""));
                     });
 

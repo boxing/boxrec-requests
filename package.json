@@ -28,7 +28,6 @@
     "@types/jest": "^22.1.1",
     "@types/node-fetch": "^2.6.1",
     "coveralls": "^3.0.0",
-    "https-proxy-agent": "^5.0.0",
     "jest": "23.0.1",
     "json-loader": "^0.5.7",
     "ts-jest": "^22.0.3",
@@ -51,7 +50,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "node-fetch": "2",
-    "snyk": "^1.265.0"
+    "snyk": "^1.883.0"
   },
   "snyk": true
 }

@@ -18,6 +18,7 @@ import {
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML, requestWrapper, requestWrapperFullResponse} from "./helpers";
+import Root = cheerio.Root;
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -383,7 +384,7 @@ export class BoxrecRequests {
 
         // the following are when login has failed
         // an unsuccessful login returns a 200
-        const $: CheerioStatic = cheerio.load(loginRedirectBody);
+        const $: Root = cheerio.load(loginRedirectBody);
         if ($("input#username").length) {
             throw new Error("Please check your credentials, could not log into BoxRec");
         }
@@ -492,8 +493,8 @@ export class BoxrecRequests {
         if (ratingsParamWrap === "") {
             const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/ratings", cookies);
 
-            const $: CheerioStatic = cheerio.load(boxrecPageBody);
-            ratingsParamWrap = $(".page form").attr("name");
+            const $: Root = cheerio.load(boxrecPageBody);
+            ratingsParamWrap = $(".page form").attr("name") || "";
         }
 
         return ratingsParamWrap;
@@ -509,8 +510,8 @@ export class BoxrecRequests {
             // not as predictable as the search box one on the search page
             const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/results", cookies);
 
-            const $: CheerioStatic = cheerio.load(boxrecPageBody);
-            resultsParamWrap = $(".page form").attr("name");
+            const $: Root = cheerio.load(boxrecPageBody);
+            resultsParamWrap = $(".page form").attr("name") || "";
         }
 
         return resultsParamWrap;
@@ -529,8 +530,8 @@ export class BoxrecRequests {
             // https://github.com/boxing/boxrec/issues/252
             // the fix I found was to wrap the response (which includes the doctype/html tag) inside a div.
             // I'm not sure how to explain why this started but this should fix it
-            const $: CheerioStatic = cheerio.load(boxrecPageBody);
-            quickSearchParamWrap = $(".navLinks form").attr("name");
+            const $: Root = cheerio.load(boxrecPageBody);
+            quickSearchParamWrap = $(".navLinks form").attr("name") || "";
         }
 
         return quickSearchParamWrap;
@@ -546,9 +547,9 @@ export class BoxrecRequests {
             // as the search box one on the search page
             const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/search", cookies);
 
-            const $: CheerioStatic = cheerio.load(boxrecPageBody);
+            const $: Root = cheerio.load(boxrecPageBody);
             searchParamWrap = $("h2:contains('Find People')")
-                .parents("td").find("form").attr("name");
+                .parents("td").find("form").attr("name") || "";
         }
 
         return searchParamWrap;
@@ -562,8 +563,8 @@ export class BoxrecRequests {
         if (titlesParamWrap === "") {
             const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/titles", cookies);
 
-            const $: CheerioStatic = cheerio.load(boxrecPageBody);
-            titlesParamWrap = $(".page form").attr("name");
+            const $: Root = cheerio.load(boxrecPageBody);
+            titlesParamWrap = $(".page form").attr("name") || "";
         }
 
         return titlesParamWrap;
@@ -577,7 +578,7 @@ export class BoxrecRequests {
      * @param boxrecPageBody
      */
     private static numberOfTableColumns(boxrecPageBody: string): number {
-        const $: CheerioStatic = cheerio.load(boxrecPageBody);
+        const $: Root = cheerio.load(boxrecPageBody);
         return $(".dataTable tbody:nth-child(2) tr:nth-child(1) td").length;
     }
 
