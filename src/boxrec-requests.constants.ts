@@ -83,6 +83,13 @@ export interface BoxrecBout extends BoxrecBoutBasic {
     location: BoxrecProfileBoutLocation;
 }
 
+export interface BoxrecDate {
+    year: number;
+    month: number;
+    day: number;
+    sport?: BoxrecFighterOption;
+}
+
 export interface BoxrecProfileBoutLocation {
     town: string | null;
     venue: string | null;
@@ -526,3 +533,4 @@ export interface BoxrecLocationEventParams {
     venue?: string;
     year?: number;
 }
+

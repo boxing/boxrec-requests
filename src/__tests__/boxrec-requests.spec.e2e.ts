@@ -4,6 +4,7 @@ import * as path from "path";
 import {getRoleOfHTML} from "../helpers";
 import DoneCallback = jest.DoneCallback;
 import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
+import Root = cheerio.Root;
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
@@ -68,7 +69,7 @@ describe("class BoxrecRequests", () => {
                try {
                    await BoxrecRequests.login("", "");
                } catch (e) {
-                   expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
+                   expect((e as any).message).toBe("Please check your credentials, could not log into BoxRec");
                }
            });
 
@@ -80,7 +81,7 @@ describe("class BoxrecRequests", () => {
                 try {
                     await BoxrecRequests.login("boxrec", "");
                 } catch (e) {
-                    expect(e.message).toBe("Please check your credentials, could not log into BoxRec");
+                    expect((e as any).message).toBe("Please check your credentials, could not log into BoxRec");
                 }
             });
 
@@ -150,7 +151,8 @@ describe("class BoxrecRequests", () => {
         const getTableRoles: (html: string, isAllFighterOrOther: ColRole) => string[] =
             (html: string, isAllFighterOrOther: ColRole): string[] => {
                 const roles: string[] = [];
-                let roleIdx: number = $(html).find(".dataTable thead th:contains('role')").eq(0).index();
+                const $a: Root = $.load(html);
+                let roleIdx: number = $a(".dataTable thead th:contains('role')").eq(0).index();
 
                 if (roleIdx === -1) {
                     throw new Error("Could not find role column");
@@ -159,9 +161,9 @@ describe("class BoxrecRequests", () => {
                 // bump the column
                 roleIdx++;
 
-                $(html).find(`.dataTable tbody tr td:nth-child(${roleIdx})`)
-                    .each((j: number, el) => {
-                        roles.push($(el).text().replace("\n", ""));
+                $a(`.dataTable tbody tr td:nth-child(${roleIdx})`)
+                    .each((j: number, el: any) => {
+                        roles.push($a(el).text().replace("\n", ""));
                     });
 
                 return roles;
@@ -181,6 +183,21 @@ describe("class BoxrecRequests", () => {
                 expect(uniqueRoles.includes("pro boxer")).toBe(true);
             });
 
+        });
+
+    });
+
+    describe("method getDate", () => {
+
+        it("can return a previous date", async () => {
+            const html: string = await BoxrecRequests.getDate(cookies, {
+                day: 28,
+                month: 9,
+                year: 2019,
+            });
+            expect(html).toContain("2019");
+            expect(html).toContain("September");
+            expect(html).toContain("28");
         });
 
     });
@@ -254,6 +271,16 @@ describe("class BoxrecRequests", () => {
             imamKhataev: 852471,
         };
 
+        describe("offset", () => {
+
+            it("should return a different page if specifying offset", async() => {
+                const response: string = await BoxrecRequests.getPersonById(cookies, 9625, BoxrecRole.proBoxer, 100);
+
+                expect(response).toContain("Flashy Sebastian");
+            });
+
+        });
+
         describe("person that has two roles", () => {
 
             describe("not specifying a role", () => {
@@ -271,7 +298,7 @@ describe("class BoxrecRequests", () => {
                         await BoxrecRequests.getPersonById(cookies, bareknuckleboxer.paulieMalignaggi,
                             BoxrecRole.amateurMuayThaiBoxer);
                     } catch (e) {
-                        expect(e.message).toBe("Person does not have this role");
+                        expect((e as any).message).toBe("Person does not have this role");
                     }
                 });
 
@@ -406,6 +433,26 @@ describe("class BoxrecRequests", () => {
             const html: string = await BoxrecRequests.listScores(cookies);
 
             expect(html).toContain("My Scores");
+        });
+
+    });
+
+    describe("method getBoxerPDF", () => {
+
+        it("should return PDF", async () => {
+            const response: string = await BoxrecRequests.getBoxerPDF(cookies, 352);
+
+            expect(response).toContain("PDF-1.4");
+        });
+
+    });
+
+    describe("method getBoxerPrint", () => {
+
+        it("should return printable version of profile", async () => {
+            const response: string = await BoxrecRequests.getBoxerPrint(cookies, 352);
+
+            expect(response).toContain("Floyd Mayweather");
         });
 
     });

@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import * as FormData from "form-data";
 import { Response as FetchResponse } from "node-fetch";
 import {
+    BoxrecDate,
     BoxrecLocationEventParams,
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
@@ -57,26 +58,22 @@ export class BoxrecRequests {
      * Makes a request to BoxRec to return/save the PDF version of a boxer profile
      * @param cookies      contains cookie information about the user
      * @param globalId     the BoxRec global id of the boxer
-     * @param pathToSaveTo directory to save to.  if not used will only return data
-     * @param fileName     file name to save as.  Will save as {globalId}.pdf as default.  Add .pdf to end of filename
      * @returns {Promise<string>}
      */
-    static async getBoxerPDF(cookies: string, globalId: number, pathToSaveTo?: string, fileName?: string):
+    static async getBoxerPDF(cookies: string, globalId: number):
         Promise<string> {
-        return BoxrecRequests.getBoxerOther(cookies, globalId, "pdf", pathToSaveTo, fileName);
+        return BoxrecRequests.getBoxerOther(cookies, globalId, "pdf");
     }
 
     /**
      * Makes a request to BoxRec to return/save the printable version of a boxer profile
      * @param cookies      contains cookie information about the user
      * @param globalId     the BoxRec global id of the boxer
-     * @param pathToSaveTo directory to save to.  if not used will only return data
-     * @param fileName     file name to save as.  Will save as {globalId}.html as default.  Add .html to end of filename
      * @returns {Promise<string>}
      */
-    static async getBoxerPrint(cookies: string, globalId: number, pathToSaveTo?: string, fileName?: string):
+    static async getBoxerPrint(cookies: string, globalId: number):
         Promise<string> {
-        return BoxrecRequests.getBoxerOther(cookies, globalId, "print", pathToSaveTo, fileName);
+        return BoxrecRequests.getBoxerOther(cookies, globalId, "print");
     }
 
     /**
@@ -91,11 +88,16 @@ export class BoxrecRequests {
     /**
      * Makes a request to BoxRec to get events/bouts on the particular date
      * @param cookies               contains cookie information about the user
-     * @param {string} dateString   date to search for.  Format ex. `2012-06-07`
+     * @param {BoxrecDate} params
      * @returns {Promise<void>}
      */
-    static async getDate(cookies: string, dateString: string): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/date`, cookies);
+    static async getDate(cookies: string, params: BoxrecDate): Promise<string> {
+        return requestWrapper(`https://boxrec.com/en/date`, cookies, {
+            "d[date][day]": params.day,
+            "d[date][month]": params.month,
+            "d[date][year]": params.year,
+            "sport": params.sport,
+        });
     }
 
     /**
@@ -471,12 +473,11 @@ export class BoxrecRequests {
      * @param cookies                       contains cookie information about the user
      * @param {number} globalId
      * @param {"pdf" | "print"} type
-     * @param {string} pathToSaveTo
-     * @param {string} fileName
+     * @todo support role as it's not just boxers (ex. amateurs)
      * @returns {Promise<string>}
      */
     private static async getBoxerOther(cookies: string, globalId: number,
-                                       type: "pdf" | "print", pathToSaveTo?: string, fileName?: string):
+                                       type: "pdf" | "print"):
         Promise<string> {
         const qs: PersonRequestParams = {};
 
@@ -486,7 +487,7 @@ export class BoxrecRequests {
             qs.print = "y";
         }
 
-        return requestWrapper(`https://boxrec.com/en/boxer/${globalId}`, cookies, qs);
+        return requestWrapper(`https://boxrec.com/en/proboxer/${globalId}`, cookies, qs);
     }
 
     private static async getRatingsParamWrap(cookies: string): Promise<string> {
@@ -606,7 +607,7 @@ export class BoxrecRequests {
             qs.toggleRatings = "y";
         }
 
-        const boxrecPageBody: string = await requestWrapper(url, cookies);
+        const boxrecPageBody: string = await requestWrapper(url, cookies, qs);
         const numberOfColumnsReceived: number =
             BoxrecRequests.numberOfTableColumns(boxrecPageBody);
 

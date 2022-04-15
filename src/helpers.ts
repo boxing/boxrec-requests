@@ -41,11 +41,12 @@ export async function requestWrapperFullResponse(url: string, cookies?: string, 
         }
 
         const queryString: URLSearchParams = new URLSearchParams(parametersOrQueryString);
+        const urlWithQueryString: string = `${url}?${queryString.toString()}`;
 
-        return fetch(`${url}?${queryString.toString()}`, {
+        return fetch(urlWithQueryString, {
             headers: {
                 Cookie: cookies || "",
-            }
+            },
         });
     } catch (e) {
         if ((e as any).message.includes("recaptcha")) {
