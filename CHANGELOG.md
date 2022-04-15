@@ -1,3 +1,9 @@
+## 6.0.1 (2022-04-15)
+
+### Fixed
+
+-   Schedule was not sending all the parameters
+
 ## 6.0.0 (2022-04-15)
 
 ### Fixed
