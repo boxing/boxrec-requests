@@ -1,3 +1,11 @@
+## 6.0.0 (2022-04-15)
+
+### Fixed
+
+-   Date was no longer working as the query string changed.  This is a breaking change and now will accept a date object which will hopefully be easier to maintain
+-   PDF/Print fixed as the URL changed
+-   Offset for getting boxer bouts was broken from the switch to `node-fetch`
+
 ## 5.3.2 (2022-03-26)
 
 ### Changed
