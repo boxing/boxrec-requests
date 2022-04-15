@@ -1,6 +1,6 @@
 {
   "name": "boxrec-requests",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "make API requests to BoxRec using NodeJS and returns the HTML body",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

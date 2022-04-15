@@ -247,7 +247,7 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapper("https://boxrec.com/en/schedule", cookies, params);
+        return requestWrapper("https://boxrec.com/en/schedule", cookies, qs);
     }
 
     /**
