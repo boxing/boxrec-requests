@@ -1,6 +1,6 @@
 {
   "name": "boxrec-requests",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "make API requests to BoxRec using NodeJS and returns the HTML body",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
+    "form-data": "^4.0.0",
     "node-fetch": "2",
     "snyk": "^1.883.0"
   },
