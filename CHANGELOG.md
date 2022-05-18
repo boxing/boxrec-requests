@@ -1,3 +1,9 @@
+## 6.0.2 (2022-05-18)
+
+### Fixed
+
+- Add `form-data` to dependency list.  This was working previously but it seems it may have been [affecting some users](https://github.com/boxing/boxrec/issues/286).  It should be added as a dependency anyways since this package uses it.
+
 ## 6.0.1 (2022-04-15)
 
 ### Fixed
