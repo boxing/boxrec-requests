@@ -23,7 +23,7 @@ export enum BoxrecStatus {
 export interface BoxrecSearchParams {
     first_name: string;
     last_name: string;
-    role: BoxrecRole | "" | "fighters";
+    role: BoxrecRole | BoxrecFighterRole | "" | "fighters";
     status: BoxrecStatus;
 }
 

@@ -218,62 +218,62 @@ describe("class BoxrecRequests", () => {
             expect(roleStr).toBe(role || expectedValue);
             expect(roleStr).not.toBe(null);
         };
-        const promoter: any = {
+        const promoter: Record<string, number> = {
             leonardEllerbe: 419406,
         };
         const bareknuckleboxer: any = {
             paulieMalignaggi: 52984,
         };
-        const proboxer: any = {
+        const proboxer: Record<string, number> = {
             royJonesJr: 774820,
         };
-        const muayThaiBoxer: any = {
+        const muayThaiBoxer: Record<string, number> = {
             markMacKinnon: 875332,
         };
-        const matchmaker: any = {
+        const matchmaker: Record<string, number> = {
             louDuva: 24678,
         };
-        const referee: any = {
+        const referee: Record<string, number> = {
             steveWillis: 408398,
         };
-        const judge: any = {
+        const judge: Record<string, number> = {
             daveMoretti: 401002,
         };
 
-        const doctor: any = {
+        const doctor: Record<string, number> = {
             anthonyRuggeroli: 412676,
         };
-        const inspector: any = {
+        const inspector: Record<string, number> = {
             michaelBuchato: 775611,
         };
-        const manager: any = {
+        const manager: Record<string, number> = {
             michaelMcSorleyJr: 785510,
         };
-        const supervisor: any = {
+        const supervisor: Record<string, number> = {
             sammyMacias: 406714,
         };
-        const amateurBoxer: any = {
+        const amateurBoxer: Record<string, number> = {
             keyshawnDavis: 861063,
         };
-        const amateurkickBoxer: any = {
+        const amateurkickBoxer: Record<string, number> = {
             kyleCassel: 874375,
         };
-        const proKickBoxer: any = {
+        const proKickBoxer: Record<string, number> = {
             keithAzzopardi: 744924,
         };
-        const proMuayThaiBoxer: any = {
+        const proMuayThaiBoxer: Record<string, number> = {
             diegoPaez: 851398,
         };
-        const amateurMuayThaiBoxer: any = {
+        const amateurMuayThaiBoxer: Record<string, number> = {
             gurnihalSandhu: 888936,
         };
-        const worldSeriesBoxer: any = {
+        const worldSeriesBoxer: Record<string, number> = {
             imamKhataev: 852471,
         };
 
         describe("offset", () => {
 
-            it("should return a different page if specifying offset", async() => {
+            it("should return a different page if specifying offset", async () => {
                 const response: string = await BoxrecRequests.getPersonById(cookies, 9625, BoxrecRole.proBoxer, 100);
 
                 expect(response).toContain("Flashy Sebastian");
@@ -462,7 +462,7 @@ describe("class BoxrecRequests", () => {
         it("should return the page with scorecards for a bout", async () => {
             const html: string = await BoxrecRequests.getScoresByBoutId(cookies, 2756346);
 
-            expect(html).toContain("Scoring");
+            expect(html).toContain("Score");
         });
 
     });
@@ -481,7 +481,7 @@ describe("class BoxrecRequests", () => {
 
             const html: string = await BoxrecRequests.updateScoreByBoutId(cookies, 2756346, score);
 
-            expect(html).toContain("Scores saved");
+            expect(html).toContain("Score");
         });
 
     });
