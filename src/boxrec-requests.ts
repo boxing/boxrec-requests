@@ -2,7 +2,7 @@ import * as cheerio from "cheerio";
 import * as FormData from "form-data";
 import { Response as FetchResponse } from "node-fetch";
 import {
-    BoxrecDate,
+    BoxrecDate, BoxrecFighterRole,
     BoxrecLocationEventParams,
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
@@ -196,7 +196,7 @@ export class BoxrecRequests {
      * @param {number} offset                   offset number of bouts/events in the profile.  todo boxer support?
      * @returns {Promise<string>}
      */
-    static async getPersonById(cookies: string, globalId: number, role: BoxrecRole | null = null, offset: number = 0):
+    static async getPersonById(cookies: string, globalId: number, role: BoxrecRole | BoxrecFighterRole | null = null, offset: number = 0):
         Promise<string> {
         if (role !== null) {
             return BoxrecRequests.makeGetPersonByIdRequest(cookies, globalId, role, offset, null);
@@ -594,7 +594,8 @@ export class BoxrecRequests {
      *                                          BoxRec column changes, therefore we just take the one with most columns
      */
     private static async makeGetPersonByIdRequest(cookies: string, globalId: number,
-                                                  role: BoxrecRole = BoxrecRole.proBoxer, offset: number = 0,
+                                                  role: BoxrecRole | BoxrecFighterRole = BoxrecRole.proBoxer,
+                                                  offset: number = 0,
                                                   previousRequestBody: string | null):
         Promise<string> {
         const url: string = `https://boxrec.com/en/${role}/${globalId}`;
