@@ -12,7 +12,7 @@ if (!BOXREC_USERNAME || !BOXREC_PASSWORD) {
     throw new Error("Required Username/Password is not set");
 }
 
-jest.setTimeout(30000);
+jest.setTimeout(90000);
 
 const napTime: number = 10000;
 
@@ -28,6 +28,8 @@ describe("class BoxrecRequests", () => {
     let num: number = 0;
 
     beforeAll(async () => {
+        await BoxrecRequests.testRequest();
+
         // to prevent massive amounts of logging in unnecessarily, after logging in we'll store the cookie in a temp
         // directory
         let cookieBuffer: Buffer;
@@ -56,10 +58,15 @@ describe("class BoxrecRequests", () => {
         expect(cookies).not.toBeNull();
     });
 
+    it("should be able to bypass hcaptcha", async () => {
+        await BoxrecRequests.solveCaptcha();
+    });
+
     describe("method login", () => {
 
         it("should return a cookie if log in was successful", async () => {
             const cookiesResponse: string = await BoxrecRequests.login(BOXREC_USERNAME, BOXREC_PASSWORD);
+            console.log(cookiesResponse)
             expect(cookiesResponse).toContain("PHPSESSID");
         });
 

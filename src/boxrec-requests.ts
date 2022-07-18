@@ -1,6 +1,7 @@
 import * as cheerio from "cheerio";
 import * as FormData from "form-data";
 import { Response as FetchResponse } from "node-fetch";
+// import fetch, {RequestInit, Response} from "node-fetch";
 import {
     BoxrecDate, BoxrecFighterRole,
     BoxrecLocationEventParams,
@@ -20,6 +21,11 @@ import {
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML, requestWrapper, requestWrapperFullResponse} from "./helpers";
 import Root = cheerio.Root;
+
+const puppeteer = require("puppeteer-extra");
+const pluginStealth = require("puppeteer-extra-plugin-stealth");
+const {hcaptcha} = require("puppeteer-hcaptcha");
+// import { hcaptcha } from "puppeteer-hcaptcha";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -335,6 +341,37 @@ export class BoxrecRequests {
         return requestWrapper("https://boxrec.com/en/watchlist", cookies);
     }
 
+    static async testRequest(): Promise<any> {
+
+    }
+
+    static async solveCaptcha(): Promise<Array<Record<string, string>>> {
+        puppeteer.use(pluginStealth());
+        const browser: any = await puppeteer.launch({
+            args: [
+                `--window-size=600,1000`,
+                "--window-position=000,000",
+                "--disable-dev-shm-usage",
+                "--no-sandbox",
+                "--user-data-dir=\"/tmp/chromium\"",
+                "--disable-web-security",
+                "--disable-features=site-per-process"
+            ],
+            headless: false,
+            ignoreHTTPSErrors: true,
+        } as any);
+
+        const [page] = await browser.pages();
+        await page.goto("https://boxrec.com");
+        await page.setDefaultNavigationTimeout(0);
+        try {
+            await hcaptcha(page, 10000);
+            return page.cookies();
+        } finally {
+            await browser.close();
+        }
+    }
+
     /**
      * Makes a request to BoxRec to log the user in
      * This is required before making any additional calls
@@ -365,6 +402,8 @@ export class BoxrecRequests {
             mode: "no-cors",
             redirect: "manual",
         });
+
+        console.log("here", data);
 
         const cookies: any = data.headers.get("set-cookie");
 
