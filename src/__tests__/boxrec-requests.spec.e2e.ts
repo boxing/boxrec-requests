@@ -513,9 +513,9 @@ describe("class BoxrecRequests", () => {
     describe("method getScoreByBoutId", () => {
 
         it("should return the page with scorecards for a bout", async () => {
-            const html: string = await BoxrecRequests.getScoresByBoutId(cookies, 2756346);
+            const response: string = await BoxrecRequests.getScoresByBoutId(cookies, 2756346);
 
-            expect(html).toContain("Score");
+            expect(response).toMatch(/score now|edit score/i);
         });
 
     });
