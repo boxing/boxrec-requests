@@ -91,7 +91,7 @@ describe("class BoxrecRequests", () => {
 
     describe("method getBout", () => {
 
-        it("should get the details of an individual bout", async() => {
+        it("should get the details of an individual bout", async () => {
             const response = await BoxrecRequests.getBout(cookies, "856254/2850125");
 
             expect(response).toContain("Saul Alvarez");
@@ -102,11 +102,11 @@ describe("class BoxrecRequests", () => {
 
     describe("method getRatings", () => {
 
-        it("should give male pro boxing ratings", async() => {
+        it("should give male pro boxing ratings", async () => {
             const response: string = await BoxrecRequests.getRatings(cookies, {
                 sex: "M",
                 role: BoxrecFighterOption["Pro Boxing"]
-            })
+            });
 
             expect(response).toContain("Male Boxing Pro Ratings");
         });
@@ -242,7 +242,7 @@ describe("class BoxrecRequests", () => {
 
     describe("method getChampions", () => {
 
-        it("should return a list of champions", async() => {
+        it("should return a list of champions", async () => {
             const response = await BoxrecRequests.getChampions(cookies);
 
             expect(response).toContain("Cruiserweight");
@@ -267,7 +267,7 @@ describe("class BoxrecRequests", () => {
 
     describe("method getEventById", () => {
 
-        it("should return an event", async() => {
+        it("should return an event", async () => {
             const response = await BoxrecRequests.getEventById(cookies, 856254);
 
             expect(response).toContain("Saul Alvarez");
@@ -520,23 +520,25 @@ describe("class BoxrecRequests", () => {
 
     });
 
-    // todo I don't think it's getting the intended results
     describe("method getSchedule", () => {
 
-        it("should return schedule events", async() => {
+        it("should return schedule events", async () => {
             const response = await BoxrecRequests.getSchedule(cookies, {
-                countryCode: 51
+                countryCode: 0 // todo match the number with the actual value
             });
 
-            expect(response).toContain("flag-icon-gb");
-        })
+            const count = (response.match(/flag-icon-gb/g) || []).length;
+
+            // we determine this by checking how many Great Britain flags are on the page, which is not the greatest way to actually verify this long term
+            expect(count).toBeGreaterThanOrEqual(3);
+        });
 
     });
 
     // todo I don't think it's getting the intended results
     describe("method getResults", () => {
 
-        it("should return results", async() => {
+        it("should return results", async () => {
             const response = await BoxrecRequests.getResults(cookies, {
                 countryCode: 51
             });
