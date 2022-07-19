@@ -550,7 +550,7 @@ export class BoxrecRequests {
 
     private static async getRatingsParamWrap(cookies: string): Promise<string> {
         if (ratingsParamWrap === "") {
-            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/ratings", cookies);
+            const boxrecPageBody: string = await BoxrecRequests.requestWrapper("https://boxrec.com/en/ratings", cookies);
 
             const $: Root = cheerio.load(boxrecPageBody);
             ratingsParamWrap = $(".page form").attr("name") || "";
@@ -567,7 +567,7 @@ export class BoxrecRequests {
         if (resultsParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and
             // not as predictable as the search box one on the search page
-            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/results", cookies);
+            const boxrecPageBody: string = await BoxrecRequests.requestWrapper("https://boxrec.com/en/results", cookies);
 
             const $: Root = cheerio.load(boxrecPageBody);
             resultsParamWrap = $(".page form").attr("name") || "";
@@ -582,7 +582,7 @@ export class BoxrecRequests {
      */
     private static async getQuickSearchParamWrap(cookies: string): Promise<string> {
         if (quickSearchParamWrap === "") {
-            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/quick_search", cookies);
+            const boxrecPageBody: string = await BoxrecRequests.requestWrapper("https://boxrec.com/en/quick_search", cookies);
 
             // not sure why but when the package is now compiled and you try to traverse the DOM Cheerio comes
             // up with errors
@@ -604,11 +604,10 @@ export class BoxrecRequests {
         if (searchParamWrap === "") {
             // it would be nice to get this from any page but the Navbar search is a POST and not as predictable
             // as the search box one on the search page
-            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/search", cookies);
+            const boxrecPageBody: string = await BoxrecRequests.requestWrapper("https://boxrec.com/en/search", cookies);
 
             const $: Root = cheerio.load(boxrecPageBody);
-            searchParamWrap = $("h2:contains('Find People')")
-                .parents("td").find("form").attr("name") || "";
+            searchParamWrap = $("form[action=\"/en/search\"]").attr("name");
         }
 
         return searchParamWrap;
@@ -620,7 +619,7 @@ export class BoxrecRequests {
      */
     private static async getTitlesParamWrap(cookies: string): Promise<string> {
         if (titlesParamWrap === "") {
-            const boxrecPageBody: string = await requestWrapper("https://boxrec.com/en/titles", cookies);
+            const boxrecPageBody: string = await BoxrecRequests.requestWrapper("https://boxrec.com/en/titles", cookies);
 
             const $: Root = cheerio.load(boxrecPageBody);
             titlesParamWrap = $(".page form").attr("name") || "";
@@ -666,7 +665,7 @@ export class BoxrecRequests {
             qs.toggleRatings = "y";
         }
 
-        const boxrecPageBody: string = await requestWrapper(url, cookies, qs);
+        const boxrecPageBody: string = await BoxrecRequests.requestWrapper(url, cookies, qs);
         const numberOfColumnsReceived: number =
             BoxrecRequests.numberOfTableColumns(boxrecPageBody);
 

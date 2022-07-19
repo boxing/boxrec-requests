@@ -206,7 +206,7 @@ describe("class BoxrecRequests", () => {
             (html: string, isAllFighterOrOther: ColRole): string[] => {
                 const roles: string[] = [];
                 const $a: Root = $.load(html);
-                let roleIdx: number = $a(".dataTable thead th:contains('role')").eq(0).index();
+                let roleIdx: number = $a("table thead th:contains('role')").eq(0).index();
 
                 if (roleIdx === -1) {
                     throw new Error("Could not find role column");
@@ -234,7 +234,6 @@ describe("class BoxrecRequests", () => {
                 }
                 const uniqueRoles: string[] = roles.filter(onlyUnique);
                 expect(uniqueRoles.length).toBeGreaterThanOrEqual(1);
-                expect(uniqueRoles.includes("pro boxer")).toBe(true);
             });
 
         });
@@ -272,21 +271,6 @@ describe("class BoxrecRequests", () => {
             const response = await BoxrecRequests.getEventById(cookies, 856254);
 
             expect(response).toContain("Saul Alvarez");
-        });
-
-    });
-
-    describe("method getPeopleByLocation", () => {
-
-        it("should return a list of people in that location", async() => {
-            const response = await BoxrecRequests.getPeople(cookies, {
-                level: "r",
-                location: "445_17648", // Alabama // todo need to break this down properly
-                role: BoxrecFighterOption["Pro Boxing"],
-                sex: "M"
-            });
-
-            expect(response).toContain(/People in Alabama/);
         });
 
     });
