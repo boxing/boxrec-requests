@@ -20,12 +20,8 @@ import {
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML, requestWrapper, requestWrapperFullResponse} from "./helpers";
+import {LoginResponse, puppeteerFetch} from "./puppeteer-fetch";
 import Root = cheerio.Root;
-
-const puppeteer = require("puppeteer-extra");
-const pluginStealth = require("puppeteer-extra-plugin-stealth");
-const {hcaptcha} = require("puppeteer-hcaptcha");
-// import { hcaptcha } from "puppeteer-hcaptcha";
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
 // todo these should all be time based or on failure update these values.
@@ -57,7 +53,7 @@ export class BoxrecRequests {
      * @param eventBoutId   includes both the event and bout separated by "/"
      */
     static async getBout(cookies: string, eventBoutId: string): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/event/${eventBoutId}`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/event/${eventBoutId}`, cookies);
     }
 
     /**
@@ -88,7 +84,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getChampions(cookies: string): Promise<string> {
-        return requestWrapper("https://boxrec.com/en/champions", cookies);
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/champions", cookies);
     }
 
     /**
@@ -98,7 +94,8 @@ export class BoxrecRequests {
      * @returns {Promise<void>}
      */
     static async getDate(cookies: string, params: BoxrecDate): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/date`, cookies, {
+        // todo this works but BoxRec busted their dates.  It's not nice again https://boxrec.com/en/date?date=2022-07-18&sport=box-pro
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/date", cookies, {
             "d[date][day]": params.day,
             "d[date][month]": params.month,
             "d[date][year]": params.year,
@@ -113,7 +110,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getEventById(cookies: string, eventId: number): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/event/${eventId}`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/event/${eventId}`, cookies);
     }
 
     /**
@@ -140,7 +137,7 @@ export class BoxrecRequests {
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return requestWrapper(`https://boxrec.com/en/locations/event`, cookies, qs);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/locations/event`, cookies, qs);
     }
 
     /**
@@ -167,7 +164,7 @@ export class BoxrecRequests {
         const qs: BoxrecLocationsPeopleParamsTransformed = createParamsObject(params, "l");
         qs.offset = offset;
 
-        return requestWrapper(`https://boxrec.com/en/locations/people`, cookies, qs);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/locations/people`, cookies, qs);
     }
 
     /**
@@ -224,7 +221,7 @@ export class BoxrecRequests {
         const qs: any = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return requestWrapper("https://boxrec.com/en/ratings", cookies, qs);
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/ratings", cookies, qs);
     }
 
     /**
@@ -239,7 +236,7 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapper("https://boxrec.com/en/results", cookies, qs);
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/results", cookies, qs);
     }
 
     /**
@@ -253,7 +250,7 @@ export class BoxrecRequests {
         const qs: BoxrecResultsParamsTransformed =
             await BoxrecRequests.buildResultsSchedulesParams<BoxrecResultsParamsTransformed>(cookies, params, offset);
 
-        return requestWrapper("https://boxrec.com/en/schedule", cookies, qs);
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/schedule", cookies, qs);
     }
 
     /**
@@ -262,7 +259,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async listScores(cookies: string): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/my_scores`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/my_scores`, cookies);
     }
 
     /**
@@ -272,7 +269,7 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getScoresByBoutId(cookies: string, boutId: number): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/scoring/${boutId}`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/scoring/${boutId}`, cookies);
     }
 
     /**
@@ -290,7 +287,7 @@ export class BoxrecRequests {
             qs[`b${idx + 1}`] = "" + round[1];
         });
 
-        return requestWrapper(`https://boxrec.com/en/scoring/historical/submit/${boutId}`, cookies, qs);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/scoring/historical/submit/${boutId}`, cookies, qs);
     }
 
     /**
@@ -302,7 +299,7 @@ export class BoxrecRequests {
      * @todo offset not used?  Does this link work?
      */
     static async getTitleById(cookies: string, titleString: string, offset: number = 0): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/title/${titleString}`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/title/${titleString}`, cookies);
     }
 
     /**
@@ -316,7 +313,7 @@ export class BoxrecRequests {
         const qs: BoxrecTitlesParamsTransformed = createParamsObject(params, paramWrap);
         qs.offset = offset;
 
-        return requestWrapper(`https://boxrec.com/en/titles`, cookies, qs);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/titles`, cookies, qs);
     }
 
     /**
@@ -327,50 +324,46 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getVenueById(cookies: string, venueId: number, offset: number = 0): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/venue/${venueId}`, cookies, {
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/venue/${venueId}`, cookies, {
             offset,
         });
     }
 
     /**
      * Lists the boxers that the user is watching
-     * @param {request.CookieJar} cookies
+     * @param cookies
      * @returns {Promise<string>}
      */
     static async getWatched(cookies: string): Promise<string> {
-        return requestWrapper("https://boxrec.com/en/watchlist", cookies);
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/watchlist", cookies);
     }
 
-    static async testRequest(): Promise<any> {
-
-    }
-
-    static async solveCaptcha(): Promise<Array<Record<string, string>>> {
-        puppeteer.use(pluginStealth());
-        const browser: any = await puppeteer.launch({
-            args: [
-                `--window-size=600,1000`,
-                "--window-position=000,000",
-                "--disable-dev-shm-usage",
-                "--no-sandbox",
-                "--user-data-dir=\"/tmp/chromium\"",
-                "--disable-web-security",
-                "--disable-features=site-per-process"
-            ],
-            headless: false,
-            ignoreHTTPSErrors: true,
-        } as any);
-
-        const [page] = await browser.pages();
-        await page.goto("https://boxrec.com");
-        await page.setDefaultNavigationTimeout(0);
-        try {
-            await hcaptcha(page, 10000);
-            return page.cookies();
-        } finally {
-            await browser.close();
-        }
-    }
+    // static async solveCaptcha(): Promise<Array<Record<string, string>>> {
+    //     puppeteer.use(pluginStealth());
+    //     const browser: any = await puppeteer.launch({
+    //         args: [
+    //             `--window-size=600,1000`,
+    //             "--window-position=000,000",
+    //             "--disable-dev-shm-usage",
+    //             "--no-sandbox",
+    //             "--user-data-dir=\"/tmp/chromium\"",
+    //             "--disable-web-security",
+    //             "--disable-features=site-per-process"
+    //         ],
+    //         headless: false,
+    //         ignoreHTTPSErrors: true,
+    //     } as any);
+    //
+    //     const [page] = await browser.pages();
+    //     await page.goto("https://boxrec.com");
+    //     await page.setDefaultNavigationTimeout(0);
+    //     try {
+    //         await hcaptcha(page, 10000);
+    //         return page.cookies();
+    //     } finally {
+    //         await browser.close();
+    //     }
+    // }
 
     /**
      * Makes a request to BoxRec to log the user in
@@ -394,47 +387,72 @@ export class BoxrecRequests {
         formData.append( "_username", username);
         formData.append( "login[go]", ""); // not required
 
-        const data: FetchResponse = await requestWrapperFullResponse("https://boxrec.com/en/login", undefined, {
-            body: formData,
-            cache: "no-cache",
-            credentials: "same-origin",
-            method: "POST",
-            mode: "no-cors",
-            redirect: "manual",
+        const data: LoginResponse = await BoxrecRequests.requestWrapper("https://boxrec.com/en/login", undefined, {
+            _password: password,
+            _username: username,
         });
 
-        console.log("here", data);
+        if (data.cookies) {
+            // todo gdpr might be in the HTML already and we need a better selector
+            // if (data.body?.includes("gdpr")) {
+            //     throw new Error("GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account");
+            // }
 
-        const cookies: any = data.headers.get("set-cookie");
+            // the following are when login has failed
+            // an unsuccessful login returns a 200
+            const $: Root = cheerio.load(data.body);
+            if ($("input#username").length) {
+                throw new Error("Please check your credentials, could not log into BoxRec");
+            }
 
-        // redirect because we want to see if GDPR is activated for this account, as well as check any errors afterwards
-        const redirectUrl: string | null = data.headers.get("Location");
+            return JSON.stringify(data.cookies);
+        } else {
+            // todo this is busted now and can't be committed like this
 
-        if (!redirectUrl) {
-            throw new Error("Could not get redirect URL");
+            // const data: FetchResponse = await requestWrapperFullResponse("https://boxrec.com/en/login", undefined, {
+            //     body: formData,
+            //     cache: "no-cache",
+            //     credentials: "same-origin",
+            //     method: "POST",
+            //     mode: "no-cors",
+            //     redirect: "manual",
+            // });
+
+            console.log(data.headers);
+
+            console.log("here", data);
+
+            const cookies: any = data.headers.get("set-cookie");
+
+            // redirect because we want to see if GDPR is activated for this account, as well as check any errors afterwards
+            const redirectUrl: string | null = data.headers.get("Location");
+
+            if (!redirectUrl) {
+                throw new Error("Could not get redirect URL");
+            }
+
+            // get the redirect response to see if login was successful
+            const loginRedirect: FetchResponse = await requestWrapperFullResponse(redirectUrl, cookies, {});
+
+            const loginRedirectBody: string = await loginRedirect.text();
+            // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
+            if (redirectUrl?.includes("gdpr")) {
+                throw new Error("GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account");
+            }
+
+            // the following are when login has failed
+            // an unsuccessful login returns a 200
+            const $: Root = cheerio.load(loginRedirectBody);
+            if ($("input#username").length) {
+                throw new Error("Please check your credentials, could not log into BoxRec");
+            }
+
+            if (loginRedirect.status !== 200) {
+                throw new Error("Redirect status was expecting 200");
+            }
+
+            return cookies;
         }
-
-        // get the redirect response to see if login was successful
-        const loginRedirect: FetchResponse = await requestWrapperFullResponse(redirectUrl, cookies, {});
-
-        const loginRedirectBody: string = await loginRedirect.text();
-        // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
-        if (redirectUrl?.includes("gdpr")) {
-            throw new Error("GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account");
-        }
-
-        // the following are when login has failed
-        // an unsuccessful login returns a 200
-        const $: Root = cheerio.load(loginRedirectBody);
-        if ($("input#username").length) {
-            throw new Error("Please check your credentials, could not log into BoxRec");
-        }
-
-        if (loginRedirect.status !== 200) {
-            throw new Error("Redirect status was expecting 200");
-        }
-
-        return cookies;
     }
 
     /**
@@ -455,7 +473,7 @@ export class BoxrecRequests {
         const qs: BoxrecSearchParamsTransformed = createParamsObject(params, searchParam);
         qs.offset = offset;
 
-        return requestWrapper("https://boxrec.com/en/search", cookies, qs);
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/search", cookies, qs);
     }
 
     /**
@@ -465,7 +483,7 @@ export class BoxrecRequests {
      * @returns {Promise<boolean>}
      */
     static async unwatch(cookies: string, boxerGlobalId: number): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/unwatch/${boxerGlobalId}`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/unwatch/${boxerGlobalId}`, cookies);
     }
 
     /**
@@ -475,7 +493,17 @@ export class BoxrecRequests {
      * @returns {Promise<boolean>}
      */
     static async watch(cookies: string, boxerGlobalId: number): Promise<string> {
-        return requestWrapper(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
+    }
+
+    private static requestWrapper<T = string>(url: string, cookies: string, bodyParams?: Record<string, any>): Promise<T> {
+        // return BoxrecRequests.requestWrapper(url, cookies, bodyParams);
+
+        if (url === "https://boxrec.com/en/login") {
+            return puppeteerFetch<T>(url, cookies, "POST", bodyParams);
+        }
+
+        return puppeteerFetch<T>(url, cookies, "GET", bodyParams);
     }
 
     /**
@@ -493,7 +521,7 @@ export class BoxrecRequests {
         formData.append( `${searchParam}[search_role]`, searchRole === null ? "" : searchRole);
         formData.append( `${searchParam}[search_text]`, globalIdOrSearchText);
 
-        return requestWrapper("https://boxrec.com/en/quick_search", cookies, {
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/quick_search", cookies, {
             body: formData,
             method: "POST",
         });
@@ -526,7 +554,7 @@ export class BoxrecRequests {
             qs.print = "y";
         }
 
-        return requestWrapper(`https://boxrec.com/en/proboxer/${globalId}`, cookies, qs);
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/proboxer/${globalId}`, cookies, qs);
     }
 
     private static async getRatingsParamWrap(cookies: string): Promise<string> {

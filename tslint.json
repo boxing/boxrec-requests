@@ -127,8 +127,7 @@
     "typedef": [
       true,
       "call-signature",
-      "property-declaration",
-      "variable-declaration"
+      "property-declaration"
     ],
     "typedef-whitespace": [
       true,
