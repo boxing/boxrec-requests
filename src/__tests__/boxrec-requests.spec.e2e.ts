@@ -2,7 +2,7 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import {getRoleOfHTML} from "../helpers";
-import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
+import {BoxrecFighterOption, BoxrecLocationLevel, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
 import Root = cheerio.Root;
 import DoneCallback = jest.DoneCallback;
 
@@ -133,7 +133,9 @@ describe("class BoxrecRequests", () => {
 
         it("should return the country if specified only", async () => {
             const response: string = await BoxrecRequests.getEvents(cookies, {
-                country: Country.USA,
+                level_id: "us",
+                level: BoxrecLocationLevel.Country,
+                location: "us_30352",
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
@@ -143,16 +145,14 @@ describe("class BoxrecRequests", () => {
         it("should return the region if specified with country", async () => {
             // todo not very good tests as they don't test that results came back
             const response: string = await BoxrecRequests.getEvents(cookies, {
-                country: Country.USA,
-                region: "Nevada",
+                level_id: "us",
+                level: BoxrecLocationLevel.Country,
+                location: "us_30352",
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
-            expect(response).toContain("Nevada");
-        });
-
-        it("should return the town if specified with country, region", () => {
-
+            // bound to be a flaky test
+            expect(response).toContain(/Events in us/i);
         });
 
     });
@@ -161,12 +161,18 @@ describe("class BoxrecRequests", () => {
 
         it("should return different people if different roles are provided", async () => {
             const proBoxerResponse: string = await BoxrecRequests.getPeople(cookies, {
+                level_id: "us",
+                location: "us_30352",
                 role: BoxrecFighterOption["Pro Boxing"],
+                sex: "m",
             });
 
             await sleep();
             const amateurBoxerResponse: string = await BoxrecRequests.getPeople(cookies, {
+                level_id: "us",
+                location: "us_30352",
                 role: BoxrecFighterOption["Amateur Boxing"],
+                sex: "m"
             });
 
             // was tested to see that two of the same requests will equal the same, so we do know this works as intended

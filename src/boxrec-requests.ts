@@ -112,17 +112,18 @@ export class BoxrecRequests {
         Promise<string> {
 
         // todo this doesn't appear to be needed for "locate people"
-        params.level_id = params.country;
+        // params.level_id = params.country;
         // todo doesn't appear to be needed
-        params.location = params.country;
+        // params.location = params.country;
 
-        if (params.country && params.region && params.town) {
-            params.level = BoxrecLocationLevel.Town;
-        } else if (params.country && params.region) {
-            params.level = BoxrecLocationLevel.Region;
-        } else {
-            params.level = BoxrecLocationLevel.Country;
-        }
+        // todo should the user pass their level region or should we be able to figure it out?
+        // if (params.country && params.region && params.town) {
+        //     params.level = BoxrecLocationLevel.Town;
+        // } else if (params.country && params.region) {
+        //     params.level = BoxrecLocationLevel.Region;
+        // } else {
+        //     params.level = BoxrecLocationLevel.Country;
+        // }
 
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;

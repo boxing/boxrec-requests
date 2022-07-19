@@ -447,9 +447,9 @@ export interface BoxrecLocationsPeopleParams {
     town?: string;
 
     // todo new
-    level: BoxrecLocationLevel,
+    level_id: string; // todo can be better than string, it's the country code UK = GB
     location: string;
-    sex: "m" | "f"
+    sex: "m" | "f";
 }
 
 export interface BoxrecLocationsPeopleParamsTransformed {
@@ -541,7 +541,7 @@ export enum BoxrecLocationLevel {
 
 // todo are all these still valid
 export interface BoxrecLocationEventParams {
-    country: Country;
+    country?: Country;
     offset?: number;
     region?: string;
     sport: BoxrecFighterOption;
@@ -550,7 +550,7 @@ export interface BoxrecLocationEventParams {
     year?: number;
 
     // todo these shouldn't be here
-    level_id?: Country;
-    location?: Country;
-    level?: BoxrecLocationLevel;
+    location: string;
+    level: BoxrecLocationLevel;
+    level_id: string;
 }
