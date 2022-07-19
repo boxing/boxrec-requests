@@ -1,8 +1,9 @@
 export interface BoxrecRatingsParams {
     country?: Country | "";
     division?: WeightDivisionCapitalized;
+    role: BoxrecFighterOption["Pro Boxing"] | BoxrecFighterOption["Amateur Boxing"];
     sex: "M" | "F"; // whatever reason this is necessary, figured it would default to Male but it does not
-    stance?: "O" | "S"; // orthodox // southpaw // undefined is both
+    // stance?: "O" | "S"; // orthodox // southpaw // undefined is both
     status?: "a" | ""; // defaults to active/inactive
 }
 
@@ -439,7 +440,7 @@ export interface BoxrecLocationsPeopleParams {
     division?: WeightDivisionCapitalized;
     l_go?: any; // BoxRec param that doesn't do anything
     region?: string;
-    role: BoxrecRole | "fighters";
+    role: BoxrecFighterOption;
     town?: string;
 }
 
@@ -524,6 +525,12 @@ export enum WeightDivision {
     minimumweight = "minimumweight"
 }
 
+export enum BoxrecLocationLevel {
+    Country = "c",
+    Region = "r",
+    Town = "t",
+}
+
 // todo are all these still valid
 export interface BoxrecLocationEventParams {
     country: Country;
@@ -537,5 +544,5 @@ export interface BoxrecLocationEventParams {
     // todo these shouldn't be here
     level_id?: Country;
     location?: Country;
-    level?: "c";
+    level?: BoxrecLocationLevel;
 }

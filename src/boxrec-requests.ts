@@ -5,6 +5,7 @@ import { Response as FetchResponse } from "node-fetch";
 import {
     BoxrecDate, BoxrecFighterRole,
     BoxrecLocationEventParams,
+    BoxrecLocationLevel,
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
     BoxrecRatingsParams,
@@ -94,11 +95,8 @@ export class BoxrecRequests {
      * @returns {Promise<void>}
      */
     static async getDate(cookies: string, params: BoxrecDate): Promise<string> {
-        // todo this works but BoxRec busted their dates.  It's not nice again https://boxrec.com/en/date?date=2022-07-18&sport=box-pro
         return BoxrecRequests.requestWrapper("https://boxrec.com/en/date", cookies, {
-            "d[date][day]": params.day,
-            "d[date][month]": params.month,
-            "d[date][year]": params.year,
+            "d[date]": `${params.year}-${params.month}-${params.day}`,
             "sport": params.sport,
         });
     }
@@ -138,7 +136,14 @@ export class BoxrecRequests {
         params.level_id = params.country;
         // todo doesn't appear to be needed
         params.location = params.country;
-        params.level = "c";
+
+        if (params.country && params.region && params.town) {
+            params.level = BoxrecLocationLevel.Town;
+        } else if (params.country && params.region) {
+            params.level = BoxrecLocationLevel.Region;
+        } else {
+            params.level = BoxrecLocationLevel.Country;
+        }
 
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;

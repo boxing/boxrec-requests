@@ -2,9 +2,9 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import {getRoleOfHTML} from "../helpers";
-import DoneCallback = jest.DoneCallback;
 import {BoxrecFighterOption, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
 import Root = cheerio.Root;
+import DoneCallback = jest.DoneCallback;
 
 const {BOXREC_USERNAME, BOXREC_PASSWORD} = process.env;
 
@@ -89,6 +89,20 @@ describe("class BoxrecRequests", () => {
 
     });
 
+    describe("method getRatings", () => {
+
+        it("should give male pro boxing ratings", async() => {
+            const response: string = await BoxrecRequests.getRatings(cookies, {
+                sex: "M",
+                role: BoxrecFighterOption["Pro Boxing"]
+            })
+
+            expect(response).toContain("Male Boxing Pro Ratings");
+            expect(response).toContain("Saul Alvarez");
+        });
+
+    });
+
     describe("method getEvents", () => {
 
         it("should return different events if different roles are provided", async () => {
@@ -107,18 +121,42 @@ describe("class BoxrecRequests", () => {
             expect(proBoxerResponse).not.toEqual(amateurBoxerResponse);
         });
 
+        it("should return the country if specified only", async () => {
+            const response: string = await BoxrecRequests.getEvents(cookies, {
+                country: Country.USA,
+                sport: BoxrecFighterOption["Pro Boxing"],
+            });
+
+            expect(response).toContain("USA");
+        });
+
+        it("should return the region if specified with country", async () => {
+            // todo not very good tests as they don't test that results came back
+            const response: string = await BoxrecRequests.getEvents(cookies, {
+                country: Country.USA,
+                region: "Nevada",
+                sport: BoxrecFighterOption["Pro Boxing"],
+            });
+
+            expect(response).toContain("Nevada");
+        });
+
+        it("should return the town if specified with country, region", () => {
+
+        });
+
     });
 
     describe("method getPeople", () => {
 
         it("should return different people if different roles are provided", async () => {
             const proBoxerResponse: string = await BoxrecRequests.getPeople(cookies, {
-                role: BoxrecRole.proBoxer,
+                role: BoxrecFighterOption["Pro Boxing"],
             });
 
             await sleep();
             const amateurBoxerResponse: string = await BoxrecRequests.getPeople(cookies, {
-                role: BoxrecRole.amateurBoxer,
+                role: BoxrecFighterOption["Amateur Boxing"],
             });
 
             // was tested to see that two of the same requests will equal the same, so we do know this works as intended

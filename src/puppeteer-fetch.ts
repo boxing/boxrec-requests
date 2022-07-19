@@ -26,17 +26,23 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
             "--user-data-dir=\"/tmp/chromium\"",
             "--disable-web-security",
             "--disable-features=site-per-process",
-            "--auto-open-devtools-for-tabs", // todo dev opens tools
+            // "--auto-open-devtools-for-tabs", // todo dev opens tools
         ],
         headless: false,
         ignoreHTTPSErrors: true,
     } as any);
 
     const [page] = await browser.pages();
-    await page.goto("http://boxrec.com");
+
+    // user agent helps to get around cloudflare when in headless mode
+    // this may need to be dynamic though
+    await page.setUserAgent(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36'
+    )
 
     // todo determine if hit Cloudflare
     // await hcaptcha(page, 10000);
+    // await page.goto("http://boxrec.com");
 
     // todo this might be all we need for GET requests
     if (method === "GET") {
@@ -50,11 +56,12 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
     }
 
     if (method === "POST") {
+        await page.goto("http://boxrec.com");
         const body = await page.evaluate((strippedUrlInside: string, bodyInside: Record<string, string>) => {
             const formData: FormData = new FormData();
             const arr: Array<[string, string]> = Object.entries(bodyInside);
-            for (const i of arr) {
-                formData.append(i[0], i[1]);
+            for (const [cookieName, val] of arr) {
+                formData.append(cookieName, val);
             }
 
             return fetch(strippedUrlInside, {
