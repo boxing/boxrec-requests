@@ -260,6 +260,16 @@ describe("class BoxrecRequests", () => {
 
     });
 
+    describe("method getEventById", () => {
+
+        it("should return an event", async() => {
+            const response = await BoxrecRequests.getEventById(cookies, 856254);
+
+            expect(response).toContain("Saul Alvarez");
+        });
+
+    });
+
     describe("method getPeopleByLocation", () => {
 
         it("should return a list of people in that location", async() => {
