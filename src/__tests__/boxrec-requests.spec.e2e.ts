@@ -500,26 +500,6 @@ describe("class BoxrecRequests", () => {
 
     });
 
-    describe("method getBoxerPDF", () => {
-
-        it("should return PDF", async () => {
-            const response: string = await BoxrecRequests.getBoxerPDF(cookies, 352);
-
-            expect(response).toContain("PDF-1.4");
-        });
-
-    });
-
-    describe("method getBoxerPrint", () => {
-
-        it("should return printable version of profile", async () => {
-            const response: string = await BoxrecRequests.getBoxerPrint(cookies, 352);
-
-            expect(response).toContain("Floyd Mayweather");
-        });
-
-    });
-
     describe("method getScoreByBoutId", () => {
 
         it("should return the page with scorecards for a bout", async () => {

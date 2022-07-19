@@ -58,28 +58,6 @@ export class BoxrecRequests {
     }
 
     /**
-     * Makes a request to BoxRec to return/save the PDF version of a boxer profile
-     * @param cookies      contains cookie information about the user
-     * @param globalId     the BoxRec global id of the boxer
-     * @returns {Promise<string>}
-     */
-    static async getBoxerPDF(cookies: string, globalId: number):
-        Promise<string> {
-        return BoxrecRequests.getBoxerOther(cookies, globalId, "pdf");
-    }
-
-    /**
-     * Makes a request to BoxRec to return/save the printable version of a boxer profile
-     * @param cookies      contains cookie information about the user
-     * @param globalId     the BoxRec global id of the boxer
-     * @returns {Promise<string>}
-     */
-    static async getBoxerPrint(cookies: string, globalId: number):
-        Promise<string> {
-        return BoxrecRequests.getBoxerOther(cookies, globalId, "print");
-    }
-
-    /**
      * Makes a request to BoxRec to return a list of current champions
      * @param cookies      contains cookie information about the user
      * @returns {Promise<string>}
