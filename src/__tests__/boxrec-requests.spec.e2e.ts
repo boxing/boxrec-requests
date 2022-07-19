@@ -235,6 +235,16 @@ describe("class BoxrecRequests", () => {
 
     });
 
+    describe("method getChampions", () => {
+
+        it("should return a list of champions", async() => {
+            const response = await BoxrecRequests.getChampions(cookies);
+
+            expect(response).toContain("Cruiserweight");
+        });
+
+    });
+
     describe("method getDate", () => {
 
         it("can return a previous date", async () => {
