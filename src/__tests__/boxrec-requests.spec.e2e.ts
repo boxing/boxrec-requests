@@ -89,6 +89,17 @@ describe("class BoxrecRequests", () => {
 
     });
 
+    describe("method getBout", () => {
+
+        it("should get the details of an individual bout", async() => {
+            const response = await BoxrecRequests.getBout(cookies, "856254/2850125");
+
+            expect(response).toContain("Saul Alvarez");
+            expect(response).toContain("Mexico");
+        });
+
+    });
+
     describe("method getRatings", () => {
 
         it("should give male pro boxing ratings", async() => {
@@ -98,7 +109,6 @@ describe("class BoxrecRequests", () => {
             })
 
             expect(response).toContain("Male Boxing Pro Ratings");
-            expect(response).toContain("Saul Alvarez");
         });
 
     });
@@ -236,6 +246,21 @@ describe("class BoxrecRequests", () => {
             expect(html).toContain("2019");
             expect(html).toContain("September");
             expect(html).toContain("28");
+        });
+
+    });
+
+    describe("method getPeopleByLocation", () => {
+
+        it("should return a list of people in that location", async() => {
+            const response = await BoxrecRequests.getPeople(cookies, {
+                level: "r",
+                location: "445_17648", // Alabama // todo need to break this down properly
+                role: BoxrecFighterOption["Pro Boxing"],
+                sex: "M"
+            });
+
+            expect(response).toContain(/People in Alabama/);
         });
 
     });
@@ -501,6 +526,32 @@ describe("class BoxrecRequests", () => {
             const html: string = await BoxrecRequests.getScoresByBoutId(cookies, 2756346);
 
             expect(html).toContain("Score");
+        });
+
+    });
+
+    // todo I don't think it's getting the intended results
+    describe("method getSchedule", () => {
+
+        it("should return schedule events", async() => {
+            const response = await BoxrecRequests.getSchedule(cookies, {
+                countryCode: 51
+            });
+
+            expect(response).toContain("flag-icon-gb");
+        })
+
+    });
+
+    // todo I don't think it's getting the intended results
+    describe("method getResults", () => {
+
+        it("should return results", async() => {
+            const response = await BoxrecRequests.getResults(cookies, {
+                countryCode: 51
+            });
+
+            expect(response).toContain("flag-icon-gb");
         });
 
     });

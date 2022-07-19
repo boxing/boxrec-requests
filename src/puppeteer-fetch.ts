@@ -28,7 +28,7 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
             "--disable-features=site-per-process",
             // "--auto-open-devtools-for-tabs", // todo dev opens tools
         ],
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
     } as any);
 
@@ -51,6 +51,9 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
 
         await page.goto(urlWithQueryString);
         const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+
+        console.log(await page.url());
+
         await browser.close();
         return html;
     }
@@ -76,7 +79,7 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
 
         const cookiesFromPage: Array<{ name: string, value: string}> = await page.cookies();
 
-        await browser.close();
+        // await browser.close();
 
         return {
             body,
