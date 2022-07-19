@@ -134,6 +134,12 @@ export class BoxrecRequests {
      */
     static async getEventsByLocation(cookies: string, params: BoxrecLocationEventParams, offset: number = 0):
         Promise<string> {
+
+        params.level_id = params.country;
+        // todo doesn't appear to be needed
+        params.location = params.country;
+        params.level = "c";
+
         const qs: Partial<BoxrecLocationEventParams> = createParamsObject(params, "l");
         qs.offset = offset;
 

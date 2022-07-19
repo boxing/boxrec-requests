@@ -44,7 +44,9 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
         const urlWithQueryString: string = `${url}?${queryString.toString()}`;
 
         await page.goto(urlWithQueryString);
-        return page.evaluate(() => document.querySelector("*")?.outerHTML);
+        const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+        await browser.close();
+        return html;
     }
 
     if (method === "POST") {

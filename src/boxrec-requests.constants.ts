@@ -475,13 +475,13 @@ export enum BoxrecFighterRole {
 
 // used as params for `locations/events`
 export enum BoxrecFighterOption {
-    "Pro Boxing" = "proboxing",
-    "Amateur Boxing" = "amateurboxing",
-    "Pro Kickboxing" = "kickboxing",
-    "Amateur Kickboxing" = "amateurkickboxing",
-    "Pro Muay Thai Boxing" = "amateurmuaythaiboxing",
-    "Bare Knuckle Boxing" = "bareknuckleboxing",
-    "World Series Boxing" = "worldseriesboxing",
+    "Pro Boxing" = "box-pro",
+    "Amateur Boxing" = "box-am",
+    "Pro Kickboxing" = "kb-pro",
+    "Amateur Kickboxing" = "kb-am",
+    "Pro Muay Thai Boxing" = "mt-pro",
+    "Amateur Muay Thai Boxing" = "mt-am",
+    "Bare Knuckle Boxing" = "kb-pro",
 }
 
 export enum BoxrecRole {
@@ -524,6 +524,7 @@ export enum WeightDivision {
     minimumweight = "minimumweight"
 }
 
+// todo are all these still valid
 export interface BoxrecLocationEventParams {
     country: Country;
     offset?: number;
@@ -532,5 +533,9 @@ export interface BoxrecLocationEventParams {
     town?: string;
     venue?: string;
     year?: number;
-}
 
+    // todo these shouldn't be here
+    level_id?: Country;
+    location?: Country;
+    level?: "c";
+}
