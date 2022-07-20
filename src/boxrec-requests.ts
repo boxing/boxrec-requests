@@ -1,11 +1,8 @@
 import * as cheerio from "cheerio";
 import * as FormData from "form-data";
-import { Response as FetchResponse } from "node-fetch";
-// import fetch, {RequestInit, Response} from "node-fetch";
 import {
-    BoxrecDate, BoxrecFighterRole,
+    BoxrecDate, BoxrecFighterOption,
     BoxrecLocationEventParams,
-    BoxrecLocationLevel,
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
     BoxrecRatingsParams,
@@ -20,7 +17,7 @@ import {
     BoxrecTitlesParamsTransformed,
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
-import {getRoleOfHTML, requestWrapper, requestWrapperFullResponse} from "./helpers";
+import {getRoleOfHTML} from "./helpers";
 import {LoginResponse, puppeteerFetch} from "./puppeteer-fetch";
 import Root = cheerio.Root;
 
@@ -190,7 +187,8 @@ export class BoxrecRequests {
      * @param {number} offset                   offset number of bouts/events in the profile.  todo boxer support?
      * @returns {Promise<string>}
      */
-    static async getPersonById(cookies: string, globalId: number, role: BoxrecRole | BoxrecFighterRole | null = null, offset: number = 0):
+    // todo don't let fighter roles from BoxRecRole
+    static async getPersonById(cookies: string, globalId: number, role: BoxrecRole | BoxrecFighterOption | null = null, offset: number = 0):
         Promise<string> {
         if (role !== null) {
             return BoxrecRequests.makeGetPersonByIdRequest(cookies, globalId, role, offset, null);
@@ -315,7 +313,8 @@ export class BoxrecRequests {
      * @returns {Promise<string>}
      */
     static async getVenueById(cookies: string, venueId: number, offset: number = 0): Promise<string> {
-        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/venue/${venueId}`, cookies, {
+        // todo location has been merged with venue, maybe one should be deprecated?
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/location/${venueId}`, cookies, {
             offset,
         });
     }
@@ -398,51 +397,53 @@ export class BoxrecRequests {
 
             return JSON.stringify(data.cookies);
         } else {
+
+            return "";
             // todo this is busted now and can't be committed like this
-
-            // const data: FetchResponse = await requestWrapperFullResponse("https://boxrec.com/en/login", undefined, {
-            //     body: formData,
-            //     cache: "no-cache",
-            //     credentials: "same-origin",
-            //     method: "POST",
-            //     mode: "no-cors",
-            //     redirect: "manual",
-            // });
-
-            console.log(data.headers);
-
-            console.log("here", data);
-
-            const cookies: any = data.headers.get("set-cookie");
-
-            // redirect because we want to see if GDPR is activated for this account, as well as check any errors afterwards
-            const redirectUrl: string | null = data.headers.get("Location");
-
-            if (!redirectUrl) {
-                throw new Error("Could not get redirect URL");
-            }
-
-            // get the redirect response to see if login was successful
-            const loginRedirect: FetchResponse = await requestWrapperFullResponse(redirectUrl, cookies, {});
-
-            const loginRedirectBody: string = await loginRedirect.text();
-            // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
-            if (redirectUrl?.includes("gdpr")) {
-                throw new Error("GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account");
-            }
-
-            // the following are when login has failed
-            // an unsuccessful login returns a 200
-            const $: Root = cheerio.load(loginRedirectBody);
-            if ($("input#username").length) {
-                throw new Error("Please check your credentials, could not log into BoxRec");
-            }
-
-            if (loginRedirect.status !== 200) {
-                throw new Error("Redirect status was expecting 200");
-            }
-
-            return cookies;
+            //
+            // // const data: FetchResponse = await requestWrapperFullResponse("https://boxrec.com/en/login", undefined, {
+            // //     body: formData,
+            // //     cache: "no-cache",
+            // //     credentials: "same-origin",
+            // //     method: "POST",
+            // //     mode: "no-cors",
+            // //     redirect: "manual",
+            // // });
+            //
+            // console.log(data.headers);
+            //
+            // console.log("here", data);
+            //
+            // const cookies: any = data.headers.get("set-cookie");
+            //
+            // // redirect because we want to see if GDPR is activated for this account, as well as check any errors afterwards
+            // const redirectUrl: string | null = data.headers.get("Location");
+            //
+            // if (!redirectUrl) {
+            //     throw new Error("Could not get redirect URL");
+            // }
+            //
+            // // get the redirect response to see if login was successful
+            // const loginRedirect: FetchResponse = await requestWrapperFullResponse(redirectUrl, cookies, {});
+            //
+            // const loginRedirectBody: string = await loginRedirect.text();
+            // // if the user hasn't given consent, the user is redirected to a page that contains `gdpr`
+            // if (redirectUrl?.includes("gdpr")) {
+            //     throw new Error("GDPR consent is needed with this account.  Log into BoxRec through their website and accept before using this account");
+            // }
+            //
+            // // the following are when login has failed
+            // // an unsuccessful login returns a 200
+            // const $: Root = cheerio.load(loginRedirectBody);
+            // if ($("input#username").length) {
+            //     throw new Error("Please check your credentials, could not log into BoxRec");
+            // }
+            //
+            // if (loginRedirect.status !== 200) {
+            //     throw new Error("Redirect status was expecting 200");
+            // }
+            //
+            // return cookies;
         }
     }
 
@@ -487,14 +488,18 @@ export class BoxrecRequests {
         return BoxrecRequests.requestWrapper(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
     }
 
-    private static requestWrapper<T = string>(url: string, cookies: string, bodyParams?: Record<string, any>): Promise<T> {
+    private static requestWrapper<T = string>(url: string, cookies: string | undefined, bodyParams?: Record<string, any>): Promise<T> {
         // return BoxrecRequests.requestWrapper(url, cookies, bodyParams);
 
         if (url === "https://boxrec.com/en/login") {
-            return puppeteerFetch<T>(url, cookies, "POST", bodyParams);
+            return puppeteerFetch<T>(url, undefined, "POST", bodyParams);
         }
 
-        return puppeteerFetch<T>(url, cookies, "GET", bodyParams);
+        if (cookies) {
+            return puppeteerFetch<T>(url, cookies, "GET", bodyParams);
+        }
+
+        throw new Error("could not determine proper request from arguments");
     }
 
     /**
@@ -607,7 +612,7 @@ export class BoxrecRequests {
             const boxrecPageBody: string = await BoxrecRequests.requestWrapper("https://boxrec.com/en/search", cookies);
 
             const $: Root = cheerio.load(boxrecPageBody);
-            searchParamWrap = $("form[action=\"/en/search\"]").attr("name");
+            searchParamWrap = $("form[action=\"/en/search\"]").attr("name") || "";
         }
 
         return searchParamWrap;
@@ -651,7 +656,7 @@ export class BoxrecRequests {
      *                                          BoxRec column changes, therefore we just take the one with most columns
      */
     private static async makeGetPersonByIdRequest(cookies: string, globalId: number,
-                                                  role: BoxrecRole | BoxrecFighterRole = BoxrecRole.proBoxer,
+                                                  role: BoxrecRole | BoxrecFighterOption = BoxrecFighterOption["Pro Boxing"],
                                                   offset: number = 0,
                                                   previousRequestBody: string | null):
         Promise<string> {

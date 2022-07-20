@@ -2,7 +2,13 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import {getRoleOfHTML} from "../helpers";
-import {BoxrecFighterOption, BoxrecLocationLevel, BoxrecRequests, BoxrecRole, Country, ScoreCard} from "../index";
+import {
+    BoxrecFighterOption,
+    BoxrecLocationLevel,
+    BoxrecRequests,
+    BoxrecRole,
+    ScoreCard
+} from "../index";
 import Root = cheerio.Root;
 import DoneCallback = jest.DoneCallback;
 
@@ -104,8 +110,8 @@ describe("class BoxrecRequests", () => {
 
         it("should give male pro boxing ratings", async () => {
             const response: string = await BoxrecRequests.getRatings(cookies, {
+                role: BoxrecFighterOption["Pro Boxing"],
                 sex: "M",
-                role: BoxrecFighterOption["Pro Boxing"]
             });
 
             expect(response).toContain("Male Boxing Pro Ratings");
@@ -117,14 +123,18 @@ describe("class BoxrecRequests", () => {
 
         it("should return different events if different roles are provided", async () => {
             const proBoxerResponse: string = await BoxrecRequests.getEvents(cookies, {
-                country: Country.USA,
+                level: BoxrecLocationLevel.Country,
+                level_id: "us",
+                location: "us_30352",
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
             await sleep();
             const amateurBoxerResponse: string = await BoxrecRequests.getEvents(cookies, {
-                country: Country.USA,
-                sport: BoxrecFighterOption["Amateur Boxing"],
+                level: BoxrecLocationLevel.Country,
+                level_id: "us",
+                location: "us_30352",
+                sport: BoxrecFighterOption["Amateur Boxing"]
             });
 
             // was tested to see that two of the same requests will equal the same, so we do know this works as intended
@@ -133,8 +143,8 @@ describe("class BoxrecRequests", () => {
 
         it("should return the country if specified only", async () => {
             const response: string = await BoxrecRequests.getEvents(cookies, {
-                level_id: "us",
                 level: BoxrecLocationLevel.Country,
+                level_id: "us",
                 location: "us_30352",
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
@@ -145,8 +155,8 @@ describe("class BoxrecRequests", () => {
         it("should return the region if specified with country", async () => {
             // todo not very good tests as they don't test that results came back
             const response: string = await BoxrecRequests.getEvents(cookies, {
-                level_id: "us",
                 level: BoxrecLocationLevel.Country,
+                level_id: "us",
                 location: "us_30352",
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
@@ -154,6 +164,16 @@ describe("class BoxrecRequests", () => {
             // bound to be a flaky test
             expect(response).toContain(/Events in us/i);
         });
+
+    });
+
+    describe("method getVenueById", () => {
+
+        it("should return the venue", async () => {
+            const response = await BoxrecRequests.getVenueById(cookies, 37664);
+
+            expect(response).toContain("Boardwalk Hall");
+        })
 
     });
 
@@ -283,8 +303,8 @@ describe("class BoxrecRequests", () => {
          * @param role
          * @param expectedValue
          */
-        const returnRole: (globalId: number, role: BoxrecRole | null, expectedValue?: BoxrecRole | "") => Promise<void>
-            = async (globalId: number, role: BoxrecRole | null = null, expectedValue?: BoxrecRole | ""):
+        const returnRole: (globalId: number, role: BoxrecRole | BoxrecFighterOption | null, expectedValue?: BoxrecRole | "") => Promise<void>
+            = async (globalId: number, role: BoxrecRole | BoxrecFighterOption | null = null, expectedValue?: BoxrecRole | ""):
             Promise<void> => {
             const html: string = await BoxrecRequests.getPersonById(cookies, globalId, role);
             const roleStr: string | null = getRoleOfHTML(html);
@@ -384,27 +404,27 @@ describe("class BoxrecRequests", () => {
             describe("should return the specified role of that person", () => {
 
                 it("(pro kickboxer)", async () => {
-                    await returnRole(proKickBoxer.keithAzzopardi, BoxrecRole.proKickBoxer);
+                    await returnRole(proKickBoxer.keithAzzopardi, BoxrecFighterOption["Pro Kickboxing"]);
                 });
 
                 it("(pro muay thai)", async () => {
-                    await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecRole.proMuayThaiBoxer);
+                    await returnRole(proMuayThaiBoxer.diegoPaez, BoxrecFighterOption["Pro Muay Thai Boxing"]);
                 });
 
                 it("(world series boxer) gets lumped in with amateur boxing", async () => {
-                    await returnRole(worldSeriesBoxer.imamKhataev, BoxrecRole.amateurBoxer);
+                    await returnRole(worldSeriesBoxer.imamKhataev, BoxrecFighterOption["Amateur Boxing"]);
                 });
 
                 it("(amateur muay thai boxer)", async () => {
-                    await returnRole(amateurMuayThaiBoxer.gurnihalSandhu, BoxrecRole.amateurMuayThaiBoxer);
+                    await returnRole(amateurMuayThaiBoxer.gurnihalSandhu, BoxrecFighterOption["Amateur Muay Thai Boxing"]);
                 });
 
                 it("(amateur boxer)", async () => {
-                    await returnRole(amateurBoxer.keyshawnDavis, BoxrecRole.amateurBoxer);
+                    await returnRole(amateurBoxer.keyshawnDavis, BoxrecFighterOption["Amateur Boxing"]);
                 });
 
                 it("(amateur kickboxer)", async () => {
-                    await returnRole(amateurkickBoxer.kyleCassel, BoxrecRole.amateurKickBoxer);
+                    await returnRole(amateurkickBoxer.kyleCassel, BoxrecFighterOption["Amateur Kickboxing"]);
                 });
 
                 it("(judge)", async () => {
@@ -535,15 +555,17 @@ describe("class BoxrecRequests", () => {
 
     });
 
-    // todo I don't think it's getting the intended results
     describe("method getResults", () => {
 
         it("should return results", async () => {
             const response = await BoxrecRequests.getResults(cookies, {
-                countryCode: 51
+                countryCode: 0
             });
 
-            expect(response).toContain("flag-icon-gb");
+            const count = (response.match(/flag-icon-gb/g) || []).length;
+
+            // we determine this by checking how many Great Britain flags are on the page, which is not the greatest way to actually verify this long term
+            expect(count).toBeGreaterThanOrEqual(3);
         });
 
     });

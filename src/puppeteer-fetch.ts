@@ -13,7 +13,7 @@ export interface LoginResponse {
 }
 
 async function puppeteerFetch<T = string>(url: string, cookies: string, method: "GET", bodyParams?: Record<string, unknown>): Promise<T>;
-async function puppeteerFetch<T = LoginResponse>(url: "https://boxrec.com/en/login", cookies: string | undefined, method: "POST", bodyParams?: Record<string, unknown>): Promise<T>;
+async function puppeteerFetch<T = LoginResponse>(url: "https://boxrec.com/en/login", cookies: undefined, method: "POST", bodyParams?: Record<string, unknown>): Promise<T>;
 async function puppeteerFetch<T = string>(url: string, cookies: string | undefined, method: "POST" | "GET" = "GET", bodyParams?: Record<string, unknown>): Promise<T | LoginResponse> {
     puppeteer.use(pluginStealth());
 
@@ -37,8 +37,8 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
     // user agent helps to get around cloudflare when in headless mode
     // this may need to be dynamic though
     await page.setUserAgent(
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36'
-    )
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
+    );
 
     // todo determine if hit Cloudflare
     // await hcaptcha(page, 10000);
@@ -50,12 +50,18 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
         const urlWithQueryString: string = `${url}?${queryString.toString()}`;
 
         await page.goto(urlWithQueryString);
-        const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
 
-        console.log(await page.url());
+        if (!url.includes("/recaptcha")) {
+            const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
 
-        await browser.close();
-        return html;
+            console.log(await page.url());
+            await browser.close();
+            return html;
+        }
+
+        // recaptcha triggered, to do bypass it
+        throw new Error("Hit recaptcha");
+
     }
 
     if (method === "POST") {
