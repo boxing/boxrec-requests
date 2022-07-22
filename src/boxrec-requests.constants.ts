@@ -490,9 +490,10 @@ export enum BoxrecFighterOption {
     "Amateur Kickboxing" = "kb-am",
     "Pro Muay Thai Boxing" = "mt-pro",
     "Amateur Muay Thai Boxing" = "mt-am",
-    "Bare Knuckle Boxing" = "kb-pro",
+    "Bare Knuckle Boxing" = "bk-pro",
 }
 
+// todo we can deprecate the fighter roles here I think and use FighterOption
 export enum BoxrecRole {
     proBoxer = "proboxer",
     amateurBoxer = "amateurboxer",

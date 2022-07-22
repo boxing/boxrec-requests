@@ -309,14 +309,11 @@ export class BoxrecRequests {
      * Makes a request to BoxRec to get the information of a venue
      * @param cookies           contains cookie information about the user
      * @param {number} venueId
-     * @param {number} offset   the number of rows to offset the search
      * @returns {Promise<string>}
      */
-    static async getVenueById(cookies: string, venueId: number, offset: number = 0): Promise<string> {
+    static async getVenueById(cookies: string, venueId: number): Promise<string> {
         // todo location has been merged with venue, maybe one should be deprecated?
-        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/location/${venueId}`, cookies, {
-            offset,
-        });
+        return BoxrecRequests.requestWrapper(`https://boxrec.com/en/location/${venueId}`, cookies);
     }
 
     /**
@@ -488,15 +485,28 @@ export class BoxrecRequests {
         return BoxrecRequests.requestWrapper(`https://boxrec.com/en/watch/${boxerGlobalId}`, cookies);
     }
 
-    private static requestWrapper<T = string>(url: string, cookies: string | undefined, bodyParams?: Record<string, any>): Promise<T> {
-        // return BoxrecRequests.requestWrapper(url, cookies, bodyParams);
+    /**
+     * Intercepts the requests and converts it for the middleware requestor
+     * @param url
+     * @param cookies
+     * @param bodyOrQueryParams
+     * @private
+     */
+    private static requestWrapper<T = string>(url: string, cookies: string | undefined, bodyOrQueryParams?: Record<string, any>): Promise<T> {
+        if (cookies) {
+            if (url === "https://boxrec.com/en/quick_search") {
+                if (bodyOrQueryParams) {
+                    return puppeteerFetch<T>(url, cookies, "POST", bodyOrQueryParams);
+                }
 
-        if (url === "https://boxrec.com/en/login") {
-            return puppeteerFetch<T>(url, undefined, "POST", bodyParams);
+                return puppeteerFetch<T>(url, cookies, "GET");
+            }
+
+            return puppeteerFetch<T>(url, cookies, "GET", bodyOrQueryParams);
         }
 
-        if (cookies) {
-            return puppeteerFetch<T>(url, cookies, "GET", bodyParams);
+        if (url === "https://boxrec.com/en/login") {
+            return puppeteerFetch<T>(url, undefined, "POST", bodyOrQueryParams);
         }
 
         throw new Error("could not determine proper request from arguments");
@@ -513,13 +523,9 @@ export class BoxrecRequests {
                                      searchRole: BoxrecRole | "" = ""): Promise<string> {
         const searchParam: string = await BoxrecRequests.getQuickSearchParamWrap(cookies);
         // use an empty string or the actual passed role
-        const formData: FormData = new FormData();
-        formData.append( `${searchParam}[search_role]`, searchRole === null ? "" : searchRole);
-        formData.append( `${searchParam}[search_text]`, globalIdOrSearchText);
-
         return BoxrecRequests.requestWrapper("https://boxrec.com/en/quick_search", cookies, {
-            body: formData,
-            method: "POST",
+            [`${searchParam}[search_role]`]: searchRole === null ? "" : searchRole,
+            [`${searchParam}[search_text]`]: globalIdOrSearchText
         });
     }
 

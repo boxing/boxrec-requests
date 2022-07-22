@@ -2,7 +2,7 @@ import * as $ from "cheerio";
 import fetch, {RequestInit, Response} from "node-fetch";
 import { URLSearchParams } from "url";
 import {BoxrecRequests} from "./boxrec-requests";
-import {BoxrecRole} from "./boxrec-requests.constants";
+import {BoxrecFighterOption, BoxrecRole} from "./boxrec-requests.constants";
 import Root = cheerio.Root;
 
 /**
@@ -14,10 +14,10 @@ export const getRoleOfHTML: (html: string) => string | null = (html: string): st
     const href: string | undefined = $a("link[rel='canonical']").attr("href");
 
     if (href) {
-        const matches: RegExpMatchArray | null = href.match(/boxrec\.com\/en\/(\w+)\/\d+/);
+        const matches: RegExpMatchArray | null = href.match(/boxrec\.com\/en\/([\w\-]+)\/\d+/);
 
         if (matches) {
-            const roleValues: string[] = Object.values(BoxrecRole);
+            const roleValues: string[] = Object.values({ ...Object.values(BoxrecRole), ...Object.values(BoxrecFighterOption)} as Record<number, string>);
             const val: string | undefined = roleValues.find((value: string) => value === matches[1]);
 
             if (val) {

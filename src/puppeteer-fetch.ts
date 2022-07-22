@@ -13,6 +13,8 @@ export interface LoginResponse {
 }
 
 async function puppeteerFetch<T = string>(url: string, cookies: string, method: "GET", bodyParams?: Record<string, unknown>): Promise<T>;
+async function puppeteerFetch<T = string>(url: "https://boxrec.com/en/quick_search", cookies: string, method: "GET"): Promise<T>;
+async function puppeteerFetch<T = string>(url: "https://boxrec.com/en/quick_search", cookies: string, method: "POST", bodyParams?: Record<string, unknown>): Promise<T>;
 async function puppeteerFetch<T = LoginResponse>(url: "https://boxrec.com/en/login", cookies: undefined, method: "POST", bodyParams?: Record<string, unknown>): Promise<T>;
 async function puppeteerFetch<T = string>(url: string, cookies: string | undefined, method: "POST" | "GET" = "GET", bodyParams?: Record<string, unknown>): Promise<T | LoginResponse> {
     puppeteer.use(pluginStealth());
@@ -28,7 +30,7 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
             "--disable-features=site-per-process",
             // "--auto-open-devtools-for-tabs", // todo dev opens tools
         ],
-        headless: true,
+        headless: false,
         ignoreHTTPSErrors: true,
     } as any);
 
@@ -46,63 +48,81 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
 
     // todo this might be all we need for GET requests
     if (method === "GET") {
-        const queryString: URLSearchParams = new URLSearchParams(bodyParams as any);
-        const urlWithQueryString: string = `${url}?${queryString.toString()}`;
+        const queryParams: URLSearchParams = new URLSearchParams(bodyParams as any);
+        const queryString = queryParams.toString();
+        const urlWithQueryString: string = `${url}${queryString ? `?${queryString.toString()}` : ""}`;
 
         await page.goto(urlWithQueryString);
 
-        if (!url.includes("/recaptcha")) {
-            const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+        const resolvedUrlAfterPageChange = await page.url();
 
-            console.log(await page.url());
+        if (resolvedUrlAfterPageChange.includes("/recaptcha")) {
+            // todo get inside iframe
+            await page.click("span[role=\"checkbox\"]");
+            await page.click("input[type=\"submit\"]");
+
+            await page.url();
+        } else {
+            const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
             await browser.close();
             return html;
         }
 
         // recaptcha triggered, to do bypass it
         throw new Error("Hit recaptcha");
-
     }
 
-    if (method === "POST") {
-        await page.goto("http://boxrec.com");
-        const body = await page.evaluate((strippedUrlInside: string, bodyInside: Record<string, string>) => {
-            const formData: FormData = new FormData();
-            const arr: Array<[string, string]> = Object.entries(bodyInside);
-            for (const [cookieName, val] of arr) {
-                formData.append(cookieName, val);
+
+    page.on('console', async (msg) => {
+        const msgArgs = msg.args();
+        for (let i = 0; i < msgArgs.length; ++i) {
+            console.log(await msgArgs[i].jsonValue());
+        }
+    });
+
+
+    // POST requests
+    await page.goto("http://localhost:3000");
+
+    const testCookie = "works?"
+
+
+    const body = await page.evaluate((urlInside: string, cookiesInside: string | undefined, bodyInside: Record<string, string>) => {
+        const formData: FormData = new FormData();
+        const arr: Array<[string, string]> = Object.entries(bodyInside);
+        for (const [cookieName, val] of arr) {
+            formData.append(cookieName, val);
+        }
+
+        const baseOptions: RequestInit = {
+            body: formData as any,
+            method: "POST",
+            credentials: "include",
+            // mode: "cors" // todo needed?
+            headers: { // todo not sure if needed
+                cookies: cookiesInside,
             }
-
-            return fetch(strippedUrlInside, {
-                body: formData as any,
-                headers: {
-                    "Access-Control-Expose-Headers": "Location",
-                },
-                method: "POST",
-                mode: "cors"
-            }).then(res => res.text());
-        }, url, bodyParams);
-
-        const cookiesFromPage: Array<{ name: string, value: string}> = await page.cookies();
-
-        // await browser.close();
-
-        return {
-            body,
-            cookies: cookiesFromPage,
         };
+
+        if (cookiesInside) {
+            baseOptions.credentials = "include";
+        }
+
+        return fetch(urlInside, baseOptions).then(res => res.text());
+    }, "http://localhost:3000", testCookie, bodyParams);
+
+    if (url === "https://boxrec.com/en/quick_search")  {
+        await browser.close();
+        return body;
     }
 
-    // const queryString: URLSearchParams = new URLSearchParams(bodyParams as any);
-    // const urlWithQueryString: string = `${url}?${queryString.toString()}`;
-    //
-    // return page.evaluate((strippedUrlInside: string, cookiesInside: string) => {
-    //     return fetch(strippedUrlInside,
-    //         {method: "GET", headers: {
-    //                 cookie: cookiesInside || "",
-    //
-    //             }}).then(res => res.text());
-    // }, urlWithQueryString, cookies);
+    const cookiesFromPage: Array<{ name: string, value: string}> = await page.cookies();
+    await browser.close();
+
+    return {
+        body,
+        cookies: cookiesFromPage,
+    };
 }
 
 export {

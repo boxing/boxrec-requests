@@ -2,13 +2,7 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import {getRoleOfHTML} from "../helpers";
-import {
-    BoxrecFighterOption,
-    BoxrecLocationLevel,
-    BoxrecRequests,
-    BoxrecRole,
-    ScoreCard
-} from "../index";
+import {BoxrecFighterOption, BoxrecLocationLevel, BoxrecRequests, BoxrecRole, ScoreCard} from "../index";
 import Root = cheerio.Root;
 import DoneCallback = jest.DoneCallback;
 
@@ -173,7 +167,7 @@ describe("class BoxrecRequests", () => {
             const response = await BoxrecRequests.getVenueById(cookies, 37664);
 
             expect(response).toContain("Boardwalk Hall");
-        })
+        });
 
     });
 
@@ -303,8 +297,8 @@ describe("class BoxrecRequests", () => {
          * @param role
          * @param expectedValue
          */
-        const returnRole: (globalId: number, role: BoxrecRole | BoxrecFighterOption | null, expectedValue?: BoxrecRole | "") => Promise<void>
-            = async (globalId: number, role: BoxrecRole | BoxrecFighterOption | null = null, expectedValue?: BoxrecRole | ""):
+        const returnRole: (globalId: number, role: BoxrecRole | BoxrecFighterOption | null, expectedValue?: BoxrecFighterOption | BoxrecRole | "") => Promise<void>
+            = async (globalId: number, role: BoxrecRole | BoxrecFighterOption | null = null, expectedValue?: BoxrecFighterOption | BoxrecRole | ""):
             Promise<void> => {
             const html: string = await BoxrecRequests.getPersonById(cookies, globalId, role);
             const roleStr: string | null = getRoleOfHTML(html);
@@ -314,7 +308,7 @@ describe("class BoxrecRequests", () => {
         const promoter: Record<string, number> = {
             leonardEllerbe: 419406,
         };
-        const bareknuckleboxer: any = {
+        const bareknuckleboxer: Record<string, number> = {
             paulieMalignaggi: 52984,
         };
         const proboxer: Record<string, number> = {
@@ -332,7 +326,6 @@ describe("class BoxrecRequests", () => {
         const judge: Record<string, number> = {
             daveMoretti: 401002,
         };
-
         const doctor: Record<string, number> = {
             anthonyRuggeroli: 412676,
         };
@@ -367,7 +360,7 @@ describe("class BoxrecRequests", () => {
         describe("offset", () => {
 
             it("should return a different page if specifying offset", async () => {
-                const response: string = await BoxrecRequests.getPersonById(cookies, 9625, BoxrecRole.proBoxer, 100);
+                const response: string = await BoxrecRequests.getPersonById(cookies, 9625, BoxrecFighterOption["Pro Boxing"], 100);
 
                 expect(response).toContain("Flashy Sebastian");
             });
@@ -380,7 +373,7 @@ describe("class BoxrecRequests", () => {
 
                 it("should give the profile default role of the person", async () => {
                     // Paulie Malignaggi should default to `Pro Boxing`
-                    await returnRole(bareknuckleboxer.paulieMalignaggi, null, BoxrecRole.proBoxer);
+                    await returnRole(bareknuckleboxer.paulieMalignaggi, null, BoxrecFighterOption["Pro Boxing"]);
                 });
             });
 
@@ -389,7 +382,7 @@ describe("class BoxrecRequests", () => {
                 it("should throw an error if the role doesn't exist for this person", async () => {
                     try {
                         await BoxrecRequests.getPersonById(cookies, bareknuckleboxer.paulieMalignaggi,
-                            BoxrecRole.amateurMuayThaiBoxer);
+                            BoxrecFighterOption["Amateur Muay Thai Boxing"]);
                     } catch (e) {
                         expect((e as any).message).toBe("Person does not have this role");
                     }
@@ -448,11 +441,11 @@ describe("class BoxrecRequests", () => {
                 });
 
                 it("(bareknuckleboxer)", async () => {
-                    await returnRole(bareknuckleboxer.paulieMalignaggi, BoxrecRole.bareKnuckleBoxer);
+                    await returnRole(bareknuckleboxer.paulieMalignaggi, BoxrecFighterOption["Bare Knuckle Boxing"]);
                 });
 
                 it("(proboxer)", async () => {
-                    await returnRole(proboxer.royJonesJr, BoxrecRole.proBoxer);
+                    await returnRole(proboxer.royJonesJr, BoxrecFighterOption["Pro Boxing"]);
                 });
 
                 it("(matchmaker)", async () => {
@@ -460,7 +453,7 @@ describe("class BoxrecRequests", () => {
                 });
 
                 it("(muaythaiboxing)", async () => {
-                    await returnRole(muayThaiBoxer.markMacKinnon, BoxrecRole.proMuayThaiBoxer);
+                    await returnRole(muayThaiBoxer.markMacKinnon, BoxrecFighterOption["Pro Muay Thai Boxing"]);
                 });
 
                 it("(referee)", async () => {
