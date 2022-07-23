@@ -471,6 +471,43 @@ export interface BoxrecBelts {
     WBO: BoxrecBasic | null;
 }
 
+export interface BoxrecLocationSearchParams {
+    term?: string;
+    level?: "c" | "r" | "t";
+    id?: string | number; // for country, it was string, for region search it was number
+    parent?: unknown; // maybe not needed
+    inc_loc?: "y";
+}
+
+export interface BoxrecLocationSearchParamsCountry extends BoxrecLocationSearchParams {
+    level: "c" | "r";
+}
+
+export type BoxrecLocationSearchParamsSearch = Omit<BoxrecLocationSearchParams, "level">;
+
+interface BoxrecLocationInformation {
+    cty: string;
+    id: string;
+    level: "c" | "r" | "t";
+    level_id: string;
+    parent: "";
+    text: string; // the name of the location
+}
+
+interface BoxrecLocationResult {
+    children: BoxrecLocationInformation[];
+    cty: "";
+    text: string;
+}
+
+export interface BoxrecLocationSearchResponse {
+    results: [BoxrecLocationResult];
+}
+
+export interface BoxrecLocationSearchResponseCountry {
+    results: [BoxrecLocationResult, BoxrecLocationResult];
+}
+
 export enum BoxrecFighterRole {
     proBoxer = "proboxer",
     amateurBoxer = "amateurboxer",

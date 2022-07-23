@@ -30,6 +30,41 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
+"@cliqz/adblocker-content@^1.23.8":
+  version "1.23.8"
+  resolved "https://registry.yarnpkg.com/@cliqz/adblocker-content/-/adblocker-content-1.23.8.tgz#c2fdf46cc746e092ad4fce594b8e5f0be6366db9"
+  integrity sha512-5Wm/OSA6H8AUVFi8SDff6xJ4zT/1VCrNoUnevFEi3e0MCmdQUvn+cJc03Saky7Ch5oLSJKTXNNMyPaODZLz24A==
+  dependencies:
+    "@cliqz/adblocker-extended-selectors" "^1.23.8"
+
+"@cliqz/adblocker-extended-selectors@^1.23.8":
+  version "1.23.8"
+  resolved "https://registry.yarnpkg.com/@cliqz/adblocker-extended-selectors/-/adblocker-extended-selectors-1.23.8.tgz#2d69c95aee385c5b51a047cbaf0219db98f50729"
+  integrity sha512-5xx47oT2Q9E3vkfEm/EzSs7cAPi8WNWtu7kJcGa/urVkDchJwdkdelvQ2Dof+k5icI5AqZorZSsk9Q7w2bLxrA==
+
+"@cliqz/adblocker-puppeteer@1.23.8":
+  version "1.23.8"
+  resolved "https://registry.yarnpkg.com/@cliqz/adblocker-puppeteer/-/adblocker-puppeteer-1.23.8.tgz#e74636cd200459d1734929e41504a76939504311"
+  integrity sha512-Ca1/DBqQXsOpKTFVAHX6OpLTSEupXmUkUWHj6iXhLLleC7RPISN5B0b801VDmaGRqoC5zKRxn0vYbIfpgCWVug==
+  dependencies:
+    "@cliqz/adblocker" "^1.23.8"
+    "@cliqz/adblocker-content" "^1.23.8"
+    tldts-experimental "^5.6.21"
+
+"@cliqz/adblocker@^1.23.8":
+  version "1.23.8"
+  resolved "https://registry.yarnpkg.com/@cliqz/adblocker/-/adblocker-1.23.8.tgz#5945bdb077a18864ed7a3fefdc30d8887eac615c"
+  integrity sha512-xM1JYTv5dA+pPP4x4IVZdjkM9aAsakTnShFLuHLzMxMHd20eUB91NXm4kK6acw9nHwG6rCyat6+u7TvAqSmR6g==
+  dependencies:
+    "@cliqz/adblocker-content" "^1.23.8"
+    "@cliqz/adblocker-extended-selectors" "^1.23.8"
+    "@remusao/guess-url-type" "^1.1.2"
+    "@remusao/small" "^1.1.2"
+    "@remusao/smaz" "^1.7.1"
+    "@types/chrome" "^0.0.183"
+    "@types/firefox-webext-browser" "^94.0.0"
+    tldts-experimental "^5.6.21"
+
 "@mapbox/node-pre-gyp@1.0.4":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.4.tgz#6c76e7a40138eac39e1a4dc869a083e43e236c00"
@@ -44,6 +79,41 @@
     rimraf "^3.0.2"
     semver "^7.3.4"
     tar "^6.1.0"
+
+"@remusao/guess-url-type@^1.1.2":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@remusao/guess-url-type/-/guess-url-type-1.2.1.tgz#b3e7c32abdf98d0fb4f93cc67cad580b5fe4ba57"
+  integrity sha512-rbOqre2jW8STjheOsOaQHLgYBaBZ9Owbdt8NO7WvNZftJlaG3y/K9oOkl8ZUpuFBisIhmBuMEW6c+YrQl5inRA==
+
+"@remusao/small@^1.1.2":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@remusao/small/-/small-1.2.1.tgz#63bfe4548832289f94ac868a0c305970c9a0e5f9"
+  integrity sha512-7MjoGt0TJMVw1GPKgWq6SJPws1SLsUXQRa43Umht+nkyw2jnpy3WpiLNqGdwo5rHr5Wp9B2W/Pm5RQp656UJdw==
+
+"@remusao/smaz-compress@^1.9.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@remusao/smaz-compress/-/smaz-compress-1.9.1.tgz#fc75eaf9bcac2d58bc4c3d518183a7cb9612d275"
+  integrity sha512-E2f48TwloQu3r6BdLOGF2aczeH7bJ/32oJGqvzT9SKur0cuUnLcZ7ZXP874E2fwmdE+cXzfC7bKzp79cDnmeyw==
+  dependencies:
+    "@remusao/trie" "^1.4.1"
+
+"@remusao/smaz-decompress@^1.9.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@remusao/smaz-decompress/-/smaz-decompress-1.9.1.tgz#8094f997e8fb591a678cda9cf08c209c825eba5b"
+  integrity sha512-TfjKKprYe3n47od8auhvJ/Ikj9kQTbDTe71ynKlxslrvvUhlIV3VQSuwYuMWMbdz1fIs0H/fxCN1Z8/H3km6/A==
+
+"@remusao/smaz@^1.7.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@remusao/smaz/-/smaz-1.9.1.tgz#a2b9b045385f81e1615a68d932b7cc8b04c9db8d"
+  integrity sha512-e6BLuP8oaXCZ9+v46Is4ilAZ/Vq6YLgmBP204Ixgk1qTjXmqvFYG7+AS7v9nsZdGOy96r9DWGFbbDVgMxwu1rA==
+  dependencies:
+    "@remusao/smaz-compress" "^1.9.1"
+    "@remusao/smaz-decompress" "^1.9.1"
+
+"@remusao/trie@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@remusao/trie/-/trie-1.4.1.tgz#755d09f8a007476334e611f42719b2d581f00720"
+  integrity sha512-yvwa+aCyYI/UjeD39BnpMypG8N06l86wIDW1/PAc6ihBRnodIfZDwccxQN3n1t74wduzaz74m4ZMHZnB06567Q==
 
 "@tensorflow-models/coco-ssd@^2.2.2":
   version "2.2.2"
@@ -140,6 +210,14 @@
   dependencies:
     "@types/node" "*"
 
+"@types/chrome@^0.0.183":
+  version "0.0.183"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.183.tgz#c12649c00ae5ae8fca511248256c0b11f91c95e2"
+  integrity sha512-sYI1qGY2oB6U5GFyuoSsVJsi2ytuEe92QrQTXQRwkISN8yn1gPY5qRq1XSwKN17yjvZTgxxeHw2ZoSHMti6qYg==
+  dependencies:
+    "@types/filesystem" "*"
+    "@types/har-format" "*"
+
 "@types/debug@^4.1.0":
   version "4.1.7"
   resolved "https://registry.npmjs.org/@types/debug/-/debug-4.1.7.tgz"
@@ -147,12 +225,34 @@
   dependencies:
     "@types/ms" "*"
 
+"@types/filesystem@*":
+  version "0.0.32"
+  resolved "https://registry.yarnpkg.com/@types/filesystem/-/filesystem-0.0.32.tgz#307df7cc084a2293c3c1a31151b178063e0a8edf"
+  integrity sha512-Yuf4jR5YYMR2DVgwuCiP11s0xuVRyPKmz8vo6HBY3CGdeMj8af93CFZX+T82+VD1+UqHOxTq31lO7MI7lepBtQ==
+  dependencies:
+    "@types/filewriter" "*"
+
+"@types/filewriter@*":
+  version "0.0.29"
+  resolved "https://registry.yarnpkg.com/@types/filewriter/-/filewriter-0.0.29.tgz#a48795ecadf957f6c0d10e0c34af86c098fa5bee"
+  integrity sha512-BsPXH/irW0ht0Ji6iw/jJaK8Lj3FJemon2gvEqHKpCdDCeemHa+rI3WBGq5z7cDMZgoLjY40oninGxqk+8NzNQ==
+
+"@types/firefox-webext-browser@^94.0.0":
+  version "94.0.1"
+  resolved "https://registry.yarnpkg.com/@types/firefox-webext-browser/-/firefox-webext-browser-94.0.1.tgz#52afb975253dc0fd350d5d58c7fe9fd1a01f64a1"
+  integrity sha512-I6iHRQJSTZ+gYt2IxdH2RRAMvcUyK8v5Ig7fHQR0IwUNYP7hz9+cziBVIKxLCO6XI7fiyRsNOWObfl3/4Js2Lg==
+
 "@types/form-data@^2.5.0":
   version "2.5.0"
   resolved "https://registry.npmjs.org/@types/form-data/-/form-data-2.5.0.tgz"
   integrity sha512-23/wYiuckYYtFpL+4RPWiWmRQH2BjFuqCUi2+N3amB1a1Drv+i/byTrGvlLwRVLFNAZbwpbQ7JvTK+VCAPMbcg==
   dependencies:
     form-data "*"
+
+"@types/har-format@*":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@types/har-format/-/har-format-1.2.8.tgz#e6908b76d4c88be3db642846bb8b455f0bfb1c4e"
+  integrity sha512-OP6L9VuZNdskgNN3zFQQ54ceYD8OLq5IbqO4VK91ORLfOm7WdT/CiT/pHEBSQEqCInJ2y3O6iCm/zGtPElpgJQ==
 
 "@types/jest@^22.1.1":
   version "22.2.3"
@@ -3527,7 +3627,7 @@ nice-try@^1.0.4:
   resolved "https://registry.npmjs.org/nice-try/-/nice-try-1.0.5.tgz"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-node-fetch@2, node-fetch@^2.6.1, node-fetch@~2.6.1:
+node-fetch@2, node-fetch@^2.6.0, node-fetch@^2.6.1, node-fetch@~2.6.1:
   version "2.6.7"
   resolved "https://registry.npmjs.org/node-fetch/-/node-fetch-2.6.7.tgz"
   integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
@@ -3983,6 +4083,16 @@ punycode@^2.1.0, punycode@^2.1.1:
   version "2.1.1"
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
+
+puppeteer-extra-plugin-adblocker@^2.13.4:
+  version "2.13.4"
+  resolved "https://registry.yarnpkg.com/puppeteer-extra-plugin-adblocker/-/puppeteer-extra-plugin-adblocker-2.13.4.tgz#ee0bf6e606d384eb93e560f09e574118d578d426"
+  integrity sha512-52tP0VACzssUWPgKaRb7YEXVhqBSOrB6wZS/1HUpJU7j5jyE3JxLJiYcA7HVdVxdlwWN/opRPkZMLGhiOT+vAQ==
+  dependencies:
+    "@cliqz/adblocker-puppeteer" "1.23.8"
+    debug "^4.1.1"
+    node-fetch "^2.6.0"
+    puppeteer-extra-plugin "^3.2.2"
 
 puppeteer-extra-plugin-stealth@^2.11.0, puppeteer-extra-plugin-stealth@^2.9.0:
   version "2.11.0"
@@ -4789,6 +4899,18 @@ through@^2.3.8:
   version "2.3.8"
   resolved "https://registry.npmjs.org/through/-/through-2.3.8.tgz"
   integrity sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==
+
+tldts-core@^5.7.84:
+  version "5.7.84"
+  resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-5.7.84.tgz#0e128f7d70c0b91741156e1d3ce072fac687ef2a"
+  integrity sha512-1qKxwSDjmWdqG81cnXGvKI+FHPiVRT6w5DORjp2+YVqDdzFUZO0oQoWu0zbDtWA6HXVk+B15yY9DKbVKZ6fRLg==
+
+tldts-experimental@^5.6.21:
+  version "5.7.84"
+  resolved "https://registry.yarnpkg.com/tldts-experimental/-/tldts-experimental-5.7.84.tgz#8c144e6dcb3df32ba60586505eb56bf57dcdc984"
+  integrity sha512-zcOASBYSPtRsbjQ0e/EVPtxdECiNFVucELwlBV6VW7dJq6IP3n9YhK6vN4I4W3Ag9mLqVYWe2T2o7ml0Va7uFw==
+  dependencies:
+    tldts-core "^5.7.84"
 
 tmpl@1.0.5:
   version "1.0.5"

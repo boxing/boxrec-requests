@@ -2,7 +2,14 @@ import * as $ from "cheerio";
 import * as fs from "fs";
 import * as path from "path";
 import {getRoleOfHTML} from "../helpers";
-import {BoxrecFighterOption, BoxrecLocationLevel, BoxrecRequests, BoxrecRole, ScoreCard} from "../index";
+import {
+    BoxrecFighterOption,
+    BoxrecLocationLevel,
+    BoxrecLocationSearchResponseCountry,
+    BoxrecRequests,
+    BoxrecRole,
+    ScoreCard
+} from "../index";
 import Root = cheerio.Root;
 import DoneCallback = jest.DoneCallback;
 
@@ -588,6 +595,58 @@ describe("class BoxrecRequests", () => {
             const html: string = await BoxrecRequests.updateScoreByBoutId(cookies, 2756346, score);
 
             expect(html).toContain("Score");
+        });
+
+    });
+
+    describe("method getLocationSearch", () => {
+
+        it("should be able to return data for all locations", async () => {
+            const response = await BoxrecRequests.getLocationSearch(cookies);
+
+            expect(response.results[0].text).toBeDefined();
+        });
+
+        it("should be able to return regions of a country", async () => {
+            const response = await BoxrecRequests.getLocationSearch(cookies, {
+                id: "gb",
+                level: "c",
+            });
+
+            expect(response.results[1].text).toBeDefined();
+        });
+
+        it("should be able to return cities of a region", async () => {
+            const response = await BoxrecRequests.getLocationSearch(cookies, {
+                id: "445",
+                level: "r",
+            });
+
+            expect(response.results[1].text).toBeDefined();
+        });
+
+        describe("search", () => {
+
+            let responseSearch: BoxrecLocationSearchResponseCountry;
+
+            beforeAll(async () => {
+                responseSearch = await BoxrecRequests.getLocationSearch(cookies, {
+                    id: "445",
+                    term: "tuscaloosa"
+                });
+
+            });
+
+            it("should be able to search for towns/regions/country which returns suggested", async () => {
+                expect(responseSearch.results[0].children[0].text).toMatch(/tuscaloosa/i);
+                expect(responseSearch.results[0].children[0].text).toMatch(/alabama/i);
+            });
+
+            it("should be able to search for towns/regions/country which returns locations", async () => {
+                expect(responseSearch.results[1].children[0].text).toMatch(/tuscaloosa/i);
+                expect(responseSearch.results[1].children[0].text).toMatch(/alabama/i);
+            });
+
         });
 
     });

@@ -1,11 +1,15 @@
 import puppeteer from "puppeteer-extra";
 // tslint:disable-next-line:typedef no-var-requires
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
+// tslint:disable-next-line:no-var-requires
+const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
+
 // tslint:disable-next-line:typedef no-var-requires
 const {hcaptcha} = require("puppeteer-hcaptcha");
 
 import * as FormData from "form-data";
 import {URLSearchParams} from "url";
+import {BoxrecLocationEventParams, BoxrecLocationSearchResponse} from "./boxrec-requests.constants";
 import {debugMsg} from "./helpers";
 
 export interface Cookie {
@@ -18,12 +22,18 @@ export interface LoginResponse {
     cookies: Cookie[];
 }
 
-async function puppeteerFetch(url: string, cookies: string, method: "GET", bodyParams?: Record<string, unknown>): Promise<LoginResponse>;
+async function puppeteerFetch(url: "https://boxrec.com/en/location_search_ajax", cookies: string, method: "GET", bodyParams: BoxrecLocationEventParams): Promise<BoxrecLocationSearchResponse>;
+async function puppeteerFetch(url: string, cookies: string, method: "GET", bodyParams?: Record<string, any>): Promise<LoginResponse>;
 async function puppeteerFetch(url: "https://boxrec.com/en/quick_search", cookies: string, method: "GET"): Promise<LoginResponse>;
-async function puppeteerFetch(url: "https://boxrec.com/en/quick_search", cookies: string, method: "POST", bodyParams?: Record<string, unknown>): Promise<LoginResponse>;
-async function puppeteerFetch(url: "https://boxrec.com/en/login", cookies: undefined, method: "POST", bodyParams?: Record<string, unknown>): Promise<LoginResponse>;
-async function puppeteerFetch(url: string, cookies: string | undefined, method: "POST" | "GET" = "GET", bodyParams?: Record<string, unknown>): Promise<LoginResponse> {
+async function puppeteerFetch(url: "https://boxrec.com/en/quick_search", cookies: string, method: "POST", bodyParams?: Record<string, any>): Promise<LoginResponse>;
+async function puppeteerFetch(url: "https://boxrec.com/en/login", cookies: undefined, method: "POST", bodyParams?: Record<string, any>): Promise<LoginResponse>;
+async function puppeteerFetch(url: string, cookies: string | undefined, method: "POST" | "GET" = "GET", bodyParams?: Record<string, any> | BoxrecLocationEventParams): Promise<LoginResponse | BoxrecLocationSearchResponse> {
     puppeteer.use(pluginStealth());
+    puppeteer.use(
+        AdblockerPlugin({
+            blockTrackers: true,
+        })
+    );
 
     debugMsg(`URL being requested is ${url}, ${method}, ${typeof bodyParams === "object" ? JSON.stringify(bodyParams) : ""}`);
 
@@ -38,7 +48,7 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
             "--disable-features=site-per-process",
             // "--auto-open-devtools-for-tabs", // todo dev opens tools
         ],
-        headless: false,
+        headless: true,
         ignoreHTTPSErrors: true,
     } as any);
 
@@ -63,7 +73,6 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
 
         debugMsg(`Going to: ${urlWithQueryString}`);
 
-
         await page.goto(urlWithQueryString);
 
         const resolvedUrlAfterPageChange = await page.url();
@@ -78,9 +87,30 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
 
             await page.url();
         } else {
-            const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+
             const cookiesFromPageGet: Array<{ name: string, value: string}> = await page.cookies();
+
+            if (url === "https://boxrec.com/en/location_search_ajax") {
+                const json = await page.evaluate(() => {
+                    const innerText = document.querySelector("body")?.innerText || "";
+
+                    try {
+                        return JSON.parse(innerText);
+                    } catch (e) {
+                        throw new Error("Could not parse, was expecting JSON");
+                    }
+                });
+                await browser.close();
+
+                return {
+                    body: json,
+                    cookies: cookiesFromPageGet
+                };
+            }
+
+            const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
             await browser.close();
+
             return {
                 body: html,
                 cookies: cookiesFromPageGet,

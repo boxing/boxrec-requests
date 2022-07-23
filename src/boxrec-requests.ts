@@ -1,8 +1,12 @@
 import * as cheerio from "cheerio";
 import * as FormData from "form-data";
 import {
-    BoxrecDate, BoxrecFighterOption,
+    BoxrecDate,
+    BoxrecFighterOption,
     BoxrecLocationEventParams,
+    BoxrecLocationSearchParamsCountry,
+    BoxrecLocationSearchParams,
+    BoxrecLocationSearchResponse, BoxrecLocationSearchResponseCountry,
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
     BoxrecRatingsParams,
@@ -15,7 +19,8 @@ import {
     BoxrecStatus,
     BoxrecTitlesParams,
     BoxrecTitlesParamsTransformed,
-    PersonRequestParams, ScoreCard
+    PersonRequestParams,
+    ScoreCard, BoxrecLocationSearchParamsSearch
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
 import {Cookie, LoginResponse, puppeteerFetch} from "./puppeteer-fetch";
@@ -353,6 +358,19 @@ export class BoxrecRequests {
     // }
 
     /**
+     * Makes a request to get BoxRec location information
+     * @param cookies
+     * @param params
+     */
+    static async getLocationSearch(cookies: string, params?: BoxrecLocationSearchParamsSearch | BoxrecLocationSearchParamsCountry): Promise<BoxrecLocationSearchResponseCountry>;
+    static async getLocationSearch(cookies: string, params?: BoxrecLocationSearchParams): Promise<BoxrecLocationSearchResponse | BoxrecLocationSearchResponseCountry> {
+        return BoxrecRequests.requestWrapper("https://boxrec.com/en/location_search_ajax", cookies, {
+            ...params,
+            inc_loc: "y",
+        });
+    }
+
+    /**
      * Makes a request to BoxRec to log the user in
      * This is required before making any additional calls
      * The session cookie is stored inside this instance of the class
@@ -492,9 +510,10 @@ export class BoxrecRequests {
      * @param bodyOrQueryParams
      * @private
      */
+    private static async requestWrapper(url: "https://boxrec.com/en/location_search_ajax", cookies: string, bodyOrQueryParams: BoxrecLocationSearchParams): Promise<BoxrecLocationSearchResponse>;
     private static async requestWrapper(url: string, cookies: string, bodyOrQueryParams?: Record<string, any>): Promise<string>;
     private static async requestWrapper(url: "https://boxrec.com/en/login", cookies: undefined, bodyOrQueryParams: Record<string, any>): Promise<LoginResponse>;
-    private static async requestWrapper(url: string, cookies: string | undefined, bodyOrQueryParams?: Record<string, any>): Promise<string | LoginResponse> {
+    private static async requestWrapper(url: string, cookies: string | undefined, bodyOrQueryParams?: Record<string, any> | BoxrecLocationEventParams): Promise<string | LoginResponse | BoxrecLocationSearchResponse> {
         if (cookies) {
             if (url === "https://boxrec.com/en/quick_search") {
                 if (bodyOrQueryParams) {
