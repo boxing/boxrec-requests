@@ -18,7 +18,7 @@ import {
     PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
-import {LoginResponse, puppeteerFetch} from "./puppeteer-fetch";
+import {Cookie, LoginResponse, puppeteerFetch} from "./puppeteer-fetch";
 import Root = cheerio.Root;
 
 // used to hold the dynamic param on BoxRec to prevent multiple unnecessary requests
@@ -492,21 +492,26 @@ export class BoxrecRequests {
      * @param bodyOrQueryParams
      * @private
      */
-    private static requestWrapper<T = string>(url: string, cookies: string | undefined, bodyOrQueryParams?: Record<string, any>): Promise<T> {
+    private static async requestWrapper(url: string, cookies: string, bodyOrQueryParams?: Record<string, any>): Promise<string>;
+    private static async requestWrapper(url: "https://boxrec.com/en/login", cookies: undefined, bodyOrQueryParams: Record<string, any>): Promise<LoginResponse>;
+    private static async requestWrapper(url: string, cookies: string | undefined, bodyOrQueryParams?: Record<string, any>): Promise<string | LoginResponse> {
         if (cookies) {
             if (url === "https://boxrec.com/en/quick_search") {
                 if (bodyOrQueryParams) {
-                    return puppeteerFetch<T>(url, cookies, "POST", bodyOrQueryParams);
+                    const responsePostQuickSearch = await puppeteerFetch(url, cookies, "POST", bodyOrQueryParams);
+                    return responsePostQuickSearch.body;
                 }
 
-                return puppeteerFetch<T>(url, cookies, "GET");
+                const responseGetQuickSearch = await puppeteerFetch(url, cookies, "GET");
+                return responseGetQuickSearch.body;
             }
 
-            return puppeteerFetch<T>(url, cookies, "GET", bodyOrQueryParams);
+            const responseGet = await puppeteerFetch(url, cookies, "GET", bodyOrQueryParams);
+            return responseGet.body;
         }
 
         if (url === "https://boxrec.com/en/login") {
-            return puppeteerFetch<T>(url, undefined, "POST", bodyOrQueryParams);
+            return puppeteerFetch(url, undefined, "POST", bodyOrQueryParams);
         }
 
         throw new Error("could not determine proper request from arguments");

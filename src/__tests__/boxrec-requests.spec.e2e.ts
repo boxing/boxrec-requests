@@ -14,7 +14,7 @@ if (!BOXREC_USERNAME || !BOXREC_PASSWORD) {
 
 jest.setTimeout(90000);
 
-const napTime: number = 10000;
+const napTime: number = 5000;
 
 const wait: (done: DoneCallback) => void = (done: DoneCallback) => setTimeout(done, napTime);
 
@@ -135,7 +135,7 @@ describe("class BoxrecRequests", () => {
             expect(proBoxerResponse).not.toEqual(amateurBoxerResponse);
         });
 
-        it("should return the country if specified only", async () => {
+        it("should return the country if specified", async () => {
             const response: string = await BoxrecRequests.getEvents(cookies, {
                 level: BoxrecLocationLevel.Country,
                 level_id: "us",
@@ -143,20 +143,30 @@ describe("class BoxrecRequests", () => {
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
-            expect(response).toContain("USA");
+            expect(response).toMatch(/us/i);
         });
 
         it("should return the region if specified with country", async () => {
-            // todo not very good tests as they don't test that results came back
             const response: string = await BoxrecRequests.getEvents(cookies, {
-                level: BoxrecLocationLevel.Country,
-                level_id: "us",
-                location: "us_30352",
+                level: BoxrecLocationLevel.Region,
+                level_id: "445",
+                location: "445_17648",
                 sport: BoxrecFighterOption["Pro Boxing"],
             });
 
             // bound to be a flaky test
-            expect(response).toContain(/Events in us/i);
+            expect(response).toMatch(/alabama/i);
+        });
+
+        it("should return the town if specified with country", async () => {
+            const response: string = await BoxrecRequests.getEvents(cookies, {
+                level: BoxrecLocationLevel.Town,
+                level_id: "17686",
+                location: "17686_17686",
+                sport: BoxrecFighterOption["Pro Boxing"],
+            });
+
+            expect(response).toMatch(/tuscaloosa/i);
         });
 
     });

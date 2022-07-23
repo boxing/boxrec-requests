@@ -6,18 +6,26 @@ const {hcaptcha} = require("puppeteer-hcaptcha");
 
 import * as FormData from "form-data";
 import {URLSearchParams} from "url";
+import {debugMsg} from "./helpers";
+
+export interface Cookie {
+    name: string;
+    value: string;
+}
 
 export interface LoginResponse {
     body: string;
-    cookies: Array<{ name: string, value: string}>;
+    cookies: Cookie[];
 }
 
-async function puppeteerFetch<T = string>(url: string, cookies: string, method: "GET", bodyParams?: Record<string, unknown>): Promise<T>;
-async function puppeteerFetch<T = string>(url: "https://boxrec.com/en/quick_search", cookies: string, method: "GET"): Promise<T>;
-async function puppeteerFetch<T = string>(url: "https://boxrec.com/en/quick_search", cookies: string, method: "POST", bodyParams?: Record<string, unknown>): Promise<T>;
-async function puppeteerFetch<T = LoginResponse>(url: "https://boxrec.com/en/login", cookies: undefined, method: "POST", bodyParams?: Record<string, unknown>): Promise<T>;
-async function puppeteerFetch<T = string>(url: string, cookies: string | undefined, method: "POST" | "GET" = "GET", bodyParams?: Record<string, unknown>): Promise<T | LoginResponse> {
+async function puppeteerFetch(url: string, cookies: string, method: "GET", bodyParams?: Record<string, unknown>): Promise<LoginResponse>;
+async function puppeteerFetch(url: "https://boxrec.com/en/quick_search", cookies: string, method: "GET"): Promise<LoginResponse>;
+async function puppeteerFetch(url: "https://boxrec.com/en/quick_search", cookies: string, method: "POST", bodyParams?: Record<string, unknown>): Promise<LoginResponse>;
+async function puppeteerFetch(url: "https://boxrec.com/en/login", cookies: undefined, method: "POST", bodyParams?: Record<string, unknown>): Promise<LoginResponse>;
+async function puppeteerFetch(url: string, cookies: string | undefined, method: "POST" | "GET" = "GET", bodyParams?: Record<string, unknown>): Promise<LoginResponse> {
     puppeteer.use(pluginStealth());
+
+    debugMsg(`URL being requested is ${url}, ${method}, ${typeof bodyParams === "object" ? JSON.stringify(bodyParams) : ""}`);
 
     const browser: any = await puppeteer.launch({
         args: [
@@ -38,6 +46,7 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
 
     // user agent helps to get around cloudflare when in headless mode
     // this may need to be dynamic though
+    // this will not work in headless is false as the browser sends its actual agent
     await page.setUserAgent(
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
     );
@@ -52,40 +61,38 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
         const queryString = queryParams.toString();
         const urlWithQueryString: string = `${url}${queryString ? `?${queryString.toString()}` : ""}`;
 
+        debugMsg(`Going to: ${urlWithQueryString}`);
+
+
         await page.goto(urlWithQueryString);
 
         const resolvedUrlAfterPageChange = await page.url();
 
+        // todo could hit captcha in post as well
         if (resolvedUrlAfterPageChange.includes("/recaptcha")) {
             // todo get inside iframe
+            debugMsg("has hit recaptcha");
+
             await page.click("span[role=\"checkbox\"]");
             await page.click("input[type=\"submit\"]");
 
             await page.url();
         } else {
             const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+            const cookiesFromPageGet: Array<{ name: string, value: string}> = await page.cookies();
             await browser.close();
-            return html;
+            return {
+                body: html,
+                cookies: cookiesFromPageGet,
+            };
         }
 
-        // recaptcha triggered, to do bypass it
+        // recaptcha triggered, todo bypass it
         throw new Error("Hit recaptcha");
     }
 
-
-    page.on('console', async (msg) => {
-        const msgArgs = msg.args();
-        for (let i = 0; i < msgArgs.length; ++i) {
-            console.log(await msgArgs[i].jsonValue());
-        }
-    });
-
-
     // POST requests
-    await page.goto("http://localhost:3000");
-
-    const testCookie = "works?"
-
+    await page.goto("https://boxrec.com");
 
     const body = await page.evaluate((urlInside: string, cookiesInside: string | undefined, bodyInside: Record<string, string>) => {
         const formData: FormData = new FormData();
@@ -97,25 +104,14 @@ async function puppeteerFetch<T = string>(url: string, cookies: string | undefin
         const baseOptions: RequestInit = {
             body: formData as any,
             method: "POST",
-            credentials: "include",
+            // credentials: "include",
             // mode: "cors" // todo needed?
-            headers: { // todo not sure if needed
-                cookies: cookiesInside,
-            }
         };
 
-        if (cookiesInside) {
-            baseOptions.credentials = "include";
-        }
-
         return fetch(urlInside, baseOptions).then(res => res.text());
-    }, "http://localhost:3000", testCookie, bodyParams);
+    }, url, cookies, bodyParams);
 
-    if (url === "https://boxrec.com/en/quick_search")  {
-        await browser.close();
-        return body;
-    }
-
+    // todo necessary?
     const cookiesFromPage: Array<{ name: string, value: string}> = await page.cookies();
     await browser.close();
 

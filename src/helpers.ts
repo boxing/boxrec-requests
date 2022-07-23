@@ -35,6 +35,13 @@ function sleep(ms) {
     });
 }
 
+export const debugMsg = (msg: string): void => {
+    if (process.env.BOXREC_REQUESTS_DEBUG) {
+        // tslint:disable-next-line:no-console
+        console.log(msg);
+    }
+};
+
 const convertPuppeteerCookieToString = (puppeteerCookies: Array<Record<string, string>>): string => {
     return puppeteerCookies.reduce((acc, cur) => {
         const expires = `Sat, 08-Apr-2023 13:16:43 GMT`;
