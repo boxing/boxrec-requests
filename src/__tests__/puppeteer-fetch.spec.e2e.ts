@@ -3,6 +3,8 @@ import puppeteer from "puppeteer-extra";
 import {puppeteerFetch} from "../puppeteer-fetch";
 // tslint:disable-next-line:no-var-requires
 const {hcaptcha} = require("puppeteer-hcaptcha");
+// tslint:disable-next-line:no-var-requires
+const solve = require("puppeteer-recaptcha-solver");
 
 global.fetch = jest.fn();
 
@@ -11,13 +13,15 @@ jest.mock("puppeteer-extra-plugin-stealth", () => {
 });
 
 jest.mock("puppeteer-hcaptcha");
+jest.mock("puppeteer-recaptcha-solver");
 
 describe("puppeteer-fetch", () => {
 
     let evaluateFn: jest.Mock;
     let fetchSpy: jest.Mock;
-    let hcaptchaSpy: jest.Mock;
     let gotoFn: jest.Mock;
+    let hcaptchaSpy: jest.Mock;
+    let recaptchSpy: jest.Mock;
     let reloadFn: jest.Mock;
     let urlFn: jest.Mock;
     let userAgentFn: jest.Mock;
@@ -26,6 +30,7 @@ describe("puppeteer-fetch", () => {
         evaluateFn = jest.fn();
         gotoFn = jest.fn();
         hcaptchaSpy = jest.fn();
+        recaptchSpy = jest.fn();
         reloadFn = jest.fn();
         urlFn = jest.fn();
         userAgentFn = jest.fn();
@@ -52,6 +57,7 @@ describe("puppeteer-fetch", () => {
             }
         };
         hcaptcha.mockImplementation(hcaptchaSpy);
+        solve.mockImplementation(recaptchSpy);
     });
 
     afterAll(() => {
@@ -136,7 +142,6 @@ describe("puppeteer-fetch", () => {
         expect(jsonSpy).toHaveBeenCalled();
     });
 
-    // todo recaptcha test
     it("should proceed to bypass recaptcha if prompted for it", async () => {
         jest.spyOn(puppeteer, "launch").mockImplementation(() => {
             return {
@@ -150,14 +155,33 @@ describe("puppeteer-fetch", () => {
                 }],
             };
         });
+
         await puppeteerFetch("http://boxrec.com/en/schedule", "", "GET", {
             foo: "bar",
         });
+
+        expect(recaptchSpy).toHaveBeenCalled();
     });
 
-    // todo recaptcha test
-    it("should proceed to do the GET call after a recaptcha", () => {
+    it("should proceed to do the GET call after a recaptcha", async() => {
+        jest.spyOn(puppeteer, "launch").mockImplementation(() => {
+            return {
+                close: () => { /**/ },
+                pages: () => [{
+                    cookies: () => "SESSID=123",
+                    evaluate: evaluateFn,
+                    goto: gotoFn,
+                    setUserAgent: userAgentFn,
+                    url: urlFn.mockResolvedValue("http://boxrec.com/recaptcha"),
+                }],
+            };
+        });
 
+        await puppeteerFetch("http://boxrec.com/en/schedule", "", "GET", {
+            foo: "bar",
+        });
+
+        expect(gotoFn).toHaveBeenCalledTimes(2);
     });
 
     it("should proceed to bypass hcaptcha (Cloudflare) if prompted for it", async () => {

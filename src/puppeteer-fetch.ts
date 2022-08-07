@@ -6,6 +6,8 @@ const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 
 // tslint:disable-next-line:typedef no-var-requires
 const {hcaptcha} = require("puppeteer-hcaptcha");
+// tslint:disable-next-line:no-var-requires
+const solve = require("puppeteer-recaptcha-solver");
 
 import * as FormData from "form-data";
 import {URLSearchParams} from "url";
@@ -83,8 +85,8 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
             await hcaptcha(page);
             await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
         } else if (await isRecaptchaPage(page)) {
-            // todo recaptcha!
-            console.log('recaptcha');
+            await solve(page);
+            await page.goto(urlWithQueryString);
         }
 
         const cookiesFromPageGet: Array<{ name: string, value: string}> = await page.cookies();

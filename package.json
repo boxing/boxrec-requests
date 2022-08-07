@@ -55,6 +55,7 @@
     "puppeteer-extra-plugin-adblocker": "^2.13.4",
     "puppeteer-extra-plugin-stealth": "^2.11.0",
     "puppeteer-hcaptcha": "^4.1.6",
+    "puppeteer-recaptcha-solver": "https://github.com/danielgatis/puppeteer-recaptcha-solver",
     "snyk": "^1.883.0"
   },
   "snyk": true
