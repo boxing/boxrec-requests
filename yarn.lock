@@ -4141,10 +4141,10 @@ puppeteer-extra@^3.2.3, puppeteer-extra@^3.3.4:
     debug "^4.1.1"
     deepmerge "^4.2.2"
 
-puppeteer-hcaptcha@^4.1.5:
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/puppeteer-hcaptcha/-/puppeteer-hcaptcha-4.1.5.tgz#b0ef1232303b5c7dee40591e071be317011d4e5e"
-  integrity sha512-qYcgnIvUIV44p7+eczW2bBBOhQ70qw/PC+TrDwDY4atG3kb5yVLAwY0nES8CdM8Zy0Jmpg5+/TQ6OShlicn5hw==
+puppeteer-hcaptcha@^4.1.6:
+  version "4.1.6"
+  resolved "https://registry.yarnpkg.com/puppeteer-hcaptcha/-/puppeteer-hcaptcha-4.1.6.tgz#f5479a6a3de40d79a2b3847b695cd8704a3da493"
+  integrity sha512-lsyuCfh1V/VgfK5EKg4+r9l6axFyL5HKnaXqiUBI8Vq5d0MNdN58pAIpYsqxSDBHpXDIeXfvy2D6oAe8GwCgJw==
   dependencies:
     "@aw1875/ghost-cursor" "^1.1.10"
     "@tensorflow-models/coco-ssd" "^2.2.2"

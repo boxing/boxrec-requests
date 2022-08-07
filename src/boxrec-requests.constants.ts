@@ -1,6 +1,7 @@
 export interface BoxrecRatingsParams {
     country?: Country | "";
     division?: WeightDivisionCapitalized;
+    // @ts-ignore // I'm not even sure why it's complaining about the types but I suppressed it
     role: BoxrecFighterOption["Pro Boxing"] | BoxrecFighterOption["Amateur Boxing"];
     sex: "M" | "F"; // whatever reason this is necessary, figured it would default to Male but it does not
     // stance?: "O" | "S"; // orthodox // southpaw // undefined is both

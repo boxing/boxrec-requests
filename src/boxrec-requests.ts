@@ -4,9 +4,10 @@ import {
     BoxrecDate,
     BoxrecFighterOption,
     BoxrecLocationEventParams,
-    BoxrecLocationSearchParamsCountry,
     BoxrecLocationSearchParams,
-    BoxrecLocationSearchResponse, BoxrecLocationSearchResponseCountry,
+    BoxrecLocationSearchParamsCountry,
+    BoxrecLocationSearchParamsSearch, BoxrecLocationSearchResponse,
+    BoxrecLocationSearchResponseCountry,
     BoxrecLocationsPeopleParams,
     BoxrecLocationsPeopleParamsTransformed,
     BoxrecRatingsParams,
@@ -19,8 +20,7 @@ import {
     BoxrecStatus,
     BoxrecTitlesParams,
     BoxrecTitlesParamsTransformed,
-    PersonRequestParams,
-    ScoreCard, BoxrecLocationSearchParamsSearch
+    PersonRequestParams, ScoreCard
 } from "./boxrec-requests.constants";
 import {getRoleOfHTML} from "./helpers";
 import {Cookie, LoginResponse, puppeteerFetch} from "./puppeteer-fetch";

@@ -22,6 +22,14 @@ export interface LoginResponse {
     cookies: Cookie[];
 }
 
+const isHcaptchaPage = async (page: any): Promise<boolean> => page.evaluate(() => {
+    return !!document.querySelector("iframe[src*='hcaptcha']");
+});
+const isRecaptchaPage = async (page: any): Promise<boolean> => {
+    const url = await page.url();
+    return url.includes("recaptcha");
+};
+
 async function puppeteerFetch(url: "https://boxrec.com/en/location_search_ajax", cookies: string, method: "GET", bodyParams: BoxrecLocationEventParams): Promise<BoxrecLocationSearchResponse>;
 async function puppeteerFetch(url: string, cookies: string, method: "GET", bodyParams?: Record<string, any>): Promise<LoginResponse>;
 async function puppeteerFetch(url: "https://boxrec.com/en/quick_search", cookies: string, method: "GET"): Promise<LoginResponse>;
@@ -61,10 +69,6 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
     );
 
-    // todo determine if hit Cloudflare
-    // await hcaptcha(page, 10000);
-    // await page.goto("http://boxrec.com");
-
     // todo this might be all we need for GET requests
     if (method === "GET") {
         const queryParams: URLSearchParams = new URLSearchParams(bodyParams as any);
@@ -75,47 +79,41 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
 
         await page.goto(urlWithQueryString);
 
-        const resolvedUrlAfterPageChange = await page.url();
+        if (await isHcaptchaPage(page)) {
+            await hcaptcha(page);
+            await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
+        } else if (await isRecaptchaPage(page)) {
+            // todo recaptcha!
+            console.log('recaptcha');
+        }
 
-        // todo could hit captcha in post as well
-        if (resolvedUrlAfterPageChange.includes("/recaptcha")) {
-            // todo get inside iframe
-            debugMsg("has hit recaptcha");
+        const cookiesFromPageGet: Array<{ name: string, value: string}> = await page.cookies();
 
-            await page.click("span[role=\"checkbox\"]");
-            await page.click("input[type=\"submit\"]");
+        if (url === "https://boxrec.com/en/location_search_ajax") {
+            const json = await page.evaluate(() => {
+                const innerText = document.querySelector("body")?.innerText || "";
 
-            await page.url();
-        } else {
-
-            const cookiesFromPageGet: Array<{ name: string, value: string}> = await page.cookies();
-
-            if (url === "https://boxrec.com/en/location_search_ajax") {
-                const json = await page.evaluate(() => {
-                    const innerText = document.querySelector("body")?.innerText || "";
-
-                    try {
-                        return JSON.parse(innerText);
-                    } catch (e) {
-                        throw new Error("Could not parse, was expecting JSON");
-                    }
-                });
-                await browser.close();
-
-                return {
-                    body: json,
-                    cookies: cookiesFromPageGet
-                };
-            }
-
-            const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+                try {
+                    return JSON.parse(innerText);
+                } catch (e) {
+                    throw new Error("Could not parse, was expecting JSON");
+                }
+            });
             await browser.close();
 
             return {
-                body: html,
-                cookies: cookiesFromPageGet,
+                body: json,
+                cookies: cookiesFromPageGet
             };
         }
+
+        const html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+        await browser.close();
+
+        return {
+            body: html,
+            cookies: cookiesFromPageGet,
+        };
 
         // recaptcha triggered, todo bypass it
         throw new Error("Hit recaptcha");

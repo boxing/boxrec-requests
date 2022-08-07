@@ -29,7 +29,7 @@ export const getRoleOfHTML: (html: string) => string | null = (html: string): st
     return null;
 };
 
-function sleep(ms) {
+function sleep(ms: number): Promise<unknown> {
     return new Promise(resolve => {
         setTimeout(resolve, ms);
     });
