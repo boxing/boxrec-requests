@@ -82,10 +82,14 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
         await page.goto(urlWithQueryString);
 
         if (await isHcaptchaPage(page)) {
+            debugMsg(`Hit hcaptcha`);
             await hcaptcha(page);
+            debugMsg(`Success! reload`);
             await page.reload({ waitUntil: ["networkidle0", "domcontentloaded"] });
         } else if (await isRecaptchaPage(page)) {
+            debugMsg(`Hit recaptcha`);
             await solve(page);
+            debugMsg(`Success! Going to: ${urlWithQueryString}`);
             await page.goto(urlWithQueryString);
         }
 
@@ -116,9 +120,6 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
             body: html,
             cookies: cookiesFromPageGet,
         };
-
-        // recaptcha triggered, todo bypass it
-        throw new Error("Hit recaptcha");
     }
 
     // POST requests

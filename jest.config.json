@@ -2,7 +2,7 @@
   "transform": {
     "^.+\\.ts?$": "ts-jest"
   },
-  "testRegex": "spec\\.ts",
+  "testRegex": "spec(\\.e2e)?\\.ts$",
   "moduleFileExtensions": [
     "ts",
     "js",

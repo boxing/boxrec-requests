@@ -51,11 +51,11 @@ describe("puppeteer-fetch", () => {
         fetchSpy = jest.spyOn(global, "fetch").mockImplementation(() => {
             /**/
         });
-        (global as any).document = {
-            querySelector: () => {
-                return { outerHTML: "" };
-            }
-        };
+        jest.spyOn(document, "querySelector").mockImplementation(() => {
+            return {
+                outerHTML: "",
+            };
+        });
         hcaptcha.mockImplementation(hcaptchaSpy);
         solve.mockImplementation(recaptchSpy);
     });
@@ -116,7 +116,7 @@ describe("puppeteer-fetch", () => {
     });
 
     it("should return a JSON object if url is `location_search_ajax`", async () => {
-        evaluateFn.mockReturnValueOnce(false)
+        evaluateFn.mockReturnValueOnce(false);
         const jsonSpy = jest.spyOn(JSON, "parse");
         jest.spyOn(puppeteer, "launch").mockImplementation(() => {
             return {
@@ -130,12 +130,11 @@ describe("puppeteer-fetch", () => {
                 }],
             };
         });
-        (global as any).document = {
-            querySelector: () => {
-                return { innerText: "{\"foo\": \"bar\"}" };
-            }
-        };
-
+        jest.spyOn(document, "querySelector").mockImplementation(() => {
+            return {
+                innerText: "{\"foo\": \"bar\"}",
+            };
+        });
         await puppeteerFetch("https://boxrec.com/en/location_search_ajax", "", "GET");
         await evaluateFn.mock.calls[1][0]();
 
@@ -163,7 +162,7 @@ describe("puppeteer-fetch", () => {
         expect(recaptchSpy).toHaveBeenCalled();
     });
 
-    it("should proceed to do the GET call after a recaptcha", async() => {
+    it("should proceed to do the GET call after a recaptcha", async () => {
         jest.spyOn(puppeteer, "launch").mockImplementation(() => {
             return {
                 close: () => { /**/ },
