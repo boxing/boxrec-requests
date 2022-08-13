@@ -56,7 +56,7 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
             "--user-data-dir=\"/tmp/chromium\"",
             "--disable-web-security",
             "--disable-features=site-per-process",
-            // "--auto-open-devtools-for-tabs", // todo dev opens tools
+            // "--auto-open-devtools-for-tabs", // opens dev tools
         ],
         headless: true,
         ignoreHTTPSErrors: true,
@@ -136,13 +136,11 @@ async function puppeteerFetch(url: string, cookies: string | undefined, method: 
             body: formData as any,
             method: "POST",
             // credentials: "include",
-            // mode: "cors" // todo needed?
         };
 
         return fetch(urlInside, baseOptions).then(res => res.text());
     }, url, cookies, bodyParams);
 
-    // todo necessary?
     const cookiesFromPage: Array<{ name: string, value: string}> = await page.cookies();
     await browser.close();
 
